@@ -52,6 +52,10 @@ def render_editor_page():
     if "ed_script_list" not in st.session_state:
         st.session_state["ed_script_list"] = []
 
+    # Инициализация флагов (ВАЖНО)
+    if "ed_flags" not in st.session_state:
+        st.session_state["ed_flags"] = []
+
     # 0. ЗАГРУЗКА
     all_cards = Library.get_all_cards()
     all_cards.sort(key=lambda x: x.name)
@@ -80,6 +84,10 @@ def render_editor_page():
             ["Melee", "Offensive", "Ranged", "Mass Summation", "Mass Individual", "On Play", "Item"],
             key="ed_type"
         )
+        flags = st.multiselect("Flags (Свойства)",
+                               ["friendly", "offensive", "unchangeable", "exhaust"],
+                               key="ed_flags")
+
         desc = st.text_area("Description", key="ed_desc", height=68)
 
     # 2. ЭФФЕКТЫ КАРТЫ (МУЛЬТИ-СПИСОК)
@@ -100,14 +108,25 @@ def render_editor_page():
         # 3. Параметры (Динамические)
         current_payload = {}
 
-        # === ЛОГИКА ВОССТАНОВЛЕНИЯ (HP / SP) ===
+        # === ОБНОВЛЕННАЯ ЛОГИКА RESTORE ===
         if ce_type in ["Restore HP", "Restore SP"]:
+            # Колонка настроек
+            c_mode, c_val, c_tgt = st.columns([1, 1, 1])
+
             def_mode = st.session_state.get("ce_restore_mode", "Flat")
-            mode = ce_col3.radio("Mode", ["Flat", "%"], index=["Flat", "%"].index(def_mode), horizontal=True,
-                                 key="ce_rest_mode_ui")
+            mode = c_mode.radio("Mode", ["Flat", "%"], index=["Flat", "%"].index(def_mode), horizontal=True,
+                                key="ce_rest_mode_ui")
 
             def_val = st.session_state.get("ce_restore_val", 10)
-            val = ce_col3.number_input("Value", 0.0, 999.0, float(def_val), step=1.0, key="ce_rest_val_ui")
+            # Разрешаем отрицательные значения (-999)
+            val = c_val.number_input("Value", -999.0, 999.0, float(def_val), step=1.0, key="ce_rest_val_ui",
+                                     help="Отрицательное значение = Урон!")
+
+            # Выбор цели (раньше его не было)
+            def_tgt = st.session_state.get("ce_restore_target", "self")
+            target_opt = c_tgt.radio("Target", ["Self", "Target"],
+                                     index=0 if def_tgt == "self" else 1,
+                                     horizontal=True, key="ce_rest_tgt_ui")
 
             is_sp = (ce_type == "Restore SP")
             is_pct = (mode == "%")
@@ -120,7 +139,10 @@ def render_editor_page():
 
             current_payload = {
                 "script_id": script_id,
-                "params": {param_key: final_val, "target": "self"}
+                "params": {
+                    param_key: final_val,
+                    "target": target_opt.lower()  # "self" или "target"
+                }
             }
 
         elif ce_type == "Self Harm (%)":
@@ -251,7 +273,8 @@ def render_editor_page():
                 if trig not in final_scripts:
                     final_scripts[trig] = []
                 final_scripts[trig].append(item["data"])
-
+            # Получаем флаги из стейта
+            selected_flags = st.session_state.get("ed_flags", [])
             new_card = Card(
                 id=card_id,
                 name=name,
@@ -259,7 +282,8 @@ def render_editor_page():
                 card_type=ctype,
                 description=desc,
                 dice_list=dice_data,
-                scripts=final_scripts  # <--- ИСПОЛЬЗУЕМ СОБРАННЫЕ СКРИПТЫ
+                scripts=final_scripts,  # <--- ИСПОЛЬЗУЕМ СОБРАННЫЕ СКРИПТЫ
+                flags = selected_flags
             )
 
             Library.save_card(new_card, filename="custom_cards.json")

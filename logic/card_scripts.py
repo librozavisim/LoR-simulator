@@ -141,32 +141,40 @@ def restore_hp(context: 'RollContext', params: dict):
     unit = context.source if target_type == "self" else context.target
 
     if unit:
-        try:
-            # Пытаемся передать source_unit, если метод обновлен
+        if amount >= 0:
+            # === ЛЕЧЕНИЕ ===
             heal = unit.heal_hp(amount)
-        except TypeError:
-            # Если нет, по старинке
-            heal = unit.heal_hp(amount)
-
-        # БЫЛО: 💚 Heal +5 HP
-        # СТАЛО: 💚 **Roland**: Healed +5 HP
-        context.log.append(f"💚 **{unit.name}**: Healed +{heal} HP")
+            context.log.append(f"💚 **{unit.name}**: Healed +{heal} HP")
+        else:
+            # === УРОН (Отрицательное лечение) ===
+            # amount отрицательный, поэтому unit.current_hp + amount уменьшит здоровье
+            # Оставляем минимум 0
+            unit.current_hp = max(0, unit.current_hp + amount)
+            context.log.append(f"💔 **{unit.name}**: Lost {amount} HP (Direct)")
 
 
 def restore_sp(context: 'RollContext', params: dict):
     amount = int(params.get("amount", 0))
-    unit = context.source
+    unit = context.source  # Обычно SP восстанавливает тот, кто использует карту, но можно доработать
 
-    if amount > 0:
-        if hasattr(unit, 'restore_sp'):
-            actual = unit.restore_sp(amount)
+    if unit:
+        if amount >= 0:
+            # === ВОССТАНОВЛЕНИЕ SP ===
+            if hasattr(unit, 'restore_sp'):
+                actual = unit.restore_sp(amount)
+            else:
+                old = unit.current_sp
+                unit.current_sp = min(unit.max_sp, unit.current_sp + amount)
+                actual = unit.current_sp - old
+
+            context.log.append(f"🧠 **{unit.name}**: Restored +{actual} SP")
         else:
-            # Фолбек
-            old = unit.current_sp
-            unit.current_sp = min(unit.max_sp, unit.current_sp + amount)
-            actual = unit.current_sp - old
-
-        context.log.append(f"🧠 **{unit.name}**: Restored +{actual} SP")
+            # === УРОН SP (Отрицательное) ===
+            # amount < 0. Вычитаем (прибавляем отрицательное)
+            # take_sanity_damage обычно принимает положительное число, поэтому берем abs(amount)
+            # Но для простоты сделаем прямую математику
+            unit.current_sp = max(-45, unit.current_sp + amount)  # -45 это порог паники
+            context.log.append(f"🤯 **{unit.name}**: Lost {amount} SP")
 
 
 def add_hp_damage(context: 'RollContext', params: dict):

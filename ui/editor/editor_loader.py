@@ -43,6 +43,9 @@ def load_card_to_state(card):
     st.session_state["ed_num_dice"] = len(card.dice_list)
     st.session_state["ed_loaded_id"] = card.id  # Запоминаем ID для перезаписи
 
+    # === ЗАГРУЗКА ФЛАГОВ ===
+    st.session_state["ed_flags"] = card.flags if card.flags else []
+
     script_list = []
     if card.scripts:
         for trigger, effects in card.scripts.items():
@@ -55,20 +58,23 @@ def load_card_to_state(card):
     st.session_state["ed_script_list"] = script_list
 
     # Загрузка эффектов On Use
+    # Загрузка настроек для формы добавления эффектов (берем первый, если есть)
     if "on_use" in card.scripts and card.scripts["on_use"]:
         script = card.scripts["on_use"][0]
         sid = script.get("script_id")
         p = script.get("params", {})
 
-        # --- RESTORE HP ---
         if sid == "restore_hp":
             st.session_state["ce_type"] = "Restore HP"
             st.session_state["ce_restore_mode"] = "Flat"
-            st.session_state["ce_restore_val"] = p.get("amount", 5)
-        elif sid == "restore_hp_percent":
-            st.session_state["ce_type"] = "Restore HP"
-            st.session_state["ce_restore_mode"] = "%"
-            st.session_state["ce_restore_val"] = p.get("percent", 0.05) * 100.0
+            st.session_state["ce_restore_val"] = float(p.get("amount", 5))
+            st.session_state["ce_restore_target"] = p.get("target", "self")  # Загружаем цель
+
+        elif sid == "restore_sp":
+            st.session_state["ce_type"] = "Restore SP"
+            st.session_state["ce_restore_mode"] = "Flat"
+            st.session_state["ce_restore_val"] = float(p.get("amount", 5))
+            st.session_state["ce_restore_target"] = p.get("target", "self")
 
         # --- RESTORE SP ---
         elif sid == "restore_sp":
