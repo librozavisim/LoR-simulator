@@ -272,22 +272,35 @@ def precalculate_interactions(team_left: list, team_right: list):
                 t_u_idx = my_slot.get('target_unit_idx', -1)
                 t_s_idx = my_slot.get('target_slot_idx', -1)
 
-                # Нет цели
-                if t_u_idx == -1 or t_u_idx >= len(enemy_team):
+                # === ИСПРАВЛЕНИЕ: ОПРЕДЕЛЕНИЕ КОМАНДЫ ЦЕЛИ ===
+                is_friendly = my_slot.get('is_ally_target', False)
+
+                # Если карта дружественная, цель находится в my_team, иначе в enemy_team
+                target_team_list = my_team if is_friendly else enemy_team
+
+                # Проверка валидности индекса в ПРАВИЛЬНОЙ команде
+                if t_u_idx == -1 or t_u_idx >= len(target_team_list):
                     my_slot['ui_status'] = {"text": "NO TARGET", "icon": "⛔", "color": "gray"}
                     continue
 
-                target_unit = enemy_team[t_u_idx]
+                target_unit = target_team_list[t_u_idx]
 
                 if target_unit.is_dead():
                     my_slot['ui_status'] = {"text": "DEAD TARGET", "icon": "💀", "color": "gray"}
                     continue
 
-                # === ЛОГИКА ОТОБРАЖЕНИЯ ===
+                # === ОТОБРАЖЕНИЕ ДЛЯ БАФФОВ (Friendly) ===
+                if is_friendly:
+                    my_slot['ui_status'] = {
+                        "text": f"BUFF > {target_unit.name}",
+                        "icon": "✨",
+                        "color": "green"  # Зеленый цвет для баффов
+                    }
+                    continue
 
+                # === ДАЛЕЕ СТАНДАРТНАЯ ЛОГИКА БОЯ (Clash/Attack) ===
                 # 1. Если этот слот был ПЕРЕНАПРАВЛЕН (проиграл конкуренцию за Clash)
                 if my_slot.get('force_onesided'):
-                    # Он бьет, но безответно, потому что слот врага занят кем-то другим
                     my_slot['ui_status'] = {
                         "text": f"One Sided > {target_unit.name}",
                         "icon": "↪️",
@@ -295,17 +308,11 @@ def precalculate_interactions(team_left: list, team_right: list):
                     }
                     continue
 
-                # 2. Если этот слот ВЫИГРАЛ право на Clash (force_clash)
-                # Или если это обычный Clash без конкуренции
+                # ... (Остальная логика Clash/Attack без изменений)
                 is_clash = False
 
                 if t_s_idx != -1 and t_s_idx < len(target_unit.active_slots):
                     target_slot = target_unit.active_slots[t_s_idx]
-
-                    # Проверка: Враг тоже целится в меня? (В меня лично или в мой слот?)
-                    # В базовой логике Clash - это взаимная атака.
-                    # Но если я перехватил (force_clash), то Clash гарантирован, даже если враг бил другого.
-
                     if my_slot.get('force_clash'):
                         is_clash = True
                     elif target_slot.get('target_unit_idx') == my_idx and \
@@ -313,13 +320,11 @@ def precalculate_interactions(team_left: list, team_right: list):
                         is_clash = True
 
                 if is_clash:
-                    # Если мы перехватили (Aggro), добавим значок
                     icon = "⚔️"
                     text = f"CLASH > {target_unit.name}"
                     if my_slot.get('force_clash'):
-                        icon = "🔥"  # Значок успешного перехвата
+                        icon = "🔥"
                         text += ""
-
                     my_slot['ui_status'] = {"text": text, "icon": icon, "color": "red"}
                 else:
                     my_slot['ui_status'] = {"text": f"ATK > {target_unit.name}", "icon": "🏹", "color": "orange"}

@@ -114,7 +114,7 @@ class ClashSystem(ClashFlowMixin):
         ctype = card.card_type.lower()
 
         # 1. Мгновенные эффекты
-        if ctype == "on_play": return 5000
+        if ctype == "on_play" or ctype == "on play": return 5000
 
         # 2. Массовые атаки (срабатывают до обычных столкновений)
         if "mass" in ctype: return 4000
@@ -234,7 +234,7 @@ class ClashSystem(ClashFlowMixin):
             # Вызываем логику из logic.battle_flow.mass_attack
             return process_mass_attack(self, act, act['opposing_team'], p_label)
 
-        if "on_play" in act['card_type']:
+        if "on_play" in act['card_type'] or "on play" in act['card_type']:
             executed_slots.add(src_id)
             self._process_card_self_scripts("on_use", source, target)
             tgt_name = f" on {target.name}" if target else ""
