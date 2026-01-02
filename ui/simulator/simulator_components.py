@@ -73,25 +73,20 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
         # Формируем список целей в зависимости от флага
         team_to_show = my_team if is_friendly else opposing_team
 
-        # Проходим по всем врагам в команде
         for t_idx, target_unit in enumerate(team_to_show):
             if target_unit.is_dead(): continue
 
-            # Для союзников показываем упрощенно, для врагов - со слотами
-            # Чтобы не усложнять, покажем просто Имя Юнита (для On Play карт обычно слот не важен)
+            # Теперь показываем слоты и для союзников, и для врагов
+            for s_i, slot_obj in enumerate(target_unit.active_slots):
+                t_spd = slot_obj['speed']
+                extra = "😵" if slot_obj.get('stunned') else f"Spd {t_spd}"
 
-            if is_friendly:
-                # Формат для союзника: "idx:0 | Name (Ally)"
-                # Используем слот 0 как заглушку, так как баффаем юнита целиком
-                opt_str = f"{t_idx}:0 | {target_unit.name} (Ally)"
+                # Метка (Ally) для ясности
+                tag = "(Ally)" if is_friendly else ""
+
+                # Формат: "idx:slot | Name Tag S# (Spd)"
+                opt_str = f"{t_idx}:{s_i} | {target_unit.name} {tag} S{s_i + 1} ({extra})"
                 target_options.append(opt_str)
-            else:
-                # Стандартная логика для врагов (по слотам)
-                for s_i, opp_slot in enumerate(target_unit.active_slots):
-                    opp_spd = opp_slot['speed']
-                    extra = "😵" if opp_slot.get('stunned') else f"Spd {opp_spd}"
-                    opt_str = f"{t_idx}:{s_i} | {target_unit.name} S{s_i + 1} ({extra})"
-                    target_options.append(opt_str)
 
         # Определяем текущий выбор
         cur_t_unit = slot.get('target_unit_idx', -1)

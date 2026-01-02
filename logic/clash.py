@@ -221,6 +221,7 @@ class ClashSystem(ClashFlowMixin):
 
         # === 1. ДОСТАЕМ НАМЕРЕНИЕ ИГРОКА ===
         intent_src = act['slot_data'].get('destroy_on_speed', True)
+        target = act['target_unit']
 
         # === ЛОГИКА ТИПОВ КАРТ ===
 
@@ -233,12 +234,17 @@ class ClashSystem(ClashFlowMixin):
             # Вызываем логику из logic.battle_flow.mass_attack
             return process_mass_attack(self, act, act['opposing_team'], p_label)
 
-        # 2. ON PLAY (Мгновенные эффекты)
         if "on_play" in act['card_type']:
             executed_slots.add(src_id)
-            # Запускаем скрипты On Use карты
-            self._process_card_self_scripts("on_use", source, None)
-            return [{"round": "On Play", "details": [f"⚡ {source.name} used {act['slot_data']['card'].name}"]}]
+            self._process_card_self_scripts("on_use", source, target)
+            tgt_name = f" on {target.name}" if target else ""
+
+            # === FIX: Добавляем логи скриптов в отчет ===
+            details = [f"⚡ {source.name} used {act['slot_data']['card'].name}{tgt_name}"]
+            if self.logs:
+                details.extend(self.logs)  # Добавляем сообщения о баффах
+
+            return [{"round": "On Play", "details": details}]
 
         # 3. STANDARD COMBAT (Melee, Ranged, Offensive)
         target = act['target_unit']
