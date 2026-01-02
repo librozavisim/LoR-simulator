@@ -85,6 +85,57 @@
         ]
       },
       "dice": []
+    },
+    {
+      "id": "azgick_rule_1",
+      "name": "Первое правило подворотен",
+      "tier": 3,
+      "type": "On Play",
+      "description": "ЗАЩИЩАТЬ СВОИХ. Все союзники получают Барьер (25% от их Макс. HP).",
+      "flags": ["friendly"],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "azgick_rule_1",
+            "params": {}
+          }
+        ]
+      },
+      "dice": []
+    },
+    {
+      "id": "azgick_rule_2",
+      "name": "Второе правило подворотен",
+      "tier": 3,
+      "type": "On Play",
+      "description": "ПОДДЕРЖИВАТЬ СВОИХ. Восстанавливает всем союзникам 50% Выдержки (Stagger).",
+      "flags": ["friendly"],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "azgick_rule_2",
+            "params": {}
+          }
+        ]
+      },
+      "dice": []
+    },
+    {
+      "id": "azgick_rule_3",
+      "name": "Третье правило подворотен",
+      "tier": 3,
+      "type": "On Play",
+      "description": "ЭЭЭЭ... ЗАБЫЛ. Все союзники получают 5 Защиты и 5 Стойкости.",
+      "flags": ["friendly"],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "azgick_rule_3",
+            "params": {}
+          }
+        ]
+      },
+      "dice": []
     }
   ]
 }

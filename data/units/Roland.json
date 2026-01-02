@@ -20,9 +20,9 @@
     },
     "deck": [],
     "base_stats": {
-        "current_hp": 1674,
-        "current_sp": 20,
-        "current_stagger": 10
+        "current_hp": 1000,
+        "current_sp": 0,
+        "current_stagger": 0
     },
     "defense": {
         "armor_name": "Standard Fixer Suit",

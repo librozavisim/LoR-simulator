@@ -24,7 +24,10 @@
         "debate_red_eye",
         "azgick_enrage",
         "azgick_smile",
-        "azgick_expose_weakness"
+        "azgick_expose_weakness",
+        "azgick_rule_1",
+        "azgick_rule_2",
+        "azgick_rule_3"
     ],
     "base_stats": {
         "current_hp": 71,

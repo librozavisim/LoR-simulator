@@ -325,6 +325,67 @@ def apply_random_fragile(context: 'RollContext', params: dict):
         target.add_status("fragile", amount, duration=2)
         context.log.append(f"🫵 **Слабость**: Наложено {amount} Хрупкости.")
 
+
+def _get_all_allies(context):
+    """Вспомогательная функция для поиска всех союзников (включая себя)."""
+    source = context.source
+    # Пытаемся найти команду через session_state (так как в context.source нет прямой ссылки на team list)
+    # Это работает в рамках Streamlit симулятора
+    import streamlit as st
+
+    my_team = []
+    if 'team_left' in st.session_state and source in st.session_state['team_left']:
+        my_team = st.session_state['team_left']
+    elif 'team_right' in st.session_state and source in st.session_state['team_right']:
+        my_team = st.session_state['team_right']
+
+    # Если не нашли (тесты), возвращаем хотя бы себя
+    if not my_team:
+        return [source]
+
+    return [u for u in my_team if not u.is_dead()]
+
+
+# === СКРИПТЫ ПРАВИЛ ПОДВОРОТЕН ===
+
+def azgick_rule_1(context: 'RollContext', params: dict):
+    """Первое правило: Барьер 25% от Макс HP всем союзникам."""
+    allies = _get_all_allies(context)
+    context.log.append(f"📜 **Первое правило**: ЗАЩИЩАТЬ СВОИХ!")
+
+    for ally in allies:
+        amount = int(ally.max_hp * 0.25)
+        ally.add_status("barrier", amount, duration=2)
+        # Лог пишем один раз или подробно? Сделаем кратко в консоль, подробно в статус
+        # context.log.append(f"🛡️ {ally.name}: +{amount} Barrier")
+
+
+def azgick_rule_2(context: 'RollContext', params: dict):
+    """Второе правило: Восстановить 50% Stagger всем союзникам."""
+    allies = _get_all_allies(context)
+    context.log.append(f"📜 **Второе правило**: ПОДДЕРЖИВАТЬ СВОИХ!")
+
+    for ally in allies:
+        missing = ally.max_stagger - ally.current_stagger
+        heal = int(ally.max_stagger * 0.5)
+
+        # Не лечим больше максимума
+        actual = min(missing, heal) if missing > 0 else 0
+        ally.current_stagger = min(ally.max_stagger, ally.current_stagger + heal)
+
+        if actual > 0:
+            pass  # Можно добавить лог, если нужно
+
+
+def azgick_rule_3(context: 'RollContext', params: dict):
+    """Третье правило: 5 Protection, 5 Endurance всем союзникам."""
+    allies = _get_all_allies(context)
+    context.log.append(f"📜 **Третье правило**: ЭЭЭЭ... ЗАБЫЛ!")
+
+    for ally in allies:
+        ally.add_status("protection", 5, duration=2)
+        ally.add_status("endurance", 5, duration=2)
+
 SCRIPTS_REGISTRY = {
     "apply_status": apply_status,
     "restore_hp": restore_hp,
@@ -338,4 +399,8 @@ SCRIPTS_REGISTRY = {
     "add_luck_bonus_roll": add_luck_bonus_roll,
     "pat_shoulder": pat_shoulder,       # <--- Новое
     "eloquence_clash": eloquence_clash, # <--- Новое
+# Новые правила:
+    "azgick_rule_1": azgick_rule_1,
+    "azgick_rule_2": azgick_rule_2,
+    "azgick_rule_3": azgick_rule_3,
 }
