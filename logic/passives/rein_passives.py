@@ -20,9 +20,7 @@ class PassiveSCells(BasePassive):
             if log_func:
                 log_func(f"🧬 {self.name}: {dice_count} слотов x 10 = Восстановлено {actual_heal} HP")
 
-# ==========================================
-# 5.6 Новое открытие [Сенсорные способности]
-# ==========================================
+
 class PassiveNewDiscovery(BasePassive):
     id = "new_discovery"
     name = "Новое открытие (Сенсоры 2%)"
@@ -33,9 +31,7 @@ class PassiveNewDiscovery(BasePassive):
     def on_calculate_stats(self, unit) -> dict:
         return {
             "wisdom": 10,
-            "bonus_intellect": 2,  # Специальный ключ для прямого бонуса к интеллекту
-            "backstab_deal": 10,
-            "backstab_take": -10
+            "bonus_intellect": 2,
         }
 
     def on_combat_start(self, unit, log_func, **kwargs):
@@ -43,9 +39,6 @@ class PassiveNewDiscovery(BasePassive):
             log_func(f"👁️ {self.name}: Сенсоры активны.")
 
 
-# ==========================================
-# 5.7 Красный Ликорис (Red Lycoris)
-# ==========================================
 class TalentRedLycoris(BasePassive):
     id = "red_lycoris"
     name = "Красный Ликорис"
@@ -63,18 +56,20 @@ class TalentRedLycoris(BasePassive):
         if unit.cooldowns.get(self.id, 0) > 0:
             return False
 
+        # Проверка Stagger < 50%
         stagger_pct = unit.current_stagger / unit.max_stagger
         if stagger_pct > 0.5:
             if log_func: log_func(f"❌ {self.name}: Выдержка слишком высока ({int(stagger_pct * 100)}%)")
             return False
 
-        # Очистка (Cleanse)
+        # Очистка (Cleanse) - удаляем все статусы
         keys_to_remove = list(unit.statuses.keys())
         for k in keys_to_remove:
             unit.remove_status(k)
         if log_func and keys_to_remove:
             log_func(f"✨ Сброс статусов: {', '.join(keys_to_remove)}")
 
+        # Накладываем статус Ликориса
         unit.add_status("red_lycoris", 1, duration=self.duration)
         unit.cooldowns[self.id] = self.cooldown
 
@@ -82,11 +77,23 @@ class TalentRedLycoris(BasePassive):
             log_func(f"🩸 {self.name}: Активирован! Иммунитет и синхронизация.")
         return True
 
-    def on_combat_start(self, unit, log_func, **kwargs):
-        # Если статус активен, запускаем регенерацию от кубиков
+    # ПЕРЕНЕСЛИ ЛОГИКУ В ON_ROUND_START
+    def on_round_start(self, unit, log_func, **kwargs):
+        # Если статус активен, запускаем регенерацию
         if unit.get_status("red_lycoris") > 0:
+
+            # Используем speed_dice (характеристику), так как слоты могут быть еще не заполнены
+            # или если мы хотим считать потенциал.
+            # Но если логика подразумевает "за каждое действие", то active_slots (если они уже брошены) точнее.
+            # В движке on_round_start вызывается ПОСЛЕ броска скорости?
+            # Смотрим clash.py: roll_speed_dice делается в roll_phase, а on_round_start в prepare_turn.
+            # Значит, active_slots уже заполнены!
+
             dice_count = len(unit.active_slots)
-            if dice_count == 0: return
+
+            # Если вдруг слотов нет (стан и т.д.), берем базу
+            if dice_count == 0:
+                dice_count = getattr(unit, 'speed_dice_count', 1)
 
             # 5% за каждый кубик
             pct = 0.05 * dice_count
@@ -101,12 +108,8 @@ class TalentRedLycoris(BasePassive):
 
             if log_func:
                 log_func(
-                    f"🩸 Ликорис ({dice_count} куб.): Восстановлено {int(pct * 100)}% ({h_amt} HP, {s_amt} SP, {stg_amt} Stg)")
+                    f"🩸 Ликорис ({dice_count} д.): Восстановлено {int(pct * 100)}% ({h_amt} HP, {s_amt} SP, {stg_amt} Stg)")
 
-
-# ==========================================
-# 5.8 Тень Величия (Shadow of Majesty)
-# ==========================================
 class TalentShadowOfMajesty(BasePassive):
     id = "shadow_majesty"
     name = "Тень Величия"
@@ -117,7 +120,7 @@ class TalentShadowOfMajesty(BasePassive):
         return {"eloquence": 5}
 
     def on_combat_start(self, unit, log_func, **kwargs):
-        # ТЕПЕРЬ МЫ БЕРЕМ ОППОНЕНТА ИЗ АРГУМЕНТОВ, А НЕ ИЗ ST.SESSION_STATE
+        # ТЕПЕРЬ МЫ БЕРЕМ ОППОНЕНТА ИЗ АРГУМЕНТОВ
         opponent = kwargs.get("opponent")
 
         if opponent:

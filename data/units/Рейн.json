@@ -20,9 +20,9 @@
     },
     "deck": [],
     "base_stats": {
-        "current_hp": -40,
+        "current_hp": 148,
         "current_sp": 157,
-        "current_stagger": -19
+        "current_stagger": 75
     },
     "defense": {
         "armor_name": "Standard Fixer Suit",
@@ -65,7 +65,11 @@
         "engineering": 0,
         "programming": 0
     },
-    "passives": [],
+    "passives": [
+        "new_discovery",
+        "s_cells",
+        "red_lycoris"
+    ],
     "talents": [
         "keep_it_together",
         "center_of_balance",
