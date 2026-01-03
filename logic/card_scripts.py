@@ -1,3 +1,4 @@
+import random
 from typing import TYPE_CHECKING
 
 import streamlit as st
@@ -115,6 +116,7 @@ def _get_targets(ctx, target_mode: str):
 # ==========================================
 
 def modify_roll_power(ctx: 'RollContext', params: dict):
+    if not _check_conditions(ctx.source, params): return
     amount = _resolve_value(ctx.source, ctx.target, params)
     if amount == 0: return
 
@@ -126,6 +128,7 @@ def modify_roll_power(ctx: 'RollContext', params: dict):
 
 
 def deal_effect_damage(ctx: 'RollContext', params: dict):
+    if not _check_conditions(ctx.source, params): return
     dmg_type = params.get("type", "hp")
     targets = _get_targets(ctx, params.get("target", "target"))
 
@@ -146,6 +149,7 @@ def deal_effect_damage(ctx: 'RollContext', params: dict):
 
 
 def restore_resource(ctx: 'RollContext', params: dict):
+    if not _check_conditions(ctx.source, params): return
     res_type = params.get("type", "hp")
     targets = _get_targets(ctx, params.get("target", "self"))
 
@@ -177,6 +181,7 @@ def restore_resource(ctx: 'RollContext', params: dict):
 
 
 def apply_status(ctx: 'RollContext', params: dict):
+    if not _check_conditions(ctx.source, params): return
     status_name = params.get("status")
     if not status_name: return
 
@@ -239,6 +244,22 @@ def multiply_status(ctx: 'RollContext', params: dict):
             u.add_status(status_name, add, duration=duration)
             ctx.log.append(f"✖️ **{u.name}**: {status_name} x{multiplier} (+{add})")
 
+def _check_conditions(unit, params) -> bool:
+    """Проверяет вероятность и требования к статам."""
+    # 1. Вероятность (0.01 = 1%)
+    prob = float(params.get("probability", 1.0))
+    if prob < 1.0 and random.random() > prob:
+        return False
+
+    # 2. Требование стата (например, Agility > 10 для Сакуры)
+    req_stat = params.get("req_stat")
+    if req_stat:
+        req_val = int(params.get("req_val", 0))
+        unit_val = _get_unit_stat(unit, req_stat)
+        if unit_val < req_val:
+            return False
+
+    return True
 
 SCRIPTS_REGISTRY = {
     "modify_roll_power": modify_roll_power,
