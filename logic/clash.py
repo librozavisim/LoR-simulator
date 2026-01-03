@@ -150,6 +150,10 @@ class ClashSystem(ClashFlowMixin):
             my_allies = team_left if u in team_left else team_right
             self._trigger_unit_event("on_combat_start", unit=u, log_func=self.log,
                                      opponent=opp_ref, enemies=opponents, allies=my_allies)
+
+            # 2. === FIX: on_round_start (Здесь срабатывает Реген, Горение, Сыры и т.д.) ===
+            self._trigger_unit_event("on_round_start", unit=u, log_func=self.log,
+                                     opponent=opp_ref, enemies=opponents, allies=my_allies)
             if self.logs:
                 report.append({"round": "Start", "rolls": "Events", "details": " | ".join(self.logs)})
             self.logs = []
