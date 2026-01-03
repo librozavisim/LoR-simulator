@@ -105,7 +105,9 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
 
             else:
                 outcome = "🤝 Draw"
-                # При ничьей оба кубика сгорают
+                # === FIX: Вызываем хуки ничьей ===
+                engine._handle_clash_draw(ctx_a)
+                engine._handle_clash_draw(ctx_d)
 
         # Если у одного нет кубика (разрушен или кончились)
         elif ctx_a:

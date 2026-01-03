@@ -7,7 +7,7 @@ from logic.statuses.custom import (
     SelfControlStatus, SmokeStatus, RedLycorisStatus, SinisterAuraStatus,
     AdaptationStatus, BulletTimeStatus, ClarityStatus, WeaknessStatus, InvisibilityStatus, EnrageTrackerStatus,
     SatietyStatus, MentalProtectionStatus, RegenGanacheStatus, BleedResistStatus, StaggerResistStatus,
-    IgnoreSatietyStatus
+    IgnoreSatietyStatus, RevengeDmgUpStatus
 )
 
 NEGATIVE_STATUSES = [
@@ -46,4 +46,5 @@ STATUS_REGISTRY = {
     "stagger_resist": StaggerResistStatus(),
     "bleed_resist": BleedResistStatus(),
     "regen_ganache": RegenGanacheStatus(),
+    "revenge_dmg_up": RevengeDmgUpStatus(),
 }

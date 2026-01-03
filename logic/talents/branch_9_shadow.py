@@ -25,6 +25,7 @@ class TalentRevenge(BasePassive):
 
     def on_take_damage(self, unit, amount, dmg_type, log_func=None):
         if amount > 0:
+            # Просто вешаем статус. Логика урона теперь внутри RevengeDmgUpStatus.
             unit.add_status("revenge_dmg_up", 1, duration=2)
             if log_func: log_func(f"🩸 **{self.name}**: Получен урон! След. атака усилена (x1.5).")
 
@@ -35,10 +36,14 @@ class TalentNotGreatAttention(BasePassive):
     id = "not_great_attention"
     name = "Невеликое внимание (А)"
     description = (
-        "9.2 А: Легкое оружие спрятано идеально.\n"
-        "Ночью/в тени: +3 к броскам Скрытности."
+        "9.2 А: Легкое оружие спрятано идеально. Ночью/в тени ваши движения незаметны.\n"
+        "Эффект: +3 к Ловкости (Agility)."
     )
     is_active_ability = False
+
+    def on_calculate_stats(self, unit) -> dict:
+        # Даем прямой бонус к атрибуту
+        return {"agility": 3}
 
 
 # ==========================================
@@ -48,20 +53,21 @@ class TalentFormidablePerson(BasePassive):
     id = "formidable_person"
     name = "Грозная персона (Б)"
     description = (
-        "9.2 Б: Устрашение +3.\n"
-        "Мелкие враги нападают реже."
+        "9.2 Б: Ваш вид внушает ужас, даже когда вы молчите.\n"
+        "Эффект: +5 к Красноречию (Eloquence)."
     )
     is_active_ability = False
 
     def on_calculate_stats(self, unit) -> dict:
-        return {"intimidation": 3}
+        # Даем прямой бонус к навыку
+        return {"eloquence": 5}
 
 # ==========================================
 # 9.3 А: Разящий Клинок
 # ==========================================
 class TalentSmashingBlade(BasePassive):
     id = "smashing_blade"
-    name = "Разящий Клинок (А)"
+    name = "Разящий Клинок (А) WIP"
     description = (
         "9.3 А: Внезапные атаки наносят x2.0 урона (вместо x1.5).\n"
         "Атака из засады (карта): Урон удвоен, накладывает Xd6 Кровотечения (X = кол-во талантов ветки)."
@@ -74,7 +80,7 @@ class TalentSmashingBlade(BasePassive):
 class TalentSlaughter(BasePassive):
     id = "slaughter"
     name = "Резня (Б)"
-    description = "9.3 Б: Последний атакующий куб (Slash/Pierce/Blunt) накладывает 2 + (Lvl/10) Кровотечения."
+    description = "9.3 Б: Последний атакующий куб (Slash/Pierce) накладывает 2 + (Lvl/10) Кровотечения."
     is_active_ability = False
 
     def on_hit(self, ctx: RollContext):
@@ -107,7 +113,7 @@ class TalentSlaughter(BasePassive):
 # 9.3 (Опц) Trapmaster
 # ==========================================
 class TalentTrapmaster(BasePassive):
-    id = "trapmaster"
+    id = "trapmaster WIP"
     name = "Trapmaster"
     description = "9.3 Опц: Рецепты ловушек. Спас-бросок врага (Int) против вашего (Engineering)."
     is_active_ability = False
@@ -121,9 +127,13 @@ class TalentFastAndSilent(BasePassive):
     name = "Быстрый и Тихий (А)"
     description = (
         "9.4 А: Бесшумные шаги (радиус слышимости 0-4м).\n"
-        "Сложность вашего обнаружения +5."
+        "Сложность вашего обнаружения +5.\n"
+        "Пассивно: +5 к Скорости."
     )
     is_active_ability = False
+
+    def on_calculate_stats(self, unit) -> dict:
+        return {"speed": 5}
 
 
 # ==========================================
@@ -135,21 +145,21 @@ class TalentAggressiveParry(BasePassive):
     description = "9.4 Б: При ничьей (Draw) в столкновении -> Наносит урон Выдержке врага (Половина вашего броска)."
     is_active_ability = False
 
-    def on_clash_lose(self, ctx):
-        # В движке "Ничья" обрабатывается внутри clash.py, нужно хукнуть туда или эмулировать
-        # Если roll == opp_roll
-        if ctx.is_draw:
-            dmg = ctx.final_value // 2
-            ctx.target.take_sanity_damage(dmg)  # Выдержка = SP/Stagger? Обычно Stagger.
-            # В движке Stagger Damage - это отдельная сущность, пока используем SP damage или просто лог
-            ctx.log.append(f"⚔️ **Парирование**: Враг получил {dmg} Stagger Dmg.")
+    def on_clash_draw(self, ctx):
+        # Считаем урон (половина броска)
+        dmg = ctx.final_value // 2
+
+        if dmg > 0 and ctx.target:
+            # Наносим прямой урон выдержке (Stagger)
+            ctx.target.current_stagger = max(0, ctx.target.current_stagger - dmg)
+            ctx.log.append(f"⚔️ **Парирование**: Враг получил {dmg} урон по Выдержке.")
 
 
 # ==========================================
 # 9.5 А: Шаг в тень
 # ==========================================
 class TalentStepIntoShadow(BasePassive):
-    id = "step_into_shadow"
+    id = "step_into_shadow WIP"
     name = "Шаг в тень (А)"
     description = "9.5 А: Сливается с тенью. При низком освещении -> Статус 'Незаметность'."
     is_active_ability = False

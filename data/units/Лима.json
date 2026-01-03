@@ -4,11 +4,19 @@
     "rank": 6,
     "avatar": "data/avatars/Лима.png",
     "base_intellect": 8,
+    "total_xp": 0,
     "pct_mods": {
         "imp_hp": 0,
         "imp_sp": 0,
+        "imp_stg": 0,
         "tal_hp": 0,
-        "tal_sp": 0
+        "tal_sp": 0,
+        "tal_stg": 0
+    },
+    "flat_mods": {
+        "imp_hp": 0,
+        "imp_sp": 0,
+        "imp_stg": 0
     },
     "deck": [],
     "base_stats": {
@@ -57,10 +65,11 @@
         "engineering": 0,
         "programming": 0
     },
-    "passives": [
-    ],
+    "passives": [],
     "talents": [
+        "revenge"
     ],
+    "augmentations": [],
     "level_rolls": {
         "3": {
             "hp": 3,
@@ -96,5 +105,8 @@
         }
     },
     "cooldowns": {},
-    "active_buffs": {}
+    "active_buffs": {},
+    "resources": {},
+    "biography": "",
+    "money_log": []
 }

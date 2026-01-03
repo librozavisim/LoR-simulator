@@ -242,3 +242,20 @@ class RegenGanacheStatus(StatusEffect):
 
     def on_turn_end(self, unit, stack) -> list[str]:
         return []
+
+
+class RevengeDmgUpStatus(StatusEffect):
+    id = "revenge_dmg_up"
+
+    def on_hit(self, ctx: RollContext, stack: int):
+        # Логика Мести: x1.5 урон и снятие
+        ctx.damage_multiplier *= 1.5
+        ctx.log.append(f"🩸 **Месть**: Урон x1.5!")
+
+        # Снимаем статус полностью после использования
+        ctx.source.remove_status("revenge_dmg_up", 999)
+
+    def on_turn_end(self, unit, stack) -> list[str]:
+        # Статус сам исчезнет по длительности (duration=2),
+        # но на всякий случай можно вернуть пустой список
+        return []

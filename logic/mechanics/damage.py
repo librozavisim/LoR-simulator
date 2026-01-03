@@ -163,10 +163,8 @@ def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
         else:
             # Обычный HP урон
             deal_direct_damage(attacker_ctx, defender, final_amt, "hp", trigger_event_func)
-            attacker_ctx.log[-1] += f" [{formula_str}]"
-
-        deal_direct_damage(attacker_ctx, defender, final_amt, "hp", trigger_event_func)
-        attacker_ctx.log[-1] += f" [{formula_str}]"
+            if attacker_ctx.log:
+                attacker_ctx.log[-1] += f" [{formula_str}]"
 
     elif dmg_type == "stagger":
         deal_direct_damage(attacker_ctx, defender, final_amt, "stagger", trigger_event_func)

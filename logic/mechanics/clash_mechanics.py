@@ -27,6 +27,10 @@ class ClashMechanicsMixin:
     def _deal_direct_damage(self, source_ctx, target, amount, dmg_type):
         return damage.deal_direct_damage(source_ctx, target, amount, dmg_type, self._trigger_unit_event)
 
+    # === NEW METHOD ===
+    def _handle_clash_draw(self, ctx):
+        return scripts.handle_clash_outcome("on_clash_draw", ctx)
+
     def _apply_damage(self, attacker_ctx, defender_ctx, dmg_type="hp"):
         return damage.apply_damage(
             attacker_ctx, 
