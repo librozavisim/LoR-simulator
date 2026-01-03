@@ -26,6 +26,7 @@ SCRIPT_SCHEMAS = {
         "params": [
             {"key": "base", "label": "База (Flat)", "type": "int", "default": 0},
             {"key": "stat", "label": "Скалирование от...", "type": "select", "opts": STAT_OPTS, "default": "None"},
+            {"key": "scale_from_target", "label": "Брать стат у Цели?", "type": "bool", "default": False},  # NEW
             {"key": "factor", "label": "Множитель стата (x)", "type": "float", "default": 1.0},
             {"key": "diff", "label": "Разница с врагом?", "type": "bool", "default": False,
              "help": "(Мой стат - Стат врага)"},
@@ -40,6 +41,7 @@ SCRIPT_SCHEMAS = {
             {"key": "type", "label": "Ресурс", "type": "select", "opts": ["hp", "sp", "stagger"], "default": "hp"},
             {"key": "base", "label": "База", "type": "int", "default": 5},
             {"key": "stat", "label": "Скалирование от...", "type": "select", "opts": STAT_OPTS, "default": "None"},
+            {"key": "scale_from_target", "label": "Брать стат у Цели?", "type": "bool", "default": False},  # NEW
             {"key": "factor", "label": "Множитель стата", "type": "float", "default": 0.5},
             {"key": "target", "label": "Цель", "type": "select", "opts": ["self", "target", "all_allies"],
              "default": "self"}
@@ -54,8 +56,8 @@ SCRIPT_SCHEMAS = {
             {"key": "base", "label": "База", "type": "int", "default": 0},
             {"key": "stat", "label": "Скалирование от...", "type": "select", "opts": STAT_OPTS,
              "default": "current_hp"},
-            {"key": "factor", "label": "Множитель (для %)", "type": "float", "default": 0.05,
-             "help": "Например 0.05 для 5% от HP"},
+            {"key": "scale_from_target", "label": "Брать стат у Цели?", "type": "bool", "default": False},  # NEW
+            {"key": "factor", "label": "Множитель (для %)", "type": "float", "default": 0.05},
             {"key": "target", "label": "Цель", "type": "select", "opts": ["self", "target", "all"], "default": "self"}
         ]
     },
@@ -66,8 +68,8 @@ SCRIPT_SCHEMAS = {
         "params": [
             {"key": "status", "label": "Статус", "type": "status_select", "default": "bleed"},
             {"key": "base", "label": "Базовое кол-во", "type": "int", "default": 1},
-            # Добавляем скалирование для статусов!
             {"key": "stat", "label": "Скейл от (опц.)", "type": "select", "opts": STAT_OPTS, "default": "None"},
+            {"key": "scale_from_target", "label": "Брать стат у Цели?", "type": "bool", "default": False},  # NEW
             {"key": "factor", "label": "Множитель скейла", "type": "float", "default": 1.0},
 
             {"key": "duration", "label": "Длительность", "type": "int", "default": 1},
@@ -76,7 +78,7 @@ SCRIPT_SCHEMAS = {
         ]
     },
 
-    # Старые утилиты
+    # ... остальные без изменений ...
     "Steal Status": {
         "id": "steal_status",
         "params": [{"key": "status", "label": "Статус", "type": "status_select", "default": "smoke"}]

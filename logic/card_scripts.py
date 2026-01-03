@@ -1,103 +1,102 @@
-import math
-import random
-import streamlit as st
 from typing import TYPE_CHECKING
+
+import streamlit as st
 
 if TYPE_CHECKING:
     from logic.context import RollContext
 
 
 # ==========================================
-# 🧮 УНИВЕРСАЛЬНЫЙ КАЛЬКУЛЯТОР
+# 🧮 УНИВЕРСАЛЬНЫЙ КАЛЬКУЛЯТОР (CORE)
 # ==========================================
 
 def _get_unit_stat(unit, stat_name: str) -> int:
     """
-    Извлекает значение характеристики, навыка, ресурса или текущего состояния.
+    Умное получение значения стата.
     """
     if not unit or not stat_name: return 0
-    stat_name = stat_name.lower()
+    key = stat_name.lower()
 
-    # 1. Текущие параметры
-    if stat_name == "hp" or stat_name == "current_hp": return unit.current_hp
-    if stat_name == "sp" or stat_name == "current_sp": return unit.current_sp
-    if stat_name == "stagger" or stat_name == "current_stagger": return unit.current_stagger
+    # 1. Динамические параметры
+    if key in ["hp", "current_hp"]: return unit.current_hp
+    if key in ["sp", "current_sp"]: return unit.current_sp
+    if key in ["stagger", "current_stagger"]: return unit.current_stagger
 
-    # 2. Максимальные параметры
-    if stat_name == "max_hp": return unit.max_hp
-    if stat_name == "max_sp": return unit.max_sp
-    if stat_name == "max_stagger": return unit.max_stagger
+    if key == "max_hp": return unit.max_hp
+    if key == "max_sp": return unit.max_sp
+    if key == "max_stagger": return unit.max_stagger
 
-    # 3. Ресурсы (Luck, Charge и т.д.)
-    if stat_name in unit.resources: return unit.resources[stat_name]
-    if stat_name == "luck": return unit.skills.get("luck", 0)  # Фоллбек на навык
+    # 2. Ресурсы
+    if key in unit.resources: return unit.resources[key]
+    if key == "luck": return unit.skills.get("luck", 0)
 
-    # 4. Атрибуты и Навыки (с учетом баффов/модификаторов)
-    # Пытаемся найти в modifiers (total_X), затем в attributes, затем в skills
-
-    # Ищем в modifiers (новая структура {'flat': val, 'pct': val} или старая int)
-    val_data = unit.modifiers.get(stat_name)
+    # 3. Атрибуты и Навыки (через modifiers)
+    val_data = unit.modifiers.get(key)
     if val_data is None:
-        val_data = unit.modifiers.get(f"total_{stat_name}")  # Совместимость
+        val_data = unit.modifiers.get(f"total_{key}")
 
     if val_data is not None:
         if isinstance(val_data, dict): return int(val_data.get("flat", 0))
         return int(val_data)
 
-    # Ищем в базе
-    if stat_name in unit.attributes: return unit.attributes[stat_name]
-    if stat_name in unit.skills: return unit.skills[stat_name]
+    if key in unit.attributes: return unit.attributes[key]
+    if key in unit.skills: return unit.skills[key]
 
     return 0
 
 
 def _resolve_value(source, target, params: dict) -> int:
     """
-    Главная формула:
-    Result = Base + ( (SourceStat - TargetStat?) * Factor )
+    Универсальная формула вычисления значения.
+    Поддерживает scale_from_target для расчета от статов цели.
     """
-    base = params.get("base", 0)
-    if isinstance(base, float): base = int(base)  # Защита от float инпутов
+    # 1. Базовое значение
+    base = int(params.get("base", params.get("amount", 0)))
 
-    stat_key = params.get("stat", None)  # Например: "strength", "eloquence", "max_hp"
-
+    # 2. Стат для скалирования
+    stat_key = params.get("stat")
     if not stat_key or stat_key == "None":
         return base
 
-    # Получаем стат источника
-    source_val = _get_unit_stat(source, stat_key)
+    # 3. Определение источника стата
+    # Если scale_from_target=True, берем стат у TARGET (того, на кого применяется эффект)
+    scale_from_target = params.get("scale_from_target", False)
 
-    # Если нужно считать разницу (Source - Target)
-    if params.get("diff", False) and target:
-        target_val = _get_unit_stat(target, stat_key)
-        final_stat = source_val - target_val
-        # Опционально: не уходить в минус? Обычно разница может быть отрицательной (штраф)
-    else:
-        final_stat = source_val
+    primary_unit = target if scale_from_target else source
+    secondary_unit = source if scale_from_target else target
 
+    # Защита на случай, если юнита нет (например target умер или None)
+    if not primary_unit:
+        return base
+
+    primary_val = _get_unit_stat(primary_unit, stat_key)
+    final_stat_val = primary_val
+
+    # 4. Разница (если включено)
+    # Если scale_from_target=True, то diff будет (Target - Source)
+    if params.get("diff", False) and secondary_unit:
+        secondary_val = _get_unit_stat(secondary_unit, stat_key)
+        final_stat_val = primary_val - secondary_val
+
+    # 5. Множитель
     factor = float(params.get("factor", 1.0))
 
-    # Считаем бонус
-    bonus = final_stat * factor
-
-    return int(base + bonus)
+    total = base + (final_stat_val * factor)
+    return int(total)
 
 
-def _get_targets(ctx, target_mode):
-    """Возвращает список целей на основе режима."""
+def _get_targets(ctx, target_mode: str):
+    """Определяет список целей."""
     if target_mode == "self":
         return [ctx.source] if ctx.source else []
     elif target_mode == "target":
         return [ctx.target] if ctx.target else []
     elif target_mode == "all":
-        # В контексте 1 на 1 это оба.
-        # В массовом бою тут нужна логика получения команд через st.session_state
         res = []
         if ctx.source: res.append(ctx.source)
         if ctx.target: res.append(ctx.target)
         return res
     elif target_mode == "all_allies":
-        # Попытка найти всех союзников
         source = ctx.source
         my_team = []
         if 'team_left' in st.session_state and source in st.session_state['team_left']:
@@ -112,109 +111,111 @@ def _get_targets(ctx, target_mode):
 
 
 # ==========================================
-# 📜 НОВЫЕ УНИВЕРСАЛЬНЫЕ СКРИПТЫ
+# 📜 СКРИПТЫ
 # ==========================================
 
-def modify_roll_power(context: 'RollContext', params: dict):
-    """
-    Изменяет силу броска.
-    Заменяет: eloquence_clash, add_hp_damage, luck_bonus (частично).
-    """
-    amount = _resolve_value(context.source, context.target, params)
+def modify_roll_power(ctx: 'RollContext', params: dict):
+    amount = _resolve_value(ctx.source, ctx.target, params)
+    if amount == 0: return
+
     reason = params.get("reason", "Bonus")
+    if reason == "Bonus" and params.get("stat"):
+        reason = f"{params['stat'].title()} scale"
 
-    if amount != 0:
-        stat_name = params.get("stat", "")
-        if stat_name: reason = f"{stat_name.title()} ({amount})"
-        context.modify_power(amount, reason)
+    ctx.modify_power(amount, reason)
 
 
-def deal_effect_damage(context: 'RollContext', params: dict):
-    """
-    Наносит прямой урон (эффектом).
-    Заменяет: self_harm_percent, deal_custom_damage.
-    """
-    dmg_type = params.get("type", "hp")  # hp / stagger / sp
-    targets = _get_targets(context, params.get("target", "target"))
-
-    amount = _resolve_value(context.source, context.target, params)
-    if amount <= 0: return
+def deal_effect_damage(ctx: 'RollContext', params: dict):
+    dmg_type = params.get("type", "hp")
+    targets = _get_targets(ctx, params.get("target", "target"))
 
     for u in targets:
+        # Считаем урон индивидуально для каждой цели (если вдруг скейл от цели)
+        amount = _resolve_value(ctx.source, u, params)
+        if amount <= 0: continue
+
         if dmg_type == "hp":
             u.current_hp = max(0, u.current_hp - amount)
-            context.log.append(f"💔 **{u.name}**: -{amount} HP (Effect)")
+            ctx.log.append(f"💔 **{u.name}**: -{amount} HP (Effect)")
         elif dmg_type == "stagger":
             u.current_stagger = max(0, u.current_stagger - amount)
-            context.log.append(f"😵 **{u.name}**: -{amount} Stagger")
+            ctx.log.append(f"😵 **{u.name}**: -{amount} Stagger")
         elif dmg_type == "sp":
-            # Используем встроенный метод для SP (он учитывает панику)
             u.take_sanity_damage(amount)
-            context.log.append(f"🤯 **{u.name}**: -{amount} SP")
+            ctx.log.append(f"🤯 **{u.name}**: -{amount} SP")
 
 
-def restore_resource(context: 'RollContext', params: dict):
-    """
-    Восстанавливает HP/SP/Stagger.
-    Заменяет: restore_hp, restore_sp.
-    """
+def restore_resource(ctx: 'RollContext', params: dict):
     res_type = params.get("type", "hp")
-    targets = _get_targets(context, params.get("target", "self"))
-
-    amount = _resolve_value(context.source, context.target, params)
-    # Если amount отрицательный, это работает как урон (но лучше использовать deal_effect_damage)
+    targets = _get_targets(ctx, params.get("target", "self"))
 
     for u in targets:
+        # Считаем лечение индивидуально (например 25% от Макс ХП цели)
+        amount = _resolve_value(ctx.source, u, params)
+
         if res_type == "hp":
-            healed = u.heal_hp(amount)
-            context.log.append(f"💚 **{u.name}**: +{healed} HP")
+            if amount >= 0:
+                healed = u.heal_hp(amount)
+                ctx.log.append(f"💚 **{u.name}**: +{healed} HP")
+            else:
+                u.current_hp = max(0, u.current_hp + amount)
+                ctx.log.append(f"💔 **{u.name}**: {amount} HP")
+
         elif res_type == "sp":
-            recovered = u.restore_sp(amount)
-            context.log.append(f"🧠 **{u.name}**: +{recovered} SP")
+            if amount >= 0:
+                recovered = u.restore_sp(amount)
+                ctx.log.append(f"🧠 **{u.name}**: +{recovered} SP")
+            else:
+                u.take_sanity_damage(abs(amount))
+                ctx.log.append(f"🤯 **{u.name}**: {amount} SP")
+
         elif res_type == "stagger":
             old = u.current_stagger
             u.current_stagger = min(u.max_stagger, u.current_stagger + amount)
-            context.log.append(f"🛡️ **{u.name}**: +{u.current_stagger - old} Stagger")
+            diff = u.current_stagger - old
+            ctx.log.append(f"🛡️ **{u.name}**: +{diff} Stagger")
 
 
-def apply_status(context: 'RollContext', params: dict):
-    """
-    Накладывает статус.
-    Теперь stack тоже может скейлиться от статов!
-    """
+def apply_status(ctx: 'RollContext', params: dict):
     status_name = params.get("status")
     if not status_name: return
 
     target_mode = params.get("target", "target")
     duration = int(params.get("duration", 1))
+    min_roll = int(params.get("min_roll", 0))
 
-    # Вычисляем количество стаков через универсальную формулу
-    # Обычно base=Stack из эдитора.
-    stack = _resolve_value(context.source, context.target, params)
+    if min_roll > 0 and ctx.final_value < min_roll:
+        return
 
-    if stack <= 0: return
+    # Подготовка параметров для расчета
+    calc_params = params.copy()
+    if "stack" in params and "base" not in params:
+        calc_params["base"] = params["stack"]
 
-    targets = _get_targets(context, target_mode)
-
-    # Хак для дыма
+    targets = _get_targets(ctx, target_mode)
     if status_name == "smoke": duration = 99
 
     for u in targets:
-        # Проверка иммунитета (Red Lycoris и т.д.)
         if u.get_status("red_lycoris") > 0 and status_name != "red_lycoris":
-            context.log.append(f"🚫 {u.name} Immune to {status_name}")
+            ctx.log.append(f"🚫 {u.name} Immune to {status_name}")
             continue
+
+        # ВАЖНО: Считаем стаки для КОНКРЕТНОГО юнита u
+        # Если scale_from_target=True, то стат возьмется у u
+        stack = _resolve_value(ctx.source, u, calc_params)
+
+        if stack <= 0: continue
 
         success, msg = u.add_status(status_name, stack, duration=duration)
         if success:
-            context.log.append(f"🧪 **{u.name}**: +{stack} {status_name.capitalize()}")
+            ctx.log.append(f"🧪 **{u.name}**: +{stack} {status_name.capitalize()}")
         elif msg:
-            context.log.append(f"🛡️ {msg}")
+            ctx.log.append(f"🛡️ {msg}")
 
 
-def steal_status(context: 'RollContext', params: dict):
+def steal_status(ctx: 'RollContext', params: dict):
     status_name = params.get("status")
-    thief, victim = context.source, context.target
+    thief, victim = ctx.source, ctx.target
     if not thief or not victim: return
 
     current = victim.get_status(status_name)
@@ -222,13 +223,13 @@ def steal_status(context: 'RollContext', params: dict):
         victim.remove_status(status_name, current)
         duration = 99 if status_name == "smoke" else 1
         thief.add_status(status_name, current, duration=duration)
-        context.log.append(f"✋ **{thief.name}** stole {current} {status_name}")
+        ctx.log.append(f"✋ **{thief.name}** stole {current} {status_name}")
 
 
-def multiply_status(context: 'RollContext', params: dict):
+def multiply_status(ctx: 'RollContext', params: dict):
     status_name = params.get("status")
     multiplier = float(params.get("multiplier", 2.0))
-    targets = _get_targets(context, params.get("target", "target"))
+    targets = _get_targets(ctx, params.get("target", "target"))
 
     for u in targets:
         current = u.get_status(status_name)
@@ -236,25 +237,14 @@ def multiply_status(context: 'RollContext', params: dict):
             add = int(current * (multiplier - 1))
             duration = 99 if status_name == "smoke" else 1
             u.add_status(status_name, add, duration=duration)
-            context.log.append(f"✖️ **{u.name}**: {status_name} x{multiplier} (+{add})")
+            ctx.log.append(f"✖️ **{u.name}**: {status_name} x{multiplier} (+{add})")
 
-
-# ==========================================
-# 📖 REGISTRY
-# ==========================================
 
 SCRIPTS_REGISTRY = {
-    # Новые универсальные
     "modify_roll_power": modify_roll_power,
     "deal_effect_damage": deal_effect_damage,
     "restore_resource": restore_resource,
     "apply_status": apply_status,
-
-    # Утилитарные
     "steal_status": steal_status,
     "multiply_status": multiply_status,
-
-    # Старые (Mapped to new logic inside functions or kept for specific logic)
-    # Мы можем оставить старые имена ключей в реестре, но направить их на новые функции,
-    # если параметры совместимы. Но лучше обновить Editor.
 }

@@ -9,16 +9,69 @@ from ui.styles import TYPE_ICONS, TYPE_COLORS
 
 # --- ПЕРЕВОДЧИК СКРИПТОВ ---
 def _format_script_text(script_id: str, params: dict) -> str:
-    """Форматирует технические ID скриптов в читаемый текст."""
-    if script_id == "restore_hp":
-        amt = params.get("amount", 0)
-        return f"💚 Восстановить {amt} HP"
+    """
+    Форматирует технические ID скриптов в читаемый текст.
+    Поддерживает и старые (amount/stack), и новые (base/stat) параметры.
+    """
+
+    # Вспомогательная функция для получения значения (Base или Amount)
+    def get_val(p):
+        return p.get("base", p.get("amount", p.get("stack", 0)))
+
+    # Вспомогательная функция для текста скалирования
+    def get_scale_text(p):
+        stat = p.get("stat")
+        if stat and stat != "None":
+            factor = p.get("factor", 1.0)
+            diff = p.get("diff", False)
+            sign = "+" if factor >= 0 else ""
+            diff_txt = " (Diff)" if diff else ""
+            return f" [{sign}{factor}x {stat}{diff_txt}]"
+        return ""
+
+    # === ЛЕЧЕНИЕ / РЕСУРСЫ ===
+    if script_id in ["restore_hp", "restore_resource"]:
+        res_type = params.get("type", "hp").upper()
+        # Если старый restore_hp, там типа нет, но мы знаем что это HP
+        if script_id == "restore_hp": res_type = "HP"
+
+        val = get_val(params)
+        scale = get_scale_text(params)
+        return f"💚 {res_type}: {val}{scale}"
+
+    elif script_id in ["restore_sp", "restore_sp_percent"]:
+        val = get_val(params)
+        return f"🧠 SP: {val}"
+
+    # === СТАТУСЫ ===
     elif script_id == "apply_status":
         status = params.get("status", "???").capitalize()
-        stack = params.get("stack", 0)
+        val = get_val(params)  # Тут оно возьмет base или stack
+        scale = get_scale_text(params)
+
         target = params.get("target", "target")
-        tgt_str = " (на себя)" if target == "self" else ""
-        return f"🧪 Наложить {stack} {status}{tgt_str}"
+        tgt_map = {"self": "себя", "target": "цель", "all": "всех", "all_allies": "союзников"}
+        tgt_str = f" ({tgt_map.get(target, target)})"
+
+        return f"🧪 {status}: {val}{scale}{tgt_str}"
+
+    # === УРОН / МОЩЬ ===
+    elif script_id == "modify_roll_power":
+        val = get_val(params)
+        scale = get_scale_text(params)
+        return f"🎲 Power: {val}{scale}"
+
+    elif script_id == "deal_effect_damage":
+        dtype = params.get("type", "hp").upper()
+        val = get_val(params)
+        scale = get_scale_text(params)
+        return f"💔 Dmg ({dtype}): {val}{scale}"
+
+    # === ПРОЧЕЕ ===
+    elif script_id == "steal_status":
+        status = params.get("status", "???")
+        return f"✋ Украсть {status}"
+
     return f"🔧 {script_id} {params}"
 
 
@@ -56,7 +109,6 @@ def render_unit_stats(unit: Unit):
     st.progress(sp_pct, text=f"Sanity: {unit.current_sp}/{unit.max_sp} {mood}")
 
     # === ОТОБРАЖЕНИЕ СТАТУС-ЭФФЕКТОВ ===
-    # Получаем суммарные стаки через UnitStatusMixin
     active_statuses = unit.statuses
     if active_statuses:
         st.markdown("---")
@@ -68,10 +120,11 @@ def render_unit_stats(unit: Unit):
             "paralysis": "⚡",
             "haste": "👟",
             "protection": "🛡️",
-            "barrier": "🟡"
+            "barrier": "🟡",
+            "endurance": "🧱",
+            "smoke": "🌫️"
         }
 
-        # Динамическое создание колонок под количество статусов
         cols = st.columns(max(4, len(active_statuses)))
         for i, (name, val) in enumerate(active_statuses.items()):
             with cols[i % 4]:

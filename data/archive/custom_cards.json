@@ -1278,6 +1278,29 @@
         ]
       },
       "dice": []
+    },
+    {
+      "id": "фывф_514e",
+      "name": "фывф",
+      "tier": 1,
+      "type": "Melee",
+      "description": "",
+      "flags": [],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "modify_roll_power",
+            "params": {
+              "base": 1,
+              "stat": "None",
+              "factor": 1.0,
+              "diff": false,
+              "reason": "Bonus"
+            }
+          }
+        ]
+      },
+      "dice": []
     }
   ]
 }
