@@ -12,9 +12,10 @@ from logic.talents.branch_3_tireless import (
     TalentSurvivor, TalentMuscleOverstrain, TalentIdolOath, TalentSurgeOfStrength
 )
 from logic.talents.branch_4_medic import TalentNoHippocraticOath, TalentGoodAsNew, TalentRemedyGood, TalentCheese, \
-    TalentStimulants, TalentYouWontDieGood, TalentCarefulNeutralization, TalentDoingGoodWork, TalentNotToday, \
+    TalentYouWontDieGood, TalentCarefulNeutralization, TalentDoingGoodWork, TalentNotToday, \
     TalentMadGoodDoctor, TalentToxicologyWeapon, TalentRemedyBad, TalentOrganStriking, TalentAdvancedToxicology, \
-    TalentYouWontDieBad, TalentMedicalJargon, TalentChristmasTree, TalentInsaneZeal, TalentGeniusToxicologist
+    TalentYouWontDieBad, TalentMedicalJargon, TalentChristmasTree, TalentInsaneZeal, TalentGeniusToxicologist, \
+    TalentConfete
 from logic.talents.branch_5_berseker import (
     TalentNakedDefense, TalentVengefulPayback, TalentBerserkerRage, TalentCalmMind,
     TalentFrenzy, TalentCatchBreath, TalentRagingFury, TalentFullConcentration,
@@ -128,7 +129,7 @@ TALENT_REGISTRY = {
     "good_as_new": TalentGoodAsNew(),
     "remedy_good": TalentRemedyGood(),
     "cheese": TalentCheese(),
-    "stimulants": TalentStimulants(),
+    "confete": TalentConfete(),
     "you_wont_die_good": TalentYouWontDieGood(),
     "careful_neutralization": TalentCarefulNeutralization(),
     "doing_good_work": TalentDoingGoodWork(),

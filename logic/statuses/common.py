@@ -27,6 +27,12 @@ class BleedStatus(StatusEffect):
     def on_roll(self, ctx: RollContext, stack: int):
         if ctx.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
             dmg = stack
+
+            if ctx.source.get_status("bleed_resist") > 0:
+                # Снижаем на 33%
+                dmg = int(dmg * 0.67)
+                # Лог можно добавить при желании
+
             ctx.source.current_hp -= dmg
             remove_amt = stack // 2
             ctx.source.remove_status("bleed", remove_amt)

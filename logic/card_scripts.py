@@ -290,6 +290,30 @@ def deal_effect_damage(ctx: 'RollContext', params: dict):
             u.take_sanity_damage(amount)
             ctx.log.append(f"🤯 **{u.name}**: -{amount} SP")
 
+
+def remove_all_positive(context: 'RollContext', params: dict):
+    """Снимает все положительные эффекты."""
+    target_mode = params.get("target", "self")
+    targets = _get_targets(context, target_mode)
+
+    # Список положительных статусов
+    POSITIVE_BUFFS = [
+        "strength", "endurance", "haste", "protection", "barrier",
+        "regen_hp", "regen_ganache", "mental_protection", "clarity",
+        "dmg_up", "power_up", "clash_power_up", "stagger_resist",
+        "bleed_resist", "ignore_satiety"
+    ]
+
+    for u in targets:
+        removed_list = []
+        for buff in POSITIVE_BUFFS:
+            if u.get_status(buff) > 0:
+                u.remove_status(buff)  # Снимаем полностью
+                removed_list.append(buff)
+
+        if removed_list:
+            context.log.append(f"🧹 **Вафли**: Снято {', '.join(removed_list)}")
+
 SCRIPTS_REGISTRY = {
     "modify_roll_power": modify_roll_power,
     "deal_effect_damage": deal_effect_damage,
@@ -298,4 +322,5 @@ SCRIPTS_REGISTRY = {
     "steal_status": steal_status,
     "multiply_status": multiply_status,
     "remove_status": remove_status_script, # <--- NEW
+    "remove_all_positive": remove_all_positive,
 }

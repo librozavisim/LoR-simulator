@@ -109,7 +109,7 @@ class PassivePovar(BasePassive):
     description = "Отлично готовишь и вкусно кушаешь! Автоматически получает доступ к талантам 4.4 и 4.5."
 
     def on_calculate_stats(self, unit) -> dict:
-        talents_to_learn = ["cheese", "stimulants"]
+        talents_to_learn = ["cheese", "confete"]
 
         for tid in talents_to_learn:
             if tid not in unit.talents:

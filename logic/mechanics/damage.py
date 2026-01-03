@@ -64,7 +64,8 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
         # Вариант: берем Pct из модификаторов
         stg_take_pct = target.modifiers["stagger_take"]["pct"]
         mod_mult = 1.0 + (stg_take_pct / 100.0)
-
+        if target.get_status("stagger_resist") > 0:
+            mod_mult *= 0.67  # -33% урона
         final_dmg = int(amount * res * mod_mult)
         target.current_stagger -= final_dmg
         source_ctx.log.append(f"😵 Stagger Dmg {final_dmg}")

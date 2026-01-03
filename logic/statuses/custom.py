@@ -165,45 +165,74 @@ class WeaknessStatus(StatusEffect):
         unit.remove_status("weakness", 1)
         return ["🔻 Слабость уменьшилась (-1)"]
 
-
-class SatietyStatus(StatusEffect):
-    id = "satiety"
-
-    def on_calculate_stats(self, unit) -> dict:
-        """
-        15+ стаков: Штрафы к характеристикам.
-        """
-        stack = unit.get_status("satiety")
-
-        if stack >= 15:
-            return {
-                "initiative": -3,  # 🔵 Синяя стрелка вниз (Скорость)
-                "power_all": -3  # 🔴 Красная стрелка вниз (Сила всех кубиков)
-            }
-        return {}
-
-    def on_turn_end(self, unit, stack) -> list[str]:
-        msgs = []
-
-        # 20+ стаков: Урон за переедание
-        # Формула: (Текущее - 20) * 10 урона
-        if stack > 20:
-            excess = stack - 20
-            damage = excess * 10
-
-            # Наносим урон напрямую
-            unit.current_hp = max(0, unit.current_hp - damage)
-            msgs.append(f"**Переедание**: {excess} лишних стаков -> -{damage} HP!")
-
-            # Снимаем 1 эффект в конце раунда (как в описании)
-            unit.remove_status("satiety", 1)
-            msgs.append("🍗 Сытость немного спала (-1)")
-
-        return msgs
-
 class MentalProtectionStatus(StatusEffect):
     id = "mental_protection"
     # Для Эдама: Снижение урона по SP.
     # Логика снижения должна быть в damage.py или card_scripts.py
     # Здесь просто заглушка
     pass
+
+
+# === ОБНОВЛЕННАЯ СЫТОСТЬ (SATIETY) ===
+class SatietyStatus(StatusEffect):
+    id = "satiety"
+
+    def on_calculate_stats(self, unit) -> dict:
+        # Проверка на Суфле (ignore_satiety)
+        if unit.get_status("ignore_satiety") > 0:
+            return {}
+
+        stack = unit.get_status("satiety")
+
+        if stack >= 15:
+            return {
+                "initiative": -3,
+                "power_all": -3
+            }
+        return {}
+
+    def on_turn_end(self, unit, stack) -> list[str]:
+        msgs = []
+        if stack > 20:
+            excess = stack - 20
+            damage = excess * 10
+            unit.current_hp = max(0, unit.current_hp - damage)
+            msgs.append(f"**Переедание**: {excess} лишних стаков -> -{damage} HP!")
+
+        unit.remove_status("satiety", 1)
+        msgs.append("🍗 Сытость немного спала (-1)")
+        return msgs
+
+
+# === СТАТУСЫ КОНФЕТ ===
+
+class IgnoreSatietyStatus(StatusEffect):
+    id = "ignore_satiety"
+    # Логика внутри SatietyStatus
+    pass
+
+
+class StaggerResistStatus(StatusEffect):
+    id = "stagger_resist"
+    # Логика в damage.py
+    pass
+
+
+class BleedResistStatus(StatusEffect):
+    id = "bleed_resist"
+    # Логика в common.py (BleedStatus)
+    pass
+
+
+class RegenGanacheStatus(StatusEffect):
+    id = "regen_ganache"
+
+    def on_round_start(self, unit, log_func, **kwargs):
+        # 5% от макс хп
+        heal = int(unit.max_hp * 0.05)
+        if heal > 0:
+            unit.heal_hp(heal)
+            if log_func: log_func(f"🍫 **Ганаш**: Регенерация +{heal} HP")
+
+    def on_turn_end(self, unit, stack) -> list[str]:
+        return []

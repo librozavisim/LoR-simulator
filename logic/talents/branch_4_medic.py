@@ -78,18 +78,29 @@ class TalentCheese(BasePassive):
             log_func(f"🧀 **Сыровар**: {added} видов сыра добавлено в инвентарь.")
 
 
-class TalentStimulants(BasePassive):
-    id = "stimulants"
+class TalentConfete(BasePassive):
+    id = "confete"
     name = "Конфетки"
     description = (
-        "4.5 (Хороший) Конфетки!!!\n"
-        "Лимит: 5 шт (8 с навыком 4.10)."
+        "4.5 (Хороший) Набор конфет с особыми свойствами.\n"
+        "В начале боя вы получаете Пралине, Марципан, Суфле, Нугу, Грильяж, Ганаш, Помадку и Вафли."
     )
-    is_active_ability = True
+    is_active_ability = False  # Теперь это пассивная выдача карт
 
-    def activate(self, unit, log_func, **kwargs):
-        if log_func: log_func("💉 Меню конфеток открыто.")
-        return True
+    def on_combat_start(self, unit, log_func, **kwargs):
+        candy_ids = [
+            "candy_praline", "candy_marzipan", "candy_souffle", "candy_nougat",
+            "candy_grillage", "candy_ganache", "candy_fudge", "candy_waffles"
+        ]
+
+        added = 0
+        for cid in candy_ids:
+            if cid not in unit.deck:
+                unit.deck.append(cid)
+                added += 1
+
+        if log_func and added > 0:
+            log_func(f"🍬 **Кондитер**: {added} видов сладостей добавлено в инвентарь.")
 
 
 class TalentYouWontDieGood(BasePassive):
