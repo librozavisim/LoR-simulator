@@ -1,5 +1,7 @@
 import streamlit as st
 import os
+
+from core.ranks import RANK_THRESHOLDS
 from core.unit.unit import Unit
 from core.unit.unit_library import UnitLibrary
 
@@ -84,14 +86,40 @@ def render_basic_info(unit, u_key):
 
     st.divider()
 
-    # === RANK (Two slots) ===
+    # === RANK (Ранг) ===
     st.markdown("**Ранг Фиксера**")
     r_c1, r_c2 = st.columns(2)
-    unit.rank = r_c1.number_input("Текущий", 1, 12, unit.rank, help="Официальный ранг", key=f"rank_cur_{u_key}")
 
-    # Status Rank
+    # Выбор ранга
+    unit.rank = r_c1.number_input("Текущий (Tier)", -1, 10, unit.rank, help="Официальный ранг (0-11)",
+                                  key=f"rank_cur_{u_key}")
+
+    # === ОТОБРАЖЕНИЕ НАЗВАНИЯ РАНГА ===
+    rank_name = "Неизвестный ранг"
+    rank_color = "gray"
+
+    # Ищем название в RANK_THRESHOLDS по индексу tier
+    for _, name, tier in RANK_THRESHOLDS:
+        if (10-tier) == unit.rank:
+            rank_name = name
+            # Подсветка для высоких рангов
+            if tier >= 10:
+                rank_color = "red"  # Color / Impurity
+            elif tier >= 9:
+                rank_color = "orange"  # Star
+            elif tier >= 7:
+                rank_color = "blue"  # Nightmare
+            else:
+                rank_color = "green"
+            break
+
+    # Выводим название под полем ввода
+    r_c1.markdown(f":{rank_color}[**{rank_name}**]")
+
+    # Status Rank (Текстовое поле)
     status_rank = unit.memory.get("status_rank", "9 (Fixer)")
-    new_status = r_c2.text_input("Статус", status_rank, help="Ранг репутации", key=f"rank_stat_{u_key}")
+    new_status = r_c2.text_input("Статус (Текст)", status_rank, help="Ранг репутации (текстовое описание)",
+                                 key=f"rank_stat_{u_key}")
     unit.memory["status_rank"] = new_status
 
     st.divider()
