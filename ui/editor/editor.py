@@ -17,34 +17,46 @@ from ui.components import _format_script_text
 
 STATUS_LIST = sorted(list(STATUS_REGISTRY.keys()))
 TARGET_OPTS = ["self", "target", "all"]
+STAT_OPTS = ["None", "strength", "endurance", "agility", "intellect", "eloquence", "luck", "max_hp", "current_hp", "max_sp", "current_sp", "charge", "smoke"]
 
 SCRIPT_SCHEMAS = {
+    # --- БОЕВЫЕ МОДИФИКАТОРЫ ---
+    "Modify Roll Power": {
+        "id": "modify_roll_power",
+        "params": [
+            {"key": "base", "label": "База (Flat)", "type": "int", "default": 0},
+            {"key": "stat", "label": "Скалирование от...", "type": "select", "opts": STAT_OPTS, "default": "None"},
+            {"key": "factor", "label": "Множитель стата (x)", "type": "float", "default": 1.0},
+            {"key": "diff", "label": "Разница с врагом?", "type": "bool", "default": False,
+             "help": "(Мой стат - Стат врага)"},
+            {"key": "reason", "label": "Название в логе", "type": "text", "default": "Bonus"}
+        ]
+    },
+
     # --- ЛЕЧЕНИЕ / РЕСУРСЫ ---
-    "Restore HP": {
-        "id": "restore_hp",
+    "Restore Resource": {
+        "id": "restore_resource",
         "params": [
-            {"key": "amount", "label": "Количество", "type": "int", "default": 5},
-            {"key": "target", "label": "Цель", "type": "select", "opts": ["self", "target"], "default": "self"}
+            {"key": "type", "label": "Ресурс", "type": "select", "opts": ["hp", "sp", "stagger"], "default": "hp"},
+            {"key": "base", "label": "База", "type": "int", "default": 5},
+            {"key": "stat", "label": "Скалирование от...", "type": "select", "opts": STAT_OPTS, "default": "None"},
+            {"key": "factor", "label": "Множитель стата", "type": "float", "default": 0.5},
+            {"key": "target", "label": "Цель", "type": "select", "opts": ["self", "target", "all_allies"],
+             "default": "self"}
         ]
     },
-    "Restore SP": {
-        "id": "restore_sp",
+
+    # --- УРОН ЭФФЕКТОМ (Self Harm / Custom Dmg) ---
+    "Deal Effect Damage": {
+        "id": "deal_effect_damage",
         "params": [
-            {"key": "amount", "label": "Количество", "type": "int", "default": 5,
-             "help": "Отрицательное = Урон рассудку"},
-            {"key": "target", "label": "Цель", "type": "select", "opts": ["self", "target"], "default": "self"}
-        ]
-    },
-    "Self Harm (%)": {
-        "id": "self_harm_percent",
-        "params": [
-            {"key": "percent", "label": "Процент HP (0.1 = 10%)", "type": "float", "default": 0.05}
-        ]
-    },
-    "Add HP Damage (%)": {
-        "id": "add_hp_damage",
-        "params": [
-            {"key": "percent", "label": "Процент от Макс HP", "type": "float", "default": 0.05}
+            {"key": "type", "label": "Тип урона", "type": "select", "opts": ["hp", "stagger", "sp"], "default": "hp"},
+            {"key": "base", "label": "База", "type": "int", "default": 0},
+            {"key": "stat", "label": "Скалирование от...", "type": "select", "opts": STAT_OPTS,
+             "default": "current_hp"},
+            {"key": "factor", "label": "Множитель (для %)", "type": "float", "default": 0.05,
+             "help": "Например 0.05 для 5% от HP"},
+            {"key": "target", "label": "Цель", "type": "select", "opts": ["self", "target", "all"], "default": "self"}
         ]
     },
 
@@ -53,62 +65,28 @@ SCRIPT_SCHEMAS = {
         "id": "apply_status",
         "params": [
             {"key": "status", "label": "Статус", "type": "status_select", "default": "bleed"},
-            {"key": "stack", "label": "Кол-во (Stack)", "type": "int", "default": 1},
+            {"key": "base", "label": "Базовое кол-во", "type": "int", "default": 1},
+            # Добавляем скалирование для статусов!
+            {"key": "stat", "label": "Скейл от (опц.)", "type": "select", "opts": STAT_OPTS, "default": "None"},
+            {"key": "factor", "label": "Множитель скейла", "type": "float", "default": 1.0},
+
             {"key": "duration", "label": "Длительность", "type": "int", "default": 1},
-            {"key": "target", "label": "Цель", "type": "select", "opts": TARGET_OPTS, "default": "target"},
-            {"key": "min_roll", "label": "Мин. бросок (0=всегда)", "type": "int", "default": 0},
-            {"key": "delay", "label": "Задержка (Delay)", "type": "int", "default": 0}
+            {"key": "target", "label": "Цель", "type": "select", "opts": ["target", "self", "all_allies"],
+             "default": "target"}
         ]
     },
-    "Apply Status (Roll)": {
-        "id": "apply_status_by_roll",
-        "params": [
-            {"key": "status", "label": "Статус", "type": "status_select", "default": "barrier"},
-            {"key": "target", "label": "Цель", "type": "select", "opts": ["self", "target"], "default": "self"}
-        ]
-    },
+
+    # Старые утилиты
     "Steal Status": {
         "id": "steal_status",
-        "params": [
-            {"key": "status", "label": "Статус", "type": "status_select", "default": "smoke"}
-        ]
+        "params": [{"key": "status", "label": "Статус", "type": "status_select", "default": "smoke"}]
     },
     "Multiply Status": {
         "id": "multiply_status",
         "params": [
             {"key": "status", "label": "Статус", "type": "status_select", "default": "smoke"},
-            {"key": "multiplier", "label": "Множитель (x)", "type": "float", "default": 2.0},
-            {"key": "target", "label": "Цель", "type": "select", "opts": ["self", "target"], "default": "target"}
+            {"key": "multiplier", "label": "Множитель", "type": "float", "default": 2.0}
         ]
-    },
-
-    # --- УНИКАЛЬНЫЕ / ПРОЧЕЕ ---
-    "Luck Scaling Roll": {
-        "id": "add_luck_bonus_roll",
-        "params": [
-            {"key": "step", "label": "Удачи за бросок", "type": "int", "default": 10},
-            {"key": "limit", "label": "Лимит бросков", "type": "int", "default": 5}
-        ]
-    },
-    "Custom Damage": {
-        "id": "deal_custom_damage",
-        "params": [
-            {"key": "type", "label": "Тип", "type": "select", "opts": ["hp", "stagger"], "default": "stagger"},
-            {"key": "scale", "label": "Множитель (x)", "type": "float", "default": 1.0},
-            {"key": "target", "label": "Цель", "type": "select", "opts": TARGET_OPTS, "default": "target"},
-            {"key": "prevent_standard", "label": "Отменить обычный урон?", "type": "bool", "default": False}
-        ]
-    },
-    "Pat Shoulder (Buff)": {
-        "id": "pat_shoulder",
-        "params": [
-            {"key": "mode", "label": "Режим", "type": "select", "opts": ["off", "def"], "default": "off"},
-            {"key": "amount", "label": "Сила баффа", "type": "int", "default": 6}
-        ]
-    },
-    "Eloquence Clash": {
-        "id": "eloquence_clash",
-        "params": []  # Нет параметров
     }
 }
 

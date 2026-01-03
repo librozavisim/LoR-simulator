@@ -1,406 +1,260 @@
-# logic/card_scripts.py
 import math
 import random
-import streamlit as st  # <--- ВАЖНО: Добавлен импорт Streamlit
+import streamlit as st
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from logic.context import RollContext
 
 
-def apply_status(context: 'RollContext', params: dict):
-    status_name = params.get("status")
-    stack = params.get("stack", 1)
-    target_type = params.get("target", "target")
-    duration = int(params.get("duration", 1))
+# ==========================================
+# 🧮 УНИВЕРСАЛЬНЫЙ КАЛЬКУЛЯТОР
+# ==========================================
 
-    unit_to_affect = context.target if target_type == "target" else context.source
-    if not unit_to_affect: return
+def _get_unit_stat(unit, stat_name: str) -> int:
+    """
+    Извлекает значение характеристики, навыка, ресурса или текущего состояния.
+    """
+    if not unit or not stat_name: return 0
+    stat_name = stat_name.lower()
 
-    # === ИММУНИТЕТ ===
-    if unit_to_affect.get_status("red_lycoris") > 0 and status_name not in ["red_lycoris"]:
-        context.log.append(f"🚫 {unit_to_affect.name} Immune to {status_name}")
-        return
+    # 1. Текущие параметры
+    if stat_name == "hp" or stat_name == "current_hp": return unit.current_hp
+    if stat_name == "sp" or stat_name == "current_sp": return unit.current_sp
+    if stat_name == "stagger" or stat_name == "current_stagger": return unit.current_stagger
 
-    # Хак для Дыма (Smoke) - он вечный
-    if status_name == "smoke": duration = 99
+    # 2. Максимальные параметры
+    if stat_name == "max_hp": return unit.max_hp
+    if stat_name == "max_sp": return unit.max_sp
+    if stat_name == "max_stagger": return unit.max_stagger
 
-    targets = []
-    if target_type == "self":
-        targets.append(context.source)
-    elif target_type == "target":
-        targets.append(context.target)
-    elif target_type == "all":
-        if context.source: targets.append(context.source)
-        if context.target: targets.append(context.target)
+    # 3. Ресурсы (Luck, Charge и т.д.)
+    if stat_name in unit.resources: return unit.resources[stat_name]
+    if stat_name == "luck": return unit.skills.get("luck", 0)  # Фоллбек на навык
+
+    # 4. Атрибуты и Навыки (с учетом баффов/модификаторов)
+    # Пытаемся найти в modifiers (total_X), затем в attributes, затем в skills
+
+    # Ищем в modifiers (новая структура {'flat': val, 'pct': val} или старая int)
+    val_data = unit.modifiers.get(stat_name)
+    if val_data is None:
+        val_data = unit.modifiers.get(f"total_{stat_name}")  # Совместимость
+
+    if val_data is not None:
+        if isinstance(val_data, dict): return int(val_data.get("flat", 0))
+        return int(val_data)
+
+    # Ищем в базе
+    if stat_name in unit.attributes: return unit.attributes[stat_name]
+    if stat_name in unit.skills: return unit.skills[stat_name]
+
+    return 0
 
 
+def _resolve_value(source, target, params: dict) -> int:
+    """
+    Главная формула:
+    Result = Base + ( (SourceStat - TargetStat?) * Factor )
+    """
+    base = params.get("base", 0)
+    if isinstance(base, float): base = int(base)  # Защита от float инпутов
 
-    if not status_name: return
+    stat_key = params.get("stat", None)  # Например: "strength", "eloquence", "max_hp"
 
-    for unit in targets:
-        if not unit: continue
-        success, msg = unit.add_status(status_name, stack, duration=duration)
+    if not stat_key or stat_key == "None":
+        return base
 
-        if success:
-            # Обычный лог успеха
-            context.log.append(f"🧪 **{unit.name}**: +{stack} {status_name.capitalize()}")
-        else:
-            # Если заблокировано и есть сообщение (например, от Clarity)
-            if msg:
-                context.log.append(f"🛡️ **{unit.name}**: {msg}")
+    # Получаем стат источника
+    source_val = _get_unit_stat(source, stat_key)
 
-
-def steal_status(context: 'RollContext', params: dict):
-    status_name = params.get("status")
-    if not status_name: return
-    thief, victim = context.source, context.target
-    if not thief or not victim: return
-
-    amount = victim.get_status(status_name)
-    if amount > 0:
-        victim.remove_status(status_name, amount)
-        duration = 99 if status_name == "smoke" else 1
-        thief.add_status(status_name, amount, duration=duration)
-
-        # БЫЛО: ✋ **Steal**: 5 Smoke from 🎯 → 👤
-        # СТАЛО: ✋ **Lilit** stole 5 Smoke from **Roland**
-        context.log.append(f"✋ **{thief.name}** stole {amount} {status_name} from **{victim.name}**")
+    # Если нужно считать разницу (Source - Target)
+    if params.get("diff", False) and target:
+        target_val = _get_unit_stat(target, stat_key)
+        final_stat = source_val - target_val
+        # Опционально: не уходить в минус? Обычно разница может быть отрицательной (штраф)
     else:
-        # Можно добавить лог неудачи, если нужно
-        pass
+        final_stat = source_val
+
+    factor = float(params.get("factor", 1.0))
+
+    # Считаем бонус
+    bonus = final_stat * factor
+
+    return int(base + bonus)
 
 
-# === НОВЫЙ СКРИПТ ===
-def apply_status_by_roll(context: 'RollContext', params: dict):
-    """
-    Накладывает статус в количестве, равном значению броска кубика.
-    Используется для Зиккурата (Блок -> Барьер).
-    """
-    status_name = params.get("status", "barrier")
-    target_type = params.get("target", "self")
-
-    unit = context.source if target_type == "self" else context.target
-
-    if unit:
-        # Берем итоговое значение броска (с учетом силы и бонусов)
-        amount = context.final_value
-
-        if amount > 0:
-            unit.add_status(status_name, amount, duration=2)  # Барьер обычно висит раунд-два
-            context.log.append(f"🛡️ {status_name.capitalize()} +{amount} (Roll) to {unit.name}")
-
-def multiply_status(context: 'RollContext', params: dict):
-    status_name = params.get("status")
-    multiplier = float(params.get("multiplier", 2.0))
-    target_type = params.get("target", "target")
-    unit = context.target if target_type == "target" else context.source
-    if not unit: return
-
-    current = unit.get_status(status_name)
-    if current > 0:
-        add = int(current * (multiplier - 1))
-        duration = 99 if status_name == "smoke" else 1
-        unit.add_status(status_name, add, duration=duration)
-
-        context.log.append(f"✖️ **{unit.name}**: {status_name} x{multiplier} (+{add})")
-
-
-def deal_custom_damage(context: 'RollContext', params: dict):
-    dmg_type = params.get("type", "stagger")
-    scale = float(params.get("scale", 1.0))
-    target_mode = params.get("target", "target")
-    prevent_std = params.get("prevent_standard", False)
-
-    base = int(context.final_value * scale)
-    targets = []
-    if target_mode == "target":
-        targets.append(context.target)
-    elif target_mode == "self":
-        targets.append(context.source)
+def _get_targets(ctx, target_mode):
+    """Возвращает список целей на основе режима."""
+    if target_mode == "self":
+        return [ctx.source] if ctx.source else []
+    elif target_mode == "target":
+        return [ctx.target] if ctx.target else []
     elif target_mode == "all":
-        if context.source: targets.append(context.source)
-        if context.target: targets.append(context.target)
-
-    for unit in targets:
-        if not unit: continue
-        if dmg_type == "stagger":
-            unit.current_stagger -= base
-            context.log.append(f"😵 **{unit.name}**: -{base} Stagger")
-        elif dmg_type == "hp":
-            unit.current_hp -= base
-            context.log.append(f"💥 **{unit.name}**: -{base} HP")
-
-    if prevent_std:
-        context.damage_multiplier = 0.0
-
-
-def restore_hp(context: 'RollContext', params: dict):
-    amount = params.get("amount", 0)
-    target_type = params.get("target", "self")
-    unit = context.source if target_type == "self" else context.target
-
-    if unit:
-        if amount >= 0:
-            # === ЛЕЧЕНИЕ ===
-            heal = unit.heal_hp(amount)
-            context.log.append(f"💚 **{unit.name}**: Healed +{heal} HP")
-        else:
-            # === УРОН (Отрицательное лечение) ===
-            # amount отрицательный, поэтому unit.current_hp + amount уменьшит здоровье
-            # Оставляем минимум 0
-            unit.current_hp = max(0, unit.current_hp + amount)
-            context.log.append(f"💔 **{unit.name}**: Lost {amount} HP (Direct)")
-
-
-def restore_sp(context: 'RollContext', params: dict):
-    amount = int(params.get("amount", 0))
-    unit = context.source  # Обычно SP восстанавливает тот, кто использует карту, но можно доработать
-
-    if unit:
-        if amount >= 0:
-            # === ВОССТАНОВЛЕНИЕ SP ===
-            if hasattr(unit, 'restore_sp'):
-                actual = unit.restore_sp(amount)
-            else:
-                old = unit.current_sp
-                unit.current_sp = min(unit.max_sp, unit.current_sp + amount)
-                actual = unit.current_sp - old
-
-            context.log.append(f"🧠 **{unit.name}**: Restored +{actual} SP")
-        else:
-            # === УРОН SP (Отрицательное) ===
-            # amount < 0. Вычитаем (прибавляем отрицательное)
-            # take_sanity_damage обычно принимает положительное число, поэтому берем abs(amount)
-            # Но для простоты сделаем прямую математику
-            unit.current_sp = max(-45, unit.current_sp + amount)  # -45 это порог паники
-            context.log.append(f"🤯 **{unit.name}**: Lost {amount} SP")
-
-
-def add_hp_damage(context: 'RollContext', params: dict):
-    """Добавляет к броску урон, равный % от Макс. HP (округление вверх)."""
-    pct = params.get("percent", 0.05)  # 5% по умолчанию
-    unit = context.source
-
-    # math.ceil - округление всегда в большую сторону
-    bonus = math.ceil(unit.max_hp * pct)
-
-    # Добавляем бонус к значению кубика в контексте
-    # Так как мы вызываем это в on_hit, это увеличит итоговый урон
-    context.modify_power(bonus, "HP Scaling")
-
-
-def self_harm_percent(context: 'RollContext', params: dict):
-    """Наносит урон самому себе в % от ТЕКУЩЕГО здоровья."""
-    pct = params.get("percent", 0.025)  # 2.5% по умолчанию
-    unit = context.source
-
-    # Урон от текущего HP
-    dmg = int(unit.current_hp * pct)
-    if dmg > 0:
-        unit.current_hp -= dmg
-        context.log.append(f"💔 Отдача: -{dmg} HP ({pct * 100}%)")
-
-
-def add_luck_bonus_roll(context: 'RollContext', params: dict):
-    """
-    Повторяет бросок за каждые X удачи и добавляет к силе.
-    """
-    unit = context.source
-    die = context.dice
-    if not die: return  # Защита
-
-    # Параметры из редактора
-    step = params.get("step", 10)  # За каждые 10 удачи
-    limit = params.get("limit", 7)  # Лимит повторений
-
-    # Получаем Удачу
-    luck_val = unit.skills.get("luck", 0)
-
-    # Считаем количество доп. бросков
-    extra_count = luck_val // step
-
-    # Применяем лимит
-    if extra_count > limit:
-        extra_count = limit
-
-    if extra_count > 0:
-        total_bonus = 0
-        rolls_history = []
-
-        # Симулируем повторные броски того же кубика
-        for _ in range(extra_count):
-            r = random.randint(die.min_val, die.max_val)
-            total_bonus += r
-            rolls_history.append(str(r))
-
-        # Применяем бонус
-        context.modify_power(total_bonus, f"Luck x{extra_count}")
-
-        # Красивый лог
-        context.log.append(f"🍀 Luck Series: +{total_bonus} ({', '.join(rolls_history)})")
-
-
-# === НОВЫЕ СКРИПТЫ ===
-
-def pat_shoulder(context: 'RollContext', params: dict):
-    mode = params.get("mode", "off")  # def или off
-    amount = params.get("amount", 6)
-    source = context.source
-
-    # Теперь мы ожидаем, что target уже передан через UI
-    target_unit = context.target
-
-    # Фолбек, если цель не передана (например, в тестах или старом коде)
-    if not target_unit:
+        # В контексте 1 на 1 это оба.
+        # В массовом бою тут нужна логика получения команд через st.session_state
+        res = []
+        if ctx.source: res.append(ctx.source)
+        if ctx.target: res.append(ctx.target)
+        return res
+    elif target_mode == "all_allies":
+        # Попытка найти всех союзников
+        source = ctx.source
         my_team = []
         if 'team_left' in st.session_state and source in st.session_state['team_left']:
             my_team = st.session_state['team_left']
         elif 'team_right' in st.session_state and source in st.session_state['team_right']:
             my_team = st.session_state['team_right']
 
-        valid_allies = [u for u in my_team if not u.is_dead() and u != source]
-        target_unit = random.choice(valid_allies) if valid_allies else source
+        if not my_team: return [source]
+        return [u for u in my_team if not u.is_dead()]
 
-    context.log.append(f"🤝 **{source.name}** выбрал **{target_unit.name}**.")
-
-    if mode == "def":
-        target_unit.add_status("endurance", amount, duration=1)
-        target_unit.add_status("protection", 1, duration=1)  # Немного защиты сверху
-        context.log.append(f"🛡️ Бафф: +{amount} к Защитным кубикам (Endurance).")
-
-    elif mode == "off":
-        target_unit.add_status("strength", amount, duration=1)
-        context.log.append(f"⚔️ Бафф: +{amount} к Атакующим кубикам (Strength).")
+    return []
 
 
-def eloquence_clash(context: 'RollContext', params: dict):
+# ==========================================
+# 📜 НОВЫЕ УНИВЕРСАЛЬНЫЕ СКРИПТЫ
+# ==========================================
+
+def modify_roll_power(context: 'RollContext', params: dict):
     """
-    Добавляет к броску разницу в красноречии.
+    Изменяет силу броска.
+    Заменяет: eloquence_clash, add_hp_damage, luck_bonus (частично).
     """
-    if not context.target: return
+    amount = _resolve_value(context.source, context.target, params)
+    reason = params.get("reason", "Bonus")
 
-    my_elo = context.source.skills.get("eloquence", 0)
-    # Пытаемся получить Elo врага. Если это моб, у него может не быть скиллов, тогда 0.
-    target_elo = getattr(context.target, "skills", {}).get("eloquence", 0)
-
-    diff = my_elo - target_elo
-
-    if diff > 0:
-        context.modify_power(diff, f"Eloquence Diff ({my_elo}-{target_elo})")
-    elif diff < 0:
-        # Опционально: штраф, если у врага язык подвешен лучше?
-        # В описании карты сказано "Увеличивает силу... на разницу". Обычно в плюс.
-        pass
+    if amount != 0:
+        stat_name = params.get("stat", "")
+        if stat_name: reason = f"{stat_name.title()} ({amount})"
+        context.modify_power(amount, reason)
 
 
-def azgick_enrage_effect(context: 'RollContext', params: dict):
+def deal_effect_damage(context: 'RollContext', params: dict):
     """
-    Наносит фиксированный урон и дает Силу.
+    Наносит прямой урон (эффектом).
+    Заменяет: self_harm_percent, deal_custom_damage.
     """
-    dmg = params.get("damage", 12)
-    str_amt = params.get("power_attack", 12)
-    target = context.target
+    dmg_type = params.get("type", "hp")  # hp / stagger / sp
+    targets = _get_targets(context, params.get("target", "target"))
 
-    if target:
-        # Наносим чистый урон HP (без резистов, как "true damage" от эффекта)
-        target.current_hp = max(1, target.current_hp - dmg)  # Не убиваем, оставляем 1 HP если что
+    amount = _resolve_value(context.source, context.target, params)
+    if amount <= 0: return
 
-        # Накладываем силу
-        target.add_status("strength", str_amt, duration=2)
+    for u in targets:
+        if dmg_type == "hp":
+            u.current_hp = max(0, u.current_hp - amount)
+            context.log.append(f"💔 **{u.name}**: -{amount} HP (Effect)")
+        elif dmg_type == "stagger":
+            u.current_stagger = max(0, u.current_stagger - amount)
+            context.log.append(f"😵 **{u.name}**: -{amount} Stagger")
+        elif dmg_type == "sp":
+            # Используем встроенный метод для SP (он учитывает панику)
+            u.take_sanity_damage(amount)
+            context.log.append(f"🤯 **{u.name}**: -{amount} SP")
 
-        context.log.append(f"😡 **Разозлить**: {target.name} получает {dmg} урона и +{str_amt} Силы!")
 
-
-def apply_random_fragile(context: 'RollContext', params: dict):
+def restore_resource(context: 'RollContext', params: dict):
     """
-    Накладывает случайное количество Fragile.
+    Восстанавливает HP/SP/Stagger.
+    Заменяет: restore_hp, restore_sp.
     """
-    min_val = params.get("min", 5)
-    max_val = params.get("max", 10)
-    target = context.target
+    res_type = params.get("type", "hp")
+    targets = _get_targets(context, params.get("target", "self"))
 
-    if target:
-        amount = random.randint(min_val, max_val)
-        target.add_status("fragile", amount, duration=2)
-        context.log.append(f"🫵 **Слабость**: Наложено {amount} Хрупкости.")
+    amount = _resolve_value(context.source, context.target, params)
+    # Если amount отрицательный, это работает как урон (но лучше использовать deal_effect_damage)
 
-
-def _get_all_allies(context):
-    """Вспомогательная функция для поиска всех союзников (включая себя)."""
-    source = context.source
-    # Пытаемся найти команду через session_state (так как в context.source нет прямой ссылки на team list)
-    # Это работает в рамках Streamlit симулятора
-    import streamlit as st
-
-    my_team = []
-    if 'team_left' in st.session_state and source in st.session_state['team_left']:
-        my_team = st.session_state['team_left']
-    elif 'team_right' in st.session_state and source in st.session_state['team_right']:
-        my_team = st.session_state['team_right']
-
-    # Если не нашли (тесты), возвращаем хотя бы себя
-    if not my_team:
-        return [source]
-
-    return [u for u in my_team if not u.is_dead()]
+    for u in targets:
+        if res_type == "hp":
+            healed = u.heal_hp(amount)
+            context.log.append(f"💚 **{u.name}**: +{healed} HP")
+        elif res_type == "sp":
+            recovered = u.restore_sp(amount)
+            context.log.append(f"🧠 **{u.name}**: +{recovered} SP")
+        elif res_type == "stagger":
+            old = u.current_stagger
+            u.current_stagger = min(u.max_stagger, u.current_stagger + amount)
+            context.log.append(f"🛡️ **{u.name}**: +{u.current_stagger - old} Stagger")
 
 
-# === СКРИПТЫ ПРАВИЛ ПОДВОРОТЕН ===
+def apply_status(context: 'RollContext', params: dict):
+    """
+    Накладывает статус.
+    Теперь stack тоже может скейлиться от статов!
+    """
+    status_name = params.get("status")
+    if not status_name: return
 
-def azgick_rule_1(context: 'RollContext', params: dict):
-    """Первое правило: Барьер 25% от Макс HP всем союзникам."""
-    allies = _get_all_allies(context)
-    context.log.append(f"📜 **Первое правило**: ЗАЩИЩАТЬ СВОИХ!")
+    target_mode = params.get("target", "target")
+    duration = int(params.get("duration", 1))
 
-    for ally in allies:
-        amount = int(ally.max_hp * 0.25)
-        ally.add_status("barrier", amount, duration=2)
-        # Лог пишем один раз или подробно? Сделаем кратко в консоль, подробно в статус
-        # context.log.append(f"🛡️ {ally.name}: +{amount} Barrier")
+    # Вычисляем количество стаков через универсальную формулу
+    # Обычно base=Stack из эдитора.
+    stack = _resolve_value(context.source, context.target, params)
 
+    if stack <= 0: return
 
-def azgick_rule_2(context: 'RollContext', params: dict):
-    """Второе правило: Восстановить 50% Stagger всем союзникам."""
-    allies = _get_all_allies(context)
-    context.log.append(f"📜 **Второе правило**: ПОДДЕРЖИВАТЬ СВОИХ!")
+    targets = _get_targets(context, target_mode)
 
-    for ally in allies:
-        missing = ally.max_stagger - ally.current_stagger
-        heal = int(ally.max_stagger * 0.5)
+    # Хак для дыма
+    if status_name == "smoke": duration = 99
 
-        # Не лечим больше максимума
-        actual = min(missing, heal) if missing > 0 else 0
-        ally.current_stagger = min(ally.max_stagger, ally.current_stagger + heal)
+    for u in targets:
+        # Проверка иммунитета (Red Lycoris и т.д.)
+        if u.get_status("red_lycoris") > 0 and status_name != "red_lycoris":
+            context.log.append(f"🚫 {u.name} Immune to {status_name}")
+            continue
 
-        if actual > 0:
-            pass  # Можно добавить лог, если нужно
+        success, msg = u.add_status(status_name, stack, duration=duration)
+        if success:
+            context.log.append(f"🧪 **{u.name}**: +{stack} {status_name.capitalize()}")
+        elif msg:
+            context.log.append(f"🛡️ {msg}")
 
 
-def azgick_rule_3(context: 'RollContext', params: dict):
-    """Третье правило: 5 Protection, 5 Endurance всем союзникам."""
-    allies = _get_all_allies(context)
-    context.log.append(f"📜 **Третье правило**: ЭЭЭЭ... ЗАБЫЛ!")
+def steal_status(context: 'RollContext', params: dict):
+    status_name = params.get("status")
+    thief, victim = context.source, context.target
+    if not thief or not victim: return
 
-    for ally in allies:
-        ally.add_status("protection", 5, duration=2)
-        ally.add_status("endurance", 5, duration=2)
+    current = victim.get_status(status_name)
+    if current > 0:
+        victim.remove_status(status_name, current)
+        duration = 99 if status_name == "smoke" else 1
+        thief.add_status(status_name, current, duration=duration)
+        context.log.append(f"✋ **{thief.name}** stole {current} {status_name}")
+
+
+def multiply_status(context: 'RollContext', params: dict):
+    status_name = params.get("status")
+    multiplier = float(params.get("multiplier", 2.0))
+    targets = _get_targets(context, params.get("target", "target"))
+
+    for u in targets:
+        current = u.get_status(status_name)
+        if current > 0:
+            add = int(current * (multiplier - 1))
+            duration = 99 if status_name == "smoke" else 1
+            u.add_status(status_name, add, duration=duration)
+            context.log.append(f"✖️ **{u.name}**: {status_name} x{multiplier} (+{add})")
+
+
+# ==========================================
+# 📖 REGISTRY
+# ==========================================
 
 SCRIPTS_REGISTRY = {
+    # Новые универсальные
+    "modify_roll_power": modify_roll_power,
+    "deal_effect_damage": deal_effect_damage,
+    "restore_resource": restore_resource,
     "apply_status": apply_status,
-    "restore_hp": restore_hp,
-    "restore_sp": restore_sp,
+
+    # Утилитарные
     "steal_status": steal_status,
     "multiply_status": multiply_status,
-    "deal_custom_damage": deal_custom_damage,
-    "add_hp_damage": add_hp_damage,       # <--- Регистрируем
-    "self_harm_percent": self_harm_percent,
-    "apply_status_by_roll": apply_status_by_roll,
-    "add_luck_bonus_roll": add_luck_bonus_roll,
-    "pat_shoulder": pat_shoulder,       # <--- Новое
-    "eloquence_clash": eloquence_clash, # <--- Новое
-# Новые правила:
-    "azgick_rule_1": azgick_rule_1,
-    "azgick_rule_2": azgick_rule_2,
-    "azgick_rule_3": azgick_rule_3,
+
+    # Старые (Mapped to new logic inside functions or kept for specific logic)
+    # Мы можем оставить старые имена ключей в реестре, но направить их на новые функции,
+    # если параметры совместимы. Но лучше обновить Editor.
 }
