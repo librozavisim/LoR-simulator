@@ -2,6 +2,7 @@ import math
 from turtle import st
 
 from logic.passives.base_passive import BasePassive
+from logic.statuses.status_definitions import NEGATIVE_STATUSES
 
 
 class PassiveSCells(BasePassive):
@@ -44,7 +45,7 @@ class TalentRedLycoris(BasePassive):
     name = "Красный Ликорис"
     description = (
         "Активно (при Stagger < 50%): Переход в состояние жизни и смерти на 4 цикла.\n"
-        "Эффекты: Полный иммунитет к урону и эффектам. Инициатива равна противнику.\n"
+        "Эффекты: Иммунитет к негативным эффектам. Инициатива равна противнику.\n"
         "Действия восстанавливают 5% HP/SP/Stagger.\n"
         "Нельзя перенаправлять атаки. Перезарядка 7 ходов."
     )
@@ -62,33 +63,42 @@ class TalentRedLycoris(BasePassive):
             if log_func: log_func(f"❌ {self.name}: Выдержка слишком высока ({int(stagger_pct * 100)}%)")
             return False
 
-        # Очистка (Cleanse) - удаляем все статусы
-        keys_to_remove = list(unit.statuses.keys())
-        for k in keys_to_remove:
-            unit.remove_status(k)
-        if log_func and keys_to_remove:
-            log_func(f"✨ Сброс статусов: {', '.join(keys_to_remove)}")
+        # === [ИЗМЕНЕНО] Умная очистка (Только негативные статусы) ===
+        removed_list = []
+
+        # 1. Очищаем активные негативные статусы
+        # Используем список ключей, чтобы безопасно удалять во время итерации
+        current_statuses = list(unit.statuses.keys())
+        for status_id in current_statuses:
+            if status_id in NEGATIVE_STATUSES:
+                unit.remove_status(status_id)
+                removed_list.append(status_id)
+
+        # 2. Очищаем отложенные негативные статусы (Delayed)
+        if hasattr(unit, "delayed_queue"):
+            new_queue = []
+            for item in unit.delayed_queue:
+                s_name = item.get("name")
+                if s_name in NEGATIVE_STATUSES:
+                    removed_list.append(f"{s_name} (Delayed)")
+                else:
+                    new_queue.append(item)
+            unit.delayed_queue = new_queue
+
+        if log_func and removed_list:
+            log_func(f"✨ Ликорис: Сожжены негативные эффекты ({', '.join(removed_list)})")
 
         # Накладываем статус Ликориса
         unit.add_status("red_lycoris", 1, duration=self.duration)
         unit.cooldowns[self.id] = self.cooldown
 
         if log_func:
-            log_func(f"🩸 {self.name}: Активирован! Иммунитет и синхронизация.")
+            log_func(f"🩸 {self.name}: Активирован! Иммунитет к негативу и синхронизация.")
         return True
 
-    # ПЕРЕНЕСЛИ ЛОГИКУ В ON_ROUND_START
     def on_round_start(self, unit, log_func, **kwargs):
         # Если статус активен, запускаем регенерацию
         if unit.get_status("red_lycoris") > 0:
-
-            # Используем speed_dice (характеристику), так как слоты могут быть еще не заполнены
-            # или если мы хотим считать потенциал.
-            # Но если логика подразумевает "за каждое действие", то active_slots (если они уже брошены) точнее.
-            # В движке on_round_start вызывается ПОСЛЕ броска скорости?
-            # Смотрим clash.py: roll_speed_dice делается в roll_phase, а on_round_start в prepare_turn.
-            # Значит, active_slots уже заполнены!
-
             dice_count = len(unit.active_slots)
 
             # Если вдруг слотов нет (стан и т.д.), берем базу
@@ -109,6 +119,16 @@ class TalentRedLycoris(BasePassive):
             if log_func:
                 log_func(
                     f"🩸 Ликорис ({dice_count} д.): Восстановлено {int(pct * 100)}% ({h_amt} HP, {s_amt} SP, {stg_amt} Stg)")
+
+    # === [НОВОЕ] Перехват наложения статусов ===
+    def on_before_status_add(self, unit, status_id, amount):
+        # Если Ликорис активен -> Блокируем только негативные статусы
+        if unit.get_status("red_lycoris") > 0:
+            if status_id in NEGATIVE_STATUSES:
+                return False, f"🩸 Lycoris blocked {status_id}"
+
+        # Положительные статусы пропускаем
+        return True, None
 
 class TalentShadowOfMajesty(BasePassive):
     id = "shadow_majesty"
