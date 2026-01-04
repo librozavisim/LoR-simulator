@@ -4,8 +4,8 @@ from core.dice import Dice
 from core.events import EventManager
 from core.unit.unit import Unit
 from logic.modifiers import RollContext
-from logic.passives import PASSIVE_REGISTRY
-from logic.talents import TALENT_REGISTRY
+from logic.character_changing.passives import PASSIVE_REGISTRY
+from logic.character_changing.talents import TALENT_REGISTRY
 
 
 class CombatEngine:

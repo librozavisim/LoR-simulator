@@ -1,5 +1,5 @@
 from logic.context import RollContext
-from logic.passives.base_passive import BasePassive
+from logic.character_changing.passives.base_passive import BasePassive
 
 
 class PassiveWitnessOfGroGoroth(BasePassive):

@@ -1,5 +1,4 @@
-from logic.passives.base_passive import BasePassive
-from logic.statuses.status_definitions import NEGATIVE_STATUSES
+from logic.character_changing.passives.base_passive import BasePassive
 
 
 # ==========================================

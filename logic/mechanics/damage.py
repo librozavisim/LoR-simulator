@@ -1,5 +1,5 @@
-from logic.passives import PASSIVE_REGISTRY
-from logic.talents import TALENT_REGISTRY
+from logic.character_changing.passives import PASSIVE_REGISTRY
+from logic.character_changing.talents import TALENT_REGISTRY
 from logic.statuses.status_manager import STATUS_REGISTRY
 # Импорт для чтения модов
 from logic.calculations.formulas import get_modded_value

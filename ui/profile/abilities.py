@@ -1,7 +1,7 @@
 import streamlit as st
 from core.library import Library
-from logic.passives import PASSIVE_REGISTRY
-from logic.talents import TALENT_REGISTRY
+from logic.character_changing.passives import PASSIVE_REGISTRY
+from logic.character_changing.talents import TALENT_REGISTRY
 
 def render_abilities(unit, u_key):
     # === DECK ===

@@ -1,7 +1,7 @@
 import streamlit as st
 from core.library import Library
-from logic.passives.__init__ import PASSIVE_REGISTRY
-from logic.talents import TALENT_REGISTRY
+from logic.character_changing.passives import PASSIVE_REGISTRY
+from logic.character_changing.talents import TALENT_REGISTRY
 from logic.weapon_definitions import WEAPON_REGISTRY
 from ui.components import _format_script_text
 from ui.styles import TYPE_ICONS, TYPE_COLORS

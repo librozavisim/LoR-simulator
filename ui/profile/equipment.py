@@ -1,6 +1,6 @@
 import streamlit as st
 from core.unit.unit_library import UnitLibrary
-from logic.augmentations import AUGMENTATION_REGISTRY
+from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
 from logic.weapon_definitions import WEAPON_REGISTRY
 
 def render_equipment(unit, u_key):

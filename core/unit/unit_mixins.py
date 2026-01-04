@@ -31,7 +31,7 @@ class UnitStatusMixin:
         self._ensure_status_storage()
         if amount <= 0: return False, None # Возвращаем статус неудачи
 
-        from logic.talents import TALENT_REGISTRY
+        from logic.character_changing.talents import TALENT_REGISTRY
         for tid in self.talents:
             if tid in TALENT_REGISTRY:
                 if hasattr(TALENT_REGISTRY[tid], "on_before_status_add"):
@@ -48,7 +48,7 @@ class UnitStatusMixin:
                         return False, msg  # Возвращаем причину блокировки
 
         # 2. Проверка через пассивки (аналогично)
-        from logic.passives import PASSIVE_REGISTRY
+        from logic.character_changing.passives import PASSIVE_REGISTRY
         for pid in self.passives:
             if pid in PASSIVE_REGISTRY:
                 if hasattr(PASSIVE_REGISTRY[pid], "on_before_status_add"):

@@ -1,7 +1,7 @@
 from logic.scripts.card_scripts import SCRIPTS_REGISTRY
 from logic.statuses.status_manager import STATUS_REGISTRY
-from logic.passives import PASSIVE_REGISTRY
-from logic.talents import TALENT_REGISTRY
+from logic.character_changing.passives import PASSIVE_REGISTRY
+from logic.character_changing.talents import TALENT_REGISTRY
 from logic.context import RollContext
 from logic.weapon_definitions import WEAPON_REGISTRY
 

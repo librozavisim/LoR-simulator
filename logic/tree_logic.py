@@ -1,5 +1,5 @@
-from logic.passives import PASSIVE_REGISTRY
-from logic.talents import TALENT_REGISTRY
+from logic.character_changing.passives import PASSIVE_REGISTRY
+from logic.character_changing.talents import TALENT_REGISTRY
 
 def get_talent_info(talent_id):
     return TALENT_REGISTRY.get(talent_id) or PASSIVE_REGISTRY.get(talent_id)

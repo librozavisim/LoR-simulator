@@ -1,45 +1,45 @@
 # logic/talents/__init__.py
-from logic.talents.branch_1_mindgames import TalentKeepItTogether, TalentCenterOfBalance, TalentControlledDistortion, \
+from logic.character_changing.talents.branch_1_mindgames import TalentKeepItTogether, TalentCenterOfBalance, TalentControlledDistortion, \
     TalentSafeEGO, TalentEmotionalStorm, TalentUnbearablePresence, TalentTeaMaster, TalentMindPower, TalentPeakSanity, \
     TalentPsychicStrain
-from logic.talents.branch_2_best import TalentOnTheWaveOfSuccess, TalentTacticalAnalysis, TalentRemarkable, \
+from logic.character_changing.talents.branch_2_best import TalentOnTheWaveOfSuccess, TalentTacticalAnalysis, TalentRemarkable, \
     TalentBehaviorStudy, TalentSpeechMaster, TalentPathfinder, TalentAceOfAllTrades, TalentKnowYourEnemy, \
     TalentAlwaysReady, TalentStrategist
-from logic.talents.branch_3_tireless import (
+from logic.character_changing.talents.branch_3_tireless import (
     TalentBigGuy, TalentDefense, TalentCommendableConstitution, TalentBigHeart,
     TalentRock, TalentDespiteAdversities, TalentHeatResistant,
     TalentAdaptationTireless, TalentToughAsSteel, TalentDefender,
     TalentSurvivor, TalentMuscleOverstrain, TalentIdolOath, TalentSurgeOfStrength
 )
-from logic.talents.branch_4_medic import TalentNoHippocraticOath, TalentGoodAsNew, TalentRemedyGood, TalentCheese, \
+from logic.character_changing.talents.branch_4_medic import TalentNoHippocraticOath, TalentGoodAsNew, TalentRemedyGood, TalentCheese, \
     TalentYouWontDieGood, TalentCarefulNeutralization, TalentDoingGoodWork, TalentNotToday, \
     TalentMadGoodDoctor, TalentToxicologyWeapon, TalentRemedyBad, TalentOrganStriking, TalentAdvancedToxicology, \
     TalentYouWontDieBad, TalentMedicalJargon, TalentChristmasTree, TalentInsaneZeal, TalentGeniusToxicologist, \
     TalentConfete
-from logic.talents.branch_5_berseker import (
+from logic.character_changing.talents.branch_5_berseker import (
     TalentNakedDefense, TalentVengefulPayback, TalentBerserkerRage, TalentCalmMind,
     TalentFrenzy, TalentCatchBreath, TalentRagingFury, TalentFullConcentration,
     TalentNakedDefense2, TalentNakedDefense3, TalentDescendingIntoMadness,
     TalentSteadyHand, TalentKeyMoment, TalentSecondWindBerserk, TalentDieHard
 )
-from logic.talents.branch_6_smoker import (
+from logic.character_changing.talents.branch_6_smoker import (
     TalentHidingInSmoke, TalentSmokeUniversality, TalentAerialFoot, TalentSmokeScreen,
     TalentRecycling, TalentSelfPreservation, TalentCleansing, TalentExperiencedSmoker,
     TalentLungProcessing, TalentToNarnia, TalentSmokeAdvantage, TalentVulnerabilitySmoke,
     TalentThickSmoke, TalentSmokeAndMirrors
 )
-from logic.talents.branch_7_luck import (
+from logic.character_changing.talents.branch_7_luck import (
     TalentDealWithFortune, TalentSecondChance, TalentSequentialLuck,
     TalentLuckyBastard, TalentJustSkill, TalentRaiseStakes,
     TalentAzino777, TalentBlessedByFate, TalentAceSleeve,
     TalentImpossiblePossible
 )
-from logic.talents.branch_8_military import (
+from logic.character_changing.talents.branch_8_military import (
     TalentAthletic, TalentFastHands, TalentLeader, TalentAddiction,
     TalentRapidRetreat, TalentCombatReload, TalentFindVulnerability,
     TalentBorrowedTime, TalentIronFormation, TalentLastHope
 )
-from logic.talents.branch_9_shadow import (
+from logic.character_changing.talents.branch_9_shadow import (
     TalentAthleticismShadow, TalentRevenge, TalentNotGreatAttention, TalentFormidablePerson,
     TalentSmashingBlade, TalentSlaughter, TalentTrapmaster, TalentFastAndSilent,
     TalentAggressiveParry, TalentStepIntoShadow, TalentTasteOfVictory, TalentSleightOfHand,
@@ -47,7 +47,7 @@ from logic.talents.branch_9_shadow import (
     TalentIdentityThief, TalentCoveringTracks, TalentCompetentAdrenaline, TalentKnifeInBack,
     TalentOppression, TalentVulnerabilityPoint, TalentExtremeMeasures, TalentButcher
 )
-from logic.talents.branch_10_energy import (
+from logic.character_changing.talents.branch_10_energy import (
     TalentElectrician, TalentPainPoints, TalentMechanicalEnergy, TalentPainShock,
     TalentEmergencyProtection, TalentStaticElectricity, TalentEnteringRhythm, TalentDirtyTricks,
     TalentPlayingOnNerves, TalentOvervoltage, TalentEMField, TalentWithCaution, TalentSharpEye,
@@ -55,29 +55,29 @@ from logic.talents.branch_10_energy import (
     TalentRuptureApplication, TalentRiftingSpace, TalentCapacitor, TalentAchillesHeel, TalentNoMistakes,
     TalentShortCircuit, TalentPrideOfSeven
 )
-from logic.talents.branch_11_flame import (
+from logic.character_changing.talents.branch_11_flame import (
     TalentStrikeWhileIronHot, TalentSpark, TalentCauterization, TalentHot,
     TalentBodyAdaptation, TalentHearthOfPower, TalentAshesToAshes,
     TalentHellfire, TalentWildfire, TalentFieryTemper,
     TalentIfrit, TalentPhoenix, TalentFirestorm, TalentBurnMeDown
 )
-from logic.talents.branch_12_technologist import (
+from logic.character_changing.talents.branch_12_technologist import (
     TalentProjection, TalentHacker, TalentLittleHelper, TalentProgrammingLanguages,
     TalentPortableShield, TalentEnergyCycle, TalentModulation, TalentAccessPoint,
     TalentError404, TalentAssHack)
-from logic.talents.branch_13_roboticist import (
+from logic.character_changing.talents.branch_13_roboticist import (
     TalentBestFriendsForever, TalentLittleBigTrouble, TalentCellExpander,
     TalentNoFirstLaw, TalentBrightTalent, TalentSmallerLighterFaster,
     TalentFrameUpgrade, TalentMadeToLast, TalentChimeraCore,
     TalentUpshotRobot, TalentQuantumHub, TalentJackOfAllTrades,
     TalentMachinaExDeo, TalentExogenesisProtocol, TalentMultiConnection
 )
-from logic.talents.branch_14_tremor import (
+from logic.character_changing.talents.branch_14_tremor import (
     TalentFightToTheEnd, TalentShareWithFriend, TalentCarelessness,
     TalentPassTheFare, TalentOwnTremor, TalentReadinessForEverything,
     TalentKeepGoing, TalentResonance, TalentImmobile, TalentTremorToBone
 )
-from logic.talents.link_talents import (
+from logic.character_changing.talents.link_talents import (
     TalentCenser, TalentArdentDefense, TalentHitmanAssortment,
     TalentThermalEnergy, TalentScorchingMastery
 )

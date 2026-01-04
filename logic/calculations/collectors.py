@@ -1,5 +1,4 @@
-from logic.passives import PASSIVE_REGISTRY
-from logic.talents import TALENT_REGISTRY
+from logic.character_changing.passives import PASSIVE_REGISTRY
 from logic.statuses.status_manager import STATUS_REGISTRY
 from logic.weapon_definitions import WEAPON_REGISTRY
 

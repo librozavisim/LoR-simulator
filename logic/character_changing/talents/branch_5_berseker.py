@@ -1,6 +1,4 @@
-import math
-from logic.passives.base_passive import BasePassive
-from core.enums import DiceType
+from logic.character_changing.passives.base_passive import BasePassive
 
 
 # ==========================================

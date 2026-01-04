@@ -1,6 +1,6 @@
 from core.enums import DiceType
+from logic.character_changing.passives.base_passive import BasePassive
 from logic.context import RollContext
-from logic.passives.base_passive import BasePassive
 
 # ==========================================
 # 9.1 А: Атлетичность

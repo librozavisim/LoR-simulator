@@ -1,5 +1,5 @@
 # logic/passives/equipment_passives.py
-from logic.passives.base_passive import BasePassive
+from logic.character_changing.passives.base_passive import BasePassive
 from core.enums import DiceType
 
 

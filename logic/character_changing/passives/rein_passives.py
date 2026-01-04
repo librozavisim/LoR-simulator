@@ -1,7 +1,6 @@
 import math
-from turtle import st
 
-from logic.passives.base_passive import BasePassive
+from logic.character_changing.passives.base_passive import BasePassive
 from logic.statuses.status_definitions import NEGATIVE_STATUSES
 
 

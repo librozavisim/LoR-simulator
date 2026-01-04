@@ -1,6 +1,6 @@
-from logic.augmentations import AUGMENTATION_REGISTRY
-from logic.passives import PASSIVE_REGISTRY
-from logic.talents import TALENT_REGISTRY
+from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
+from logic.character_changing.passives import PASSIVE_REGISTRY
+from logic.character_changing.talents import TALENT_REGISTRY
 
 # Импорт наших новых модулей
 from logic.calculations.modifiers import init_modifiers, init_bonuses

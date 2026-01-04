@@ -6,8 +6,8 @@ from io import StringIO
 from core.card import Card
 from core.library import Library
 from logic.clash import ClashSystem
-from logic.passives import PASSIVE_REGISTRY
-from logic.talents import TALENT_REGISTRY
+from logic.character_changing.passives import PASSIVE_REGISTRY
+from logic.character_changing.talents import TALENT_REGISTRY
 from logic.statuses.status_manager import StatusManager
 
 

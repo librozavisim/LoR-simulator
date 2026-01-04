@@ -2,8 +2,8 @@ import random
 from core.enums import DiceType
 from logic.context import RollContext
 from logic.statuses.status_manager import STATUS_REGISTRY
-from logic.passives import PASSIVE_REGISTRY
-from logic.talents import TALENT_REGISTRY
+from logic.character_changing.passives import PASSIVE_REGISTRY
+from logic.character_changing.talents import TALENT_REGISTRY
 from logic.mechanics.scripts import process_card_scripts
 # Импортируем функцию для чтения новой структуры модов
 from logic.calculations.formulas import get_modded_value

@@ -1,11 +1,11 @@
-from logic.passives.asgick_passives import PassiveWitnessOfGroGoroth, PassivePovar, PassiveFoodLover
-from logic.passives.equipment_passives import PassiveAnnihilator, PassiveBanganrang, PassiveGanitar, PassiveLimagun
-from logic.passives.lilith_passives import PassiveHedonism, PassiveWagTail, PassiveBackstreetDemon, \
+from logic.character_changing.passives.asgick_passives import PassiveWitnessOfGroGoroth, PassivePovar, PassiveFoodLover
+from logic.character_changing.passives.equipment_passives import PassiveAnnihilator, PassiveBanganrang, PassiveGanitar, PassiveLimagun
+from logic.character_changing.passives.lilith_passives import PassiveHedonism, PassiveWagTail, PassiveBackstreetDemon, \
     PassiveDaughterOfBackstreets, PassiveBlessingOfWind, PassiveLiveFastDieYoung
-from logic.passives.lima_passives import PassiveAcceleratedLearning, TalentArtOfSelfDefense, PassiveLuckyStreak, \
+from logic.character_changing.passives.lima_passives import PassiveAcceleratedLearning, TalentArtOfSelfDefense, PassiveLuckyStreak, \
     PassiveFourEyes, PassiveHuntersVedas, PassiveMindSuppression
-from logic.passives.rein_passives import PassiveSCells, PassiveNewDiscovery, TalentRedLycoris, TalentShadowOfMajesty
-from logic.passives.zafiel_passives import PassiveSevereTraining, PassiveAdaptation
+from logic.character_changing.passives.rein_passives import PassiveSCells, PassiveNewDiscovery, TalentRedLycoris, TalentShadowOfMajesty
+from logic.character_changing.passives.zafiel_passives import PassiveSevereTraining, PassiveAdaptation
 
 # === РЕГИСТРАЦИЯ ===
 PASSIVE_REGISTRY = {

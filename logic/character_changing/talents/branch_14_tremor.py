@@ -1,5 +1,6 @@
-from logic.passives.base_passive import BasePassive
 import random
+
+from logic.character_changing.passives.base_passive import BasePassive
 
 
 # ==========================================
