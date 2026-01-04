@@ -33,14 +33,8 @@ class PassiveWitnessOfGroGoroth(BasePassive):
             "sp_flat": -50,  # Рассудок -50
             "stagger_pct": -50,  # Выдержка -50%
             "talent_slots": 2,  # <--- ДОБАВЛЕНО: +2 слота талантов
-
-            # Эмуляция +0.2 резиста (+20% входящего урона)
-            # Это безопаснее, чем менять unit.hp_resists напрямую
-            "damage_take_pct": 2000,
-
-            # Угроза -1 (влияет на приоритет атак врага)
             "threat_level": -1,
-
+            "damage_take_pct": 20,
             "disable_block": 1,
             "disable_evade": 1
         }
@@ -66,11 +60,6 @@ class PassiveWitnessOfGroGoroth(BasePassive):
         # Оставляем только живых союзников, исключая себя
         real_allies = [a for a in allies if a != unit]
         unit.memory['cached_allies'] = real_allies
-
-        if not unit.memory.get("grogoroth_resists_applied"):
-            unit.hp_resists.slash += 0.2
-            unit.hp_resists.blunt += 0.2
-            unit.memory["grogoroth_resists_applied"] = True
 
         if log_func:
             log_func(f"👁️ **{self.name}**: Тело изменено. Связь с {len(real_allies)} союзниками установлена.")

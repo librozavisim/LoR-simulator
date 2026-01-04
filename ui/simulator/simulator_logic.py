@@ -26,21 +26,48 @@ def get_teams():
     """Вспомогательная функция для получения команд из сессии."""
     return st.session_state.get('team_left', []), st.session_state.get('team_right', [])
 
+
 def set_cooldowns(u):
     if not u.memory.get("battle_initialized"):
-        u.card_cooldowns = {}
         u.memory["battle_initialized"] = True
+        u.card_cooldowns = {}
+
         if getattr(u, 'deck', None):
             for card_id in u.deck:
                 card = Library.get_card(card_id)
                 if card:
-                    # Формула:
-                    # Ранг 1 -> КД 0 (Доступна)
-                    # Ранг 2 -> КД 1 (Недоступна 1 ход)
-                    # Ранг 3 -> КД 2 (Недоступна 2 хода)
                     initial_cd = max(0, card.tier - 1)
                     if initial_cd > 0:
                         u.card_cooldowns[card_id] = initial_cd
+
+        # === [ИЗМЕНЕНИЕ] Запуск on_combat_start только один раз в начале боя ===
+        # Находим врагов и союзников для контекста
+        l_team, r_team = get_teams()
+        opponents = r_team if u in l_team else l_team
+        my_allies = l_team if u in l_team else r_team
+
+        # Для простоты логов (в консоль или лог боя)
+        # Если нужно вывести в UI, можно сохранить в st.session_state['turn_message'] или аналог
+        # Но здесь мы просто инициализируем состояние.
+
+        def log_dummy(msg):
+            # Можно добавлять в стартовое сообщение, если очень нужно
+            pass
+
+        # 1. Passives
+        for pid in u.passives:
+            if pid in PASSIVE_REGISTRY:
+                PASSIVE_REGISTRY[pid].on_combat_start(u, log_dummy, enemies=opponents, allies=my_allies)
+        # 2. Talents
+        for pid in u.talents:
+            if pid in TALENT_REGISTRY:
+                TALENT_REGISTRY[pid].on_combat_start(u, log_dummy, enemies=opponents, allies=my_allies)
+        # 3. Weapons
+        from logic.weapon_definitions import WEAPON_REGISTRY
+        if u.weapon_id in WEAPON_REGISTRY:
+            wep = WEAPON_REGISTRY[u.weapon_id]
+            if wep.passive_id and wep.passive_id in PASSIVE_REGISTRY:
+                PASSIVE_REGISTRY[wep.passive_id].on_combat_start(u, log_dummy, enemies=opponents, allies=my_allies)
 
 def roll_phase():
     """

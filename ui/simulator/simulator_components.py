@@ -68,6 +68,9 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
 
         # Фильтрация по кулдауну (CD)
         for c in raw_cards:
+            if str(c.card_type).lower() == "item":
+                continue
+
             cd_left = unit.card_cooldowns.get(c.id, 0)
             if cd_left > 0:
                 # Можно добавлять с пометкой, но пока просто пропускаем для чистоты UI
