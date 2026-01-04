@@ -165,6 +165,7 @@ def apply_status(ctx: 'RollContext', params: dict):
 
     target_mode = params.get("target", "target")
     duration = int(params.get("duration", 1))
+    delay = int(params.get("delay", 0))
     min_roll = int(params.get("min_roll", 0))
 
     if min_roll > 0 and ctx.final_value < min_roll:
@@ -189,9 +190,14 @@ def apply_status(ctx: 'RollContext', params: dict):
 
         if stack <= 0: continue
 
-        success, msg = u.add_status(status_name, stack, duration=duration)
+        # === [FIX] Передаем delay в метод добавления статуса ===
+        success, msg = u.add_status(status_name, stack, duration=duration, delay=delay)
+
         if success:
-            ctx.log.append(f"🧪 **{u.name}**: +{stack} {status_name.capitalize()}")
+            if msg == "Delayed":
+                ctx.log.append(f"⏰ **{u.name}**: {status_name.capitalize()} (Delayed {delay} turns)")
+            else:
+                ctx.log.append(f"🧪 **{u.name}**: +{stack} {status_name.capitalize()}")
         elif msg:
             ctx.log.append(f"🛡️ {msg}")
 
