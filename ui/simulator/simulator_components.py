@@ -90,7 +90,9 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
                 t_spd = slot_obj['speed']
                 extra = "😵" if slot_obj.get('stunned') else f"Spd {t_spd}"
                 tag = "(Ally)" if is_friendly else ""
-                target_options.append(f"{t_idx}:{s_i} | {target_unit.name} {tag} S{s_i + 1} ({extra})")
+                display_u = t_idx + 1
+                display_s = s_i + 1
+                target_options.append(f"{display_u}:{display_s} | {target_unit.name} {tag} S{display_s} ({extra})")
 
         cur_t_unit = slot.get('target_unit_idx', -1)
         cur_t_slot = slot.get('target_slot_idx', -1)
@@ -105,12 +107,16 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
                                            key=f"{key_prefix}_{unit.name}_tgt_{slot_idx}", label_visibility="collapsed")
 
         if selected_tgt_str == "None":
-            slot['target_unit_idx'] = -1;
+            slot['target_unit_idx'] = -1
             slot['target_slot_idx'] = -1
         else:
-            parts = selected_tgt_str.split('|')[0].strip().split(':')
-            slot['target_unit_idx'] = int(parts[0]);
-            slot['target_slot_idx'] = int(parts[1])
+            try:
+                parts = selected_tgt_str.split('|')[0].strip().split(':')
+                slot['target_unit_idx'] = int(parts[0]) - 1
+                slot['target_slot_idx'] = int(parts[1]) - 1
+            except:
+                slot['target_unit_idx'] = -1
+                slot['target_slot_idx'] = -1
 
         # === ВЫБОР КАРТЫ ===
         if slot.get('locked'):
