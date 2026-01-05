@@ -173,7 +173,7 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
             )
             slot['card'] = new_card
 
-        # === СТРОКА 2: Опции (Чекбоксы) ===
+        # === СТРОКА 2: Опции (Чекбоксы с Картинками) ===
         can_redirect = True
         enemy_spd_val = 0
         has_athletic = ("athletic" in unit.talents) or ("athletic" in unit.passives)
@@ -193,24 +193,40 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
 
         _, c_opt1, c_opt2 = st.columns([2.5, 1, 1])
 
+        # --- КНОПКА AGGRO (Перехват) ---
         aggro_val = slot.get('is_aggro', False)
 
-        if can_redirect:
-            c_opt1.checkbox("✋", value=aggro_val,
-                            key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}",
-                            help=f"Aggro (Моя Spd {speed} > Врага {enemy_spd_val})")
-        else:
-            c_opt1.checkbox("✋", value=False, disabled=True,
-                            key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}",
-                            help=f"Слишком медленный для перехвата! ({speed} <= {enemy_spd_val})")
-            if aggro_val:
-                slot['is_aggro'] = False
+        with c_opt1:
+            # Иконка "Слот" или "Перехват"
+            icon_aggro = get_icon_html("dice_slot", width=30)
+            st.markdown(f"<div style='text-align:center; height:30px;'>{icon_aggro}</div>", unsafe_allow_html=True)
 
+            if can_redirect:
+                c_opt1.checkbox("Aggro", value=aggro_val,
+                                key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}",
+                                help=f"Перехватить (Моя Spd {speed} > Врага {enemy_spd_val})",
+                                label_visibility="collapsed")  # Прячем текст, оставляем только галочку под иконкой
+            else:
+                c_opt1.checkbox("Aggro", value=False, disabled=True,
+                                key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}",
+                                help=f"Слишком медленный для перехвата! ({speed} <= {enemy_spd_val})",
+                                label_visibility="collapsed")
+                if aggro_val:
+                    slot['is_aggro'] = False
+
+        # --- КНОПКА DESTROY (Слом кубика) ---
         slot_destroy = slot.get('destroy_on_speed', True)
-        new_destroy = c_opt2.checkbox("💥", value=slot_destroy,
+
+        with c_opt2:
+            # Иконка "Сломанный кубик"
+            icon_broken = get_icon_html("dice_broken", width=30)
+            st.markdown(f"<div style='text-align:center; height:30px;'>{icon_broken}</div>", unsafe_allow_html=True)
+
+            new_destroy = st.checkbox("Break", value=slot_destroy,
                                       key=f"{key_prefix}_{unit.name}_destroy_{slot_idx}",
-                                      help="Разрушать карту врага при разнице скорости 8+? (Если выключено -> Враг получит Помеху)")
-        slot['destroy_on_speed'] = new_destroy
+                                      help="Разрушать карту врага при разнице скорости 8+? (Если выключено -> Враг получит Помеху)",
+                                      label_visibility="collapsed")
+            slot['destroy_on_speed'] = new_destroy
 
         st.divider()
 
@@ -225,8 +241,13 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
                 for d in selected_card.dice_list:
                     color = TYPE_COLORS.get(d.dtype, "black")
 
-                    # [FIX] Используем get_icon_html для поддержки картинок (включая webp)
+                    # [FIX] Иконка типа атаки (Slash/Pierce/Blunt/Block/Evade)
                     dtype_key = d.dtype.name.lower()
+
+                    # Проверяем на контр-кубик
+                    if getattr(d, 'is_counter', False):
+                        dtype_key = f"counter_{dtype_key}"
+
                     icon_html = get_icon_html(dtype_key, width=20)
 
                     dice_display.append(f"{icon_html} :{color}[**{d.min_val}-{d.max_val}**]")
@@ -259,6 +280,7 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
 
 
 def render_active_abilities(unit, unit_key):
+    # ... (Без изменений)
     abilities = []
     for pid in unit.passives:
         if pid in PASSIVE_REGISTRY: abilities.append((pid, PASSIVE_REGISTRY[pid]))
@@ -308,6 +330,7 @@ def render_active_abilities(unit, unit_key):
 
 
 def render_inventory(unit, unit_key):
+    # ... (Без изменений)
     inventory_cards = []
     if unit.deck:
         for cid in unit.deck:
