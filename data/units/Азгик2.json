@@ -1,7 +1,7 @@
 {
     "name": "Азгик2",
     "level": 28,
-    "rank": 9,
+    "rank": 6,
     "avatar": "data/avatars/Азгик2.png",
     "base_intellect": 3,
     "total_xp": 201326592,
@@ -52,7 +52,7 @@
         "candy_waffles"
     ],
     "base_stats": {
-        "current_hp": 1,
+        "current_hp": 35,
         "current_sp": 47,
         "current_stagger": 4
     },
@@ -82,7 +82,7 @@
     },
     "attributes": {
         "strength": 6,
-        "endurance": 3,
+        "endurance": 7,
         "agility": 30,
         "wisdom": 3,
         "psych": 6
@@ -90,11 +90,11 @@
     "skills": {
         "strike_power": 0,
         "medicine": 0,
-        "willpower": 0,
+        "willpower": 13,
         "luck": 0,
         "acrobatics": 0,
         "shields": 0,
-        "tough_skin": 0,
+        "tough_skin": 7,
         "speed": 30,
         "light_weapon": 0,
         "medium_weapon": 0,

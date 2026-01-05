@@ -206,23 +206,16 @@ def apply_skill_effects(skills, mods, logs):
 
 
 def calculate_speed_dice(unit, speed_val, mods):
-    """Считает кубики скорости."""
-    dice_count = 1
-    if speed_val >= 10: dice_count += 1
-    if speed_val >= 20: dice_count += 1
-    if speed_val >= 30: dice_count += 1
+    """Считает кубики скорости с поддержкой оверкапа."""
+    dice_count = speed_val // 10 + 1
 
     final_dice = []
     # Берем инициативу из mods (flat)
     global_init = mods["initiative"]["flat"]
 
     for i in range(dice_count):
-        skill_bonus = 0
-        if i == 3 and speed_val >= 30:
-            skill_bonus = 5
-        else:
-            points = max(0, min(10, speed_val - (i * 10)))
-            skill_bonus = points // 2
+        points = max(0, min(10, speed_val - (i * 10)))
+        skill_bonus = points // 2
 
         d_min = unit.base_speed_min + global_init + skill_bonus
         d_max = unit.base_speed_max + global_init + skill_bonus
