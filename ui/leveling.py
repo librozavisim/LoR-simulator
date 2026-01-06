@@ -53,13 +53,16 @@ def render_leveling_page():
         return
 
     # --- 1. ВЫБОР ПЕРСОНАЖА ---
+    # --- 1. ВЫБОР ПЕРСОНАЖА (С СОХРАНЕНИЕМ) ---
     roster_names = list(st.session_state['roster'].keys())
-    def_idx = 0
-    if 'last_lvl_unit' in st.session_state and st.session_state['last_lvl_unit'] in roster_names:
-        def_idx = roster_names.index(st.session_state['last_lvl_unit'])
 
-    selected_name = st.selectbox("Персонаж", roster_names, index=def_idx, key="lvl_char_sel")
-    st.session_state['last_lvl_unit'] = selected_name
+    # Используем key="leveling_selected_unit", который восстанавливается в app.py
+    selected_name = st.selectbox(
+        "Персонаж",
+        roster_names,
+        key="leveling_selected_unit",
+        on_change=st.session_state.get('save_callback')
+    )
     unit = st.session_state['roster'][selected_name]
 
     cur_tier, cur_rank_name = get_rank_info(unit.level)

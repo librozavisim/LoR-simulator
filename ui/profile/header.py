@@ -16,21 +16,31 @@ def render_header(roster):
     # --- HEADER / SELECTION ---
     c1, c2 = st.columns([3, 1])
 
-    # FIRST check the button (to update state before rendering selector)
+    # Сначала проверяем кнопку создания (чтобы обновить состояние до рендера селектора)
     if c2.button("➕ Новый"):
         n = f"Unit_{len(roster) + 1}"
         u = Unit(n)
         roster[n] = u
         UnitLibrary.save_unit(u)
 
-        # Update selection to the new character
-        st.session_state["profile_unit_selector"] = n
+        # Обновляем селектор на нового
+        st.session_state["profile_selected_unit"] = n
 
-        # Reload page to apply changes
+        # Сохраняем состояние сразу
+        if 'save_callback' in st.session_state:
+            st.session_state['save_callback']()
+
         st.rerun()
 
-    # THEN draw the selector (it picks up value from session_state)
-    sel = c1.selectbox("Персонаж", list(roster.keys()), key="profile_unit_selector")
+    # Рисуем селектор с привязкой к сохранению
+    # Streamlit сам подставит значение из st.session_state['profile_selected_unit']
+    sel = c1.selectbox(
+        "Персонаж",
+        list(roster.keys()),
+        key="profile_selected_unit",
+        on_change=st.session_state.get('save_callback')
+    )
+
     unit = roster[sel]
     u_key = unit.name.replace(" ", "_")
 

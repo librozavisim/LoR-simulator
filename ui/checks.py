@@ -368,13 +368,16 @@ def render_checks_page():
         return
 
     roster_names = list(st.session_state['roster'].keys())
-    default_ix = 0
-    if 'last_check_unit' in st.session_state and st.session_state['last_check_unit'] in roster_names:
-        default_ix = roster_names.index(st.session_state['last_check_unit'])
 
+    # === ВЫБОР ПЕРСОНАЖА (С СОХРАНЕНИЕМ) ===
     c_sel, _ = st.columns([1, 1])
-    selected_name = c_sel.selectbox("Персонаж", roster_names, index=default_ix)
-    st.session_state['last_check_unit'] = selected_name
+    selected_name = c_sel.selectbox(
+        "Персонаж",
+        roster_names,
+        key="checks_selected_unit",
+        on_change=st.session_state.get('save_callback')
+    )
+
     unit = st.session_state['roster'][selected_name]
     unit.recalculate_stats()
 

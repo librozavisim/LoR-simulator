@@ -20,22 +20,17 @@ def render_skill_tree_page():
 
     roster_names = list(st.session_state['roster'].keys())
 
-    # Пытаемся сохранить выбор между перезагрузками
-    default_ix = 0
-    if 'last_tree_unit' in st.session_state:
-        if st.session_state['last_tree_unit'] in roster_names:
-            default_ix = roster_names.index(st.session_state['last_tree_unit'])
-
-    selected_name = st.selectbox("Выберите персонажа для прокачки:", roster_names, index=default_ix)
-    st.session_state['last_tree_unit'] = selected_name
+    selected_name = st.selectbox(
+        "Выберите персонажа для прокачки:",
+        roster_names,
+        key="tree_selected_unit",
+        on_change=st.session_state.get('save_callback')
+    )
 
     unit = st.session_state['roster'][selected_name]
-
-    # ВАЖНО: Пересчитываем статы, чтобы убедиться, что модификаторы (включая talent_slots) актуальны
     unit.recalculate_stats()
 
     # 2. ОЧКИ ТАЛАНТОВ
-    # === FIX: Чтение бонусных слотов ===
     bonus_slots = 0
     if "talent_slots" in unit.modifiers:
         bonus_slots = int(unit.modifiers["talent_slots"].get("flat", 0))
