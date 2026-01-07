@@ -13,9 +13,10 @@ def apply_status(ctx: 'RollContext', params: dict):
     duration = int(params.get("duration", 1))
     delay = int(params.get("delay", 0))
     min_roll = int(params.get("min_roll", 0))
-
-    if min_roll > 0 and ctx.final_value < min_roll:
-        return
+    if min_roll > 0:
+        # Check against base_value (natural roll), not final_value
+        if ctx.base_value < min_roll:
+            return
 
     # Подготовка параметров для расчета
     calc_params = params.copy()

@@ -1,6 +1,7 @@
 # logic/card_scripts.py
 
-from logic.scripts.combat import modify_roll_power, deal_effect_damage, self_harm_percent, add_hp_damage
+from logic.scripts.combat import modify_roll_power, deal_effect_damage, self_harm_percent, add_hp_damage, \
+    nullify_hp_damage
 from logic.scripts.resources import restore_resource
 from logic.scripts.statuses import (
     apply_status, steal_status, multiply_status, remove_status_script,
@@ -15,6 +16,7 @@ SCRIPTS_REGISTRY = {
     "deal_effect_damage": deal_effect_damage,
     "self_harm_percent": self_harm_percent,
     "add_hp_damage": add_hp_damage,
+    "nullify_hp_damage": nullify_hp_damage,
 
     # Resources
     "restore_resource": restore_resource,

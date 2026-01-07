@@ -22,8 +22,18 @@ def deal_effect_damage(ctx: 'RollContext', params: dict):
     dmg_type = params.get("type", "hp")
     targets = _get_targets(ctx, params.get("target", "target"))
 
+    stat_key = params.get("stat", "None")
+
     for u in targets:
-        amount = _resolve_value(ctx.source, u, params)
+        if stat_key == "roll":
+            # Берем значение броска
+            base = int(params.get("base", 0))
+            factor = float(params.get("factor", 1.0))
+            amount = int(base + (ctx.final_value * factor))
+        else:
+            # Стандартный резолв от статов
+            amount = _resolve_value(ctx.source, u, params)
+
         if amount <= 0: continue
 
         if dmg_type == "hp":
@@ -33,10 +43,9 @@ def deal_effect_damage(ctx: 'RollContext', params: dict):
             u.current_stagger = max(0, u.current_stagger - amount)
             ctx.log.append(f"😵 **{u.name}**: -{amount} Stagger")
         elif dmg_type == "sp":
-            # === ЛОГИКА ЭДАМА (Mental Protection) ===
+            # Логика Эдама (Mental Protection)
             ment_prot = u.get_status("mental_protection")
             if ment_prot > 0:
-                # 1 стак = 25%, 2 стака = 50% (макс)
                 pct_red = min(0.50, ment_prot * 0.25)
                 reduction = int(amount * pct_red)
                 amount -= reduction
@@ -45,6 +54,10 @@ def deal_effect_damage(ctx: 'RollContext', params: dict):
             u.take_sanity_damage(amount)
             ctx.log.append(f"🤯 **{u.name}**: -{amount} SP")
 
+def nullify_hp_damage(ctx: 'RollContext', params: dict):
+    """Обнуляет множитель урона, предотвращая нанесение стандартного HP урона."""
+    ctx.damage_multiplier = 0.0
+    # ctx.log.append("🚫 HP Damage Negated") # Можно раскомментить для дебага
 
 def self_harm_percent(ctx: 'RollContext', params: dict):
     """Наносит урон самому себе в % от Макс ХП."""

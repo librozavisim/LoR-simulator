@@ -353,8 +353,8 @@
       "id": "demon_scream",
       "name": "Крик Демона",
       "tier": 3,
-      "type": "mass summation",
-      "description": "Массовая атака. Наносит урон всем на поле боя (включая союзников и самого себя). Не наносит урон по HP, наносит двойной урон по Stagger.",
+      "type": "Mass Summation",
+      "description": "Массовая атака. Наносит двойной урон по Stagger (от значения броска) всем врагам.",
       "flags": [],
       "scripts": {},
       "dice": [
@@ -365,14 +365,18 @@
           "scripts": {
             "on_hit": [
               {
+                "script_id": "nullify_hp_damage",
+                "params": {}
+              },
+              {
                 "script_id": "deal_effect_damage",
                 "params": {
                   "type": "stagger",
                   "base": 0,
                   "factor": 2.0,
-                  "stat": "current_hp",
+                  "stat": "roll",
                   "scale_from_target": false,
-                  "target": "all"
+                  "target": "target"
                 }
               }
             ]
