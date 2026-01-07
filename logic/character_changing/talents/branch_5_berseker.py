@@ -33,7 +33,7 @@ class TalentVengefulPayback(BasePassive):
     is_active_ability = False
 
     def on_round_end(self, unit, log_func, **kwargs):
-        lost_hp = max(0, unit.max_hp - unit.current_hp)
+        lost_hp = min(max(0, unit.max_hp - unit.current_hp), unit.max_hp)
         current_chunks = lost_hp // 10
 
         mem_key = f"{self.id}_chunks"

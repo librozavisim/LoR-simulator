@@ -71,7 +71,9 @@
         "vengeful_payback",
         "berserker_rage",
         "calm_mind",
-        "frenzy"
+        "frenzy",
+        "hiding_in_smoke",
+        "smoke_universality"
     ],
     "augmentations": [],
     "level_rolls": {

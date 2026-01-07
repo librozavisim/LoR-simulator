@@ -642,6 +642,52 @@
           "scripts": {}
         }
       ]
+    },
+    {
+      "id": "1323123_cf12",
+      "name": "1323123",
+      "tier": 1,
+      "type": "Melee",
+      "description": "",
+      "flags": [],
+      "scripts": {},
+      "dice": [
+        {
+          "type": "slash",
+          "base_min": 1,
+          "base_max": 1,
+          "is_counter": false,
+          "scripts": {}
+        },
+        {
+          "type": "slash",
+          "base_min": 1,
+          "base_max": 1,
+          "is_counter": false,
+          "scripts": {}
+        },
+        {
+          "type": "slash",
+          "base_min": 1,
+          "base_max": 1,
+          "is_counter": false,
+          "scripts": {}
+        },
+        {
+          "type": "slash",
+          "base_min": 50,
+          "base_max": 50,
+          "is_counter": false,
+          "scripts": {}
+        },
+        {
+          "type": "slash",
+          "base_min": 2,
+          "base_max": 5,
+          "is_counter": false,
+          "scripts": {}
+        }
+      ]
     }
   ]
 }
