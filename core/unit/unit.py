@@ -1,8 +1,9 @@
 # core/unit.py
 from dataclasses import dataclass
 from core.unit.unit_data import UnitData
-from core.unit.unit_mixins import UnitStatusMixin, UnitCombatMixin, UnitLifecycleMixin
-
+from core.unit.mixins.status import UnitStatusMixin
+from core.unit.mixins.combat import UnitCombatMixin
+from core.unit.mixins.lifecycle import UnitLifecycleMixin
 
 @dataclass
 class Unit(UnitData, UnitStatusMixin, UnitCombatMixin, UnitLifecycleMixin):
@@ -21,11 +22,8 @@ class Unit(UnitData, UnitStatusMixin, UnitCombatMixin, UnitLifecycleMixin):
         """Считает текущий баланс."""
         return sum(item.get("amount", 0) for item in self.money_log)
 
-    # Можно переопределить from_dict, чтобы сразу вызывать recalculate_stats
     @classmethod
     def from_dict(cls, data: dict):
-        # Вызываем родительский метод (из UnitData), который создаст экземпляр Unit
         unit = super().from_dict(data)
-        # И сразу пересчитываем статы
         unit.recalculate_stats()
         return unit

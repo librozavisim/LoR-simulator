@@ -37,3 +37,5 @@ class BasePassive:
     def on_calculate_stats(self, unit) -> dict: return {}
 
     def on_take_damage(self, unit, amount: int, dmg_type: str, log_func=None): pass
+
+    def get_speed_dice_bonus(self, unit) -> int: return 0

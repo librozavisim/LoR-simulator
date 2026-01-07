@@ -27,19 +27,27 @@ class TalentNakedDefense(BasePassive):
 class TalentVengefulPayback(BasePassive):
     id = "vengeful_payback"
     name = "Злобная расплата"
-    description = "5.2 За каждые 10 потерянных HP вы получаете 1 Силу на следующий раунд."
+    description = "5.2 За каждые 10 потерянных HP вы получаете 1 Силу на следующий раунд (единожды при потере)."
     is_active_ability = False
 
     def on_round_end(self, unit, log_func, **kwargs):
-        lost_hp = unit.max_hp - unit.current_hp
-        chunks = lost_hp // 10
+        lost_hp = max(0, unit.max_hp - unit.current_hp)
+        current_chunks = lost_hp // 10
+
         mem_key = f"{self.id}_chunks"
         previous_chunks = unit.memory.get(mem_key, 0)
-        bonus = chunks
-        if bonus > 0:
-            unit.add_status("strength", bonus, duration=3)
-            if log_func: log_func(f"🩸 **{self.name}**: -{lost_hp} HP -> +{bonus} Силы")
 
+        bonus = current_chunks - previous_chunks
+
+        if bonus > 0:
+            # Даем силу только за новые переходы
+            unit.add_status("strength", bonus, duration=3)
+            if log_func:
+                log_func(
+                    f"🩸 **{self.name}**: Потеря здоровья (Порог {previous_chunks}->{current_chunks}) -> +{bonus} Силы")
+
+        if current_chunks != previous_chunks:
+            unit.memory[mem_key] = current_chunks
 
 # ==========================================
 # 5.3 Ярость
@@ -121,8 +129,16 @@ class TalentFrenzy(BasePassive):
         "Если Самообладание > 10: +1 Дополнительная Контр-кость."
     )
     is_active_ability = False
-    # Логика добавления кубиков реализована в core/unit_mixins.py
 
+    def get_speed_dice_bonus(self, unit):
+        bonus = 1  # Базовый бонус
+
+        # Проверка условия "Самообладание > 10" (предполагаем, что это SP или ресурс)
+        # Замените 'self_control' на реальный атрибут, если он отличается (например unit.current_sp)
+        if unit.resources.get("self_control", 0) > 10:
+            bonus += 1
+
+        return bonus
 
 # ==========================================
 # 5.5 (Опц) Перевести дух
