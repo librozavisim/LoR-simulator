@@ -8,14 +8,21 @@
     "pct_mods": {
         "imp_hp": 0,
         "imp_sp": 0,
+        "imp_stg": 0,
         "tal_hp": 0,
-        "tal_sp": 0
+        "tal_sp": 0,
+        "tal_stg": 0
+    },
+    "flat_mods": {
+        "imp_hp": 0,
+        "imp_sp": 0,
+        "imp_stg": 0
     },
     "deck": [],
     "base_stats": {
-        "current_hp": 138,
+        "current_hp": 114,
         "current_sp": 60,
-        "current_stagger": 69
+        "current_stagger": 57
     },
     "defense": {
         "armor_name": "Standard Fixer Suit",
@@ -58,10 +65,9 @@
         "engineering": 0,
         "programming": 0
     },
-    "passives": [
-    ],
-    "talents": [
-    ],
+    "passives": [],
+    "talents": [],
+    "augmentations": [],
     "level_rolls": {
         "3": {
             "hp": 1,
@@ -98,6 +104,12 @@
     },
     "cooldowns": {},
     "active_buffs": {},
+    "resources": {},
     "biography": "",
-    "money_log": []
+    "money_log": [
+        {
+            "amount": 14460000,
+            "reason": ""
+        }
+    ]
 }

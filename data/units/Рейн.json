@@ -144,6 +144,11 @@
     "resources": {
         "luck": 124
     },
-    "biography": "",
-    "money_log": []
+    "biography": "Буквально тесак, халат Свен",
+    "money_log": [
+        {
+            "amount": 7889000,
+            "reason": ""
+        }
+    ]
 }
