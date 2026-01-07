@@ -2,6 +2,7 @@ import streamlit as st
 import math
 from core.unit.unit_library import UnitLibrary
 from core.ranks import get_rank_info
+from ui.format_utils import format_large_number
 
 
 def calculate_rank_penalty_values(player_lvl: int, target_lvl: int):
@@ -80,7 +81,7 @@ def render_leveling_page():
         c_info1, c_info2, c_info3 = st.columns(3)
         c_info1.metric("Уровень", unit.level)
         c_info2.metric("Ранг", cur_rank_name)
-        c_info3.metric("Всего XP", f"{current_xp:,}")
+        c_info3.metric("Всего XP", format_large_number(current_xp))
 
     st.divider()
 
@@ -161,7 +162,7 @@ def render_leveling_page():
             # Для лога
             _, rp, ep = calculate_rank_penalty_values(unit.level, lvl)
             eff = max(0, lvl - rp - ep)
-            enemy_details.append(f"{cnt}x Lvl {lvl} (Eff {eff}) = {total_row:,} XP")
+            enemy_details.append(f"{cnt}x Lvl {lvl} = {format_large_number(total_row)} XP")
 
     # 3. Сумма
     total_gained_xp = mission_xp + enemies_xp
@@ -193,35 +194,27 @@ def render_leveling_page():
 
         # --- ПОЛОСКА ОПЫТА (НОВОЕ) ---
         if new_level > 0:
-            # 1. Порог начала текущего (нового) уровня: 2^(Level-1)
             xp_cur_start = 2 ** (new_level - 1)
-
-            # 2. Порог следующего уровня: 2^(Level)
             xp_next_start = 2 ** new_level
-
-            # 3. Прогресс внутри уровня
-            xp_in_level = final_pool - xp_cur_start
+            xp_in_level = final_xp_pool - xp_cur_start
             xp_span = xp_next_start - xp_cur_start
 
             ratio = 0.0
-            if xp_span > 0:
-                ratio = xp_in_level / xp_span
-
-            # Clamp 0..1
+            if xp_span > 0: ratio = xp_in_level / xp_span
             ratio = max(0.0, min(1.0, ratio))
 
-            st.progress(ratio,
-                        text=f"До уровня {new_level + 1}: {int(ratio * 100)}% ({int(final_pool):,} / {int(xp_next_start):,} XP)")
+            # === КРАСИВОЕ ОТОБРАЖЕНИЕ В БАРЕ ===
+            f_current = format_large_number(final_xp_pool)
+            f_next = format_large_number(xp_next_start)
+            st.progress(ratio, text=f"До уровня {new_level + 1}: {int(ratio * 100)}% ({f_current} / {f_next})")
 
         with st.expander("Подробности расчета"):
-            st.write(f"Start XP: {current_xp:,}")
-            if mission_xp > 0:
-                st.write(f"+ Mission: {mission_xp:,}")
+            st.write(f"Start: {format_large_number(current_xp)}")
+            if mission_xp > 0: st.write(f"+ Mission: {format_large_number(mission_xp)}")
             if enemy_details:
                 st.write("+ Enemies:")
-                for d in enemy_details:
-                    st.caption(d)
-            st.write(f"= Final Pool: {final_xp_pool:,}")
+                for d in enemy_details: st.caption(d)
+            st.write(f"= Final: {format_large_number(final_xp_pool)}")
 
     with c_res_r:
         st.write("")

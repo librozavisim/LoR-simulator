@@ -2,6 +2,8 @@ import streamlit as st
 from core.unit.unit_library import UnitLibrary
 from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
 from logic.weapon_definitions import WEAPON_REGISTRY
+from ui.format_utils import format_large_number
+
 
 def render_equipment(unit, u_key):
     # EQUIPMENT, RESISTS AND WEAPON
@@ -72,46 +74,47 @@ def render_equipment(unit, u_key):
     unit.hp_resists.blunt = r3.number_input("🔨 Blunt", 0.1, 3.0, unit.hp_resists.blunt, 0.1, format="%.1f",
                                             key=f"res_blunt_{unit.name}")
 
-    total_money = unit.get_total_money()
+    total_money = unit.get_total_money() if hasattr(unit, 'get_total_money') else 0
     money_color = "green" if total_money >= 0 else "red"
 
-    with st.expander(f"💰 Финансы: :{money_color}[{total_money} Ан]", expanded=False):
-        # Add form
+    # Форматируем заголовок: 1.5к Ан
+    formatted_total = format_large_number(total_money)
+
+    with st.expander(f"💰 Финансы: :{money_color}[{formatted_total} Ан]", expanded=False):
         c_mon1, c_mon2, c_mon3 = st.columns([1, 2, 1])
         with c_mon1:
-            # Allow negative numbers for spending
             amount = st.number_input("Сумма", value=0, step=100, key=f"money_amt_{u_key}")
         with c_mon2:
-            reason = st.text_input("Описание", placeholder="Награда за заказ...", key=f"money_reason_{u_key}")
+            reason = st.text_input("Описание", placeholder="Награда...", key=f"money_reason_{u_key}")
         with c_mon3:
-            st.write("")  # Indent
+            st.write("")
             if st.button("Добавить", key=f"money_add_{u_key}", use_container_width=True):
                 if amount != 0:
+                    if not hasattr(unit, 'money_log'): unit.money_log = []
                     unit.money_log.append({"amount": amount, "reason": reason})
                     UnitLibrary.save_unit(unit)
                     st.rerun()
 
         st.divider()
 
-        # Transaction log (newest on top)
-        if unit.money_log:
-            # Limit output, e.g., to last 50 entries, to prevent lag
+        if hasattr(unit, 'money_log') and unit.money_log:
             history = unit.money_log[::-1]
-
-            for item in history:
+            for item in history[:50]:  # Показываем последние 50
                 amt = item['amount']
                 desc = item.get('reason', '...')
 
-                # Pretty display: Amount on left, description below in gray
                 icon = "💸" if amt < 0 else "💰"
                 color = "red" if amt < 0 else "green"
                 sign = "+" if amt > 0 else ""
 
+                # Форматируем сумму транзакции (например, +10к)
+                formatted_amt = format_large_number(abs(amt))
+
                 st.markdown(f"""
-                        <div style="border-left: 3px solid {'#ff4b4b' if amt < 0 else '#09ab3b'}; padding-left: 10px; margin-bottom: 5px;">
-                            <div style="font-weight: bold; font-size: 1.1em;">{icon} :{color}[{sign}{amt} Ан]</div>
-                            <div style="color: gray; font-size: 0.9em;">{desc}</div>
-                        </div>
-                        """, unsafe_allow_html=True)
+                            <div style="border-left: 3px solid {'#ff4b4b' if amt < 0 else '#09ab3b'}; padding-left: 10px; margin-bottom: 5px;">
+                                <div style="font-weight: bold; font-size: 1.1em;">{icon} :{color}[{sign}{formatted_amt} Ан]</div>
+                                <div style="color: gray; font-size: 0.9em;">{desc}</div>
+                            </div>
+                            """, unsafe_allow_html=True)
         else:
             st.caption("История транзакций пуста.")
