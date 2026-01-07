@@ -8,7 +8,14 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_def, inte
     def_card = target.current_card
 
     # Расчет скорости
-    _, adv_def, _, destroy_def = calculate_speed_advantage(spd_atk, spd_def, intent_atk, True)
+    adv_atk, adv_def, _, destroy_def = calculate_speed_advantage(spd_atk, spd_def, intent_atk, True)
+
+    # === [NEW] ПРОВЕРКА ГЕДОНИЗМА ===
+    # Если Атакующий (source) должен сломать защиту (destroy_def), но имеет Гедонизм
+    if destroy_def and "hedonism" in source.passives:
+        destroy_def = False
+        adv_atk = True
+    # =================================================
 
     on_use_logs = []
     engine._process_card_self_scripts("on_use", source, target, custom_log_list=on_use_logs)
@@ -47,6 +54,10 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_def, inte
             val_atk = ctx_atk_c.final_value
             val_cnt = ctx_cnt.final_value
 
+            if ctx_atk_c and ctx_cnt:
+                ctx_atk_c.opponent_ctx = ctx_cnt
+                ctx_cnt.opponent_ctx = ctx_atk_c
+
             detail_logs_c = []
 
             if val_cnt >= val_atk:
@@ -80,6 +91,8 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_def, inte
                 outcome = f"⚡ Counter Break"
 
                 # Кубик сломан.
+                engine._handle_clash_win(ctx_atk_c)
+                engine._handle_clash_lose(ctx_cnt)
                 active_counter_die = None
 
                 # Логируем провал
@@ -116,9 +129,8 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_def, inte
 
         if destroy_def and def_die:
             def_die = None
-
+        ctx_atk = engine._create_roll_context(source, target, die, is_disadvantage=adv_atk)
         # Бросок атаки
-        ctx_atk = engine._create_roll_context(source, target, die)
 
         detail_logs = []
         if j == 0 and on_use_logs: detail_logs.extend(on_use_logs)
@@ -128,6 +140,10 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_def, inte
             ctx_def = engine._create_roll_context(target, source, def_die, is_disadvantage=adv_def)
             val_atk = ctx_atk.final_value
             val_def = ctx_def.final_value
+
+            if ctx_atk and ctx_def:
+                ctx_atk.opponent_ctx = ctx_def
+                ctx_def.opponent_ctx = ctx_atk
 
             outcome = ""
             if val_atk > val_def:

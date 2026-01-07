@@ -67,27 +67,6 @@ class UnitCombatMixin:
                 if not slot.get('source_effect'):
                     slot['source_effect'] = "Lycoris 🩸"
 
-        # 5. ТАЛАНТ: МАХНУТЬ ХВОСТИКОМ (Это отдельная механика карты в слоте)
-        if "wag_tail" in self.passives:
-            if self.computed_speed_dice:
-                d_min, d_max = self.computed_speed_dice[0]
-            else:
-                d_min, d_max = self.base_speed_min, self.base_speed_max
-
-            mod = self.get_status("haste") - self.get_status("slow") - self.get_status("bind")
-            val_tail = max(1, random.randint(d_min, d_max) + mod)
-
-            card_tail = Card(
-                id="tail_swipe_counter", name="Tail Counter",
-                description="Counter Evade: Отражает атаку и сгорает.",
-                dice_list=[Dice(5, 7, DiceType.EVADE, is_counter=True)]
-            )
-
-            self.active_slots.append({
-                'speed': val_tail, 'card': card_tail, 'target_slot': -1, 'is_aggro': False,
-                'source_effect': 'Tail Swipe 🐈', 'locked': True, 'consumed': False
-            })
-
         # 6. ТАЛАНТ: ОБОРОНА (ZAFU) - Тоже карта в слоте
         if "defense_zafu" in self.talents:
             zafu_dice_list = []

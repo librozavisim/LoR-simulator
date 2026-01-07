@@ -1,16 +1,35 @@
 # ==========================================
 # Махнуть хвостиком (Wag Tail)
 # ==========================================
+from core.dice import Dice
 from core.enums import DiceType
 from logic.context import RollContext
 from logic.character_changing.passives.base_passive import BasePassive
 
 
+# ==========================================
+# Махнуть хвостиком (Wag Tail)
+# ==========================================
 class PassiveWagTail(BasePassive):
     id = "wag_tail"
     name = "Махнуть хвостиком"
-    description = "🐈 (Пассивно) Каждый раунд создает дополнительный слот с Counter Evade (5-7). Отражает одну карту противника и исчезает."
-    is_active_ability = False  # Убеждаемся, что это не активка
+    description = "🐈 (Пассивно) Каждый раунд добавляет 1 Counter Evade (5-7) в пул контр-атак."
+    is_active_ability = False
+
+    def on_round_start(self, unit, log_func, **kwargs):
+        # Create the counter evade die
+        # Note: 5-7 range as per description
+        evade_die = Dice(5, 7, DiceType.EVADE, is_counter=True)
+
+        # Add to the unit's counter dice pool
+        # This list is cleared every round in roll_speed_dice
+        if not hasattr(unit, 'counter_dice'):
+            unit.counter_dice = []
+
+        unit.counter_dice.append(evade_die)
+
+        if log_func:
+            log_func(f"🐈 **{self.name}**: +1 Counter Evade (5-7) added to pool.")
 
 
 # ==========================================
@@ -21,38 +40,44 @@ class PassiveBackstreetDemon(BasePassive):
     name = "Демон переулка"
     description = "Сильная сторона: Уворот наносит урон. Слабая: Блок врага наносит вам урон."
 
-    # --- СИЛЬНАЯ СТОРОНА ---
-    def modify_clash_interaction(self, ctx, interaction, loser_ctx):
-        if ctx.dice.dtype == DiceType.EVADE:
-            enemy_roll = loser_ctx.final_value
-            counter_dmg = enemy_roll // 2
+    # --- СИЛЬНАЯ СТОРОНА (Победа Уворотом) ---
+    def on_clash_win(self, ctx):
+        # 1. Проверяем, что выиграли УВОРОТОМ
+        if ctx.dice.dtype != DiceType.EVADE:
+            return
 
-            interaction["action"] = "damage"
-            interaction["dmg_type"] = "hp"
-            interaction["amount"] = counter_dmg
-            interaction["target"] = loser_ctx.source
-            interaction["is_full_attack"] = False
+        # 2. Получаем контекст проигравшего (Врага)
+        loser = getattr(ctx, 'opponent_ctx', None)
+        if not loser: return
 
-            # ПОДРОБНЫЙ ЛОГ
-            ctx.log.append(f"😈 **{self.name}**: Успешный уворот! Враг открылся.")
-            ctx.log.append(f"   ↳ Контратака на **{counter_dmg}** урона (50% от броска врага {enemy_roll})")
+        # 3. Считаем урон (Половина броска врага)
+        counter_dmg = loser.final_value // 2
+        if counter_dmg <= 0: return
 
-    # --- СЛАБАЯ СТОРОНА ---
-    def modify_clash_interaction_loser(self, ctx, interaction, winner_ctx):
-        """
-        ctx: Лилит (Проигравшая)
-        winner_ctx: Враг (Победитель)
-        """
-        if winner_ctx.dice.dtype == DiceType.BLOCK:
-            dmg = winner_ctx.final_value // 2
+        # 4. Наносим урон врагу (HP)
+        # Так как это прямой урон от эффекта, используем current_hp
+        loser.source.current_hp = max(0, loser.source.current_hp - counter_dmg)
 
-            # Наносим урон
-            ctx.source.current_hp = max(0, ctx.source.current_hp - dmg)
+        ctx.log.append(f"😈 **{self.name}**: Уворот! Враг получает {counter_dmg} урона (50% от {loser.final_value})")
 
-            # ПОДРОБНЫЙ ЛОГ
-            # Используем emoji разбитого сердца и объясняем причину
-            ctx.log.append(f"💔 **{self.name} (Слабость)**: Атака заблокирована!")
-            ctx.log.append(f"   ↳ Лилит получает **{dmg}** урона от отдачи (50% от Блока {winner_ctx.final_value})")
+    # --- СЛАБАЯ СТОРОНА (Проигрыш против Блока) ---
+    def on_clash_lose(self, ctx):
+        # ctx.source - это Лилит (Проигравшая)
+
+        # 1. Получаем контекст победителя (Врага)
+        winner = getattr(ctx, 'opponent_ctx', None)
+        if not winner: return
+
+        # 2. Проверяем, что враг выиграл БЛОКОМ
+        if winner.dice.dtype == DiceType.BLOCK:
+            # 3. Считаем урон (Половина броска Блока)
+            recoil_dmg = winner.final_value // 2
+            if recoil_dmg <= 0: return
+
+            # 4. Лилит получает урон
+            ctx.source.current_hp = max(0, ctx.source.current_hp - recoil_dmg)
+
+            ctx.log.append(f"💔 **{self.name}**: Разбились о блок! Получено {recoil_dmg} урона.")
 
 
 # ==========================================
@@ -75,11 +100,15 @@ class PassiveDaughterOfBackstreets(BasePassive):
         if log_func:
             log_func(f"🏙️ **{self.name}**: Реген (+1 HP, +1 SP, +1 Stagger)")
 
+
+# ==========================================
+# Гедонизм (Hedonism)
+# ==========================================
 class PassiveHedonism(BasePassive):
     id = "hedonism"
     name = "Гедонизм"
-    description = "Не позволяет сбрасывать ваши атаки при разнице скорости 8+. (Но вы все равно деретесь с Помехой)."
-
+    description = "Вы не можете уничтожать кубики врага за счет разницы в скорости. Вместо этого вы получаете Помеху (Disadvantage) на этот бросок."
+    is_active_ability = False
 
 # ==========================================
 # Тату "Благословение Ветра" (Blessing of Wind)
@@ -116,17 +145,21 @@ class PassiveLiveFastDieYoung(BasePassive):
     name = "Живи быстро, умирай молодым"
     description = "Каждый кубик скорости даёт +1 к Силе и Стойкости в начале сцены. +1 Дым за победу в столкновении атакой."
 
-    def on_combat_start(self, unit, log_func, **kwargs):
-        # ИСПРАВЛЕНИЕ: Считаем реальные активные слоты (unit.active_slots),
-        # а не базовые характеристики. Это учитывает Ярость, Ускорение и другие бонусы.
-        slots_count = len(unit.active_slots) if unit.active_slots else 1
+    # === [UPD] Используем on_round_start вместо on_combat_start ===
+    def on_round_start(self, unit, log_func, **kwargs):
+        # Если юнит в оглушении, бонусов за скорость нет
+        if unit.is_staggered():
+            return
 
-        # Накладываем баффы
-        unit.add_status("strength", slots_count)
-        unit.add_status("endurance", slots_count)
+        # Считаем реальные активные слоты (включая бонусы от Ярости и т.д.)
+        slots_count = len(unit.active_slots) if unit.active_slots else 0
 
-        if log_func:
-            log_func(f"⚡ **{self.name}**: +{slots_count} Силы и Стойкости (за {slots_count} слота)")
+        if slots_count > 0:
+            unit.add_status("strength", slots_count, duration=1)
+            unit.add_status("endurance", slots_count, duration=1)
+
+            if log_func:
+                log_func(f"⚡ **{self.name}**: +{slots_count} Силы и Стойкости (за {slots_count} слота)")
 
     def on_clash_win(self, ctx: RollContext):
         # Если выиграли атакующим кубиком -> +1 Дым

@@ -25,6 +25,19 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
     # Передаем интенты в калькулятор
     adv_a, adv_d, destroy_a, destroy_d = calculate_speed_advantage(spd_a, spd_d, intent_a, intent_d)
 
+    # === [NEW] ПРОВЕРКА ГЕДОНИЗМА (Спасение от поломки) ===
+    # Если кубик должен быть уничтожен, но есть Гедонизм -> Отменяем уничтожение, даем Помеху
+
+    if destroy_d and "hedonism" in attacker.passives:
+        destroy_d = False
+        adv_a = True
+        # (Опционально можно добавить лог, но пока молча меняем правила)
+
+        # Аналогично, если Защитник (defender) перегнал Атакующего и должен сломать его кубик (destroy_a):
+    if destroy_a and "hedonism" in defender.passives:
+        destroy_a = False
+        adv_d = True
+
     # Подготовка очередей кубиков (копируем, т.к. будем менять для Melee Recycle)
     queue_a = list(ac.dice_list)
     queue_d = list(dc.dice_list)
@@ -62,6 +75,10 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
 
         val_a = ctx_a.final_value if ctx_a else 0
         val_d = ctx_d.final_value if ctx_d else 0
+
+        if ctx_a and ctx_d:
+            ctx_a.opponent_ctx = ctx_d
+            ctx_d.opponent_ctx = ctx_a
 
         outcome = ""
         detail_logs = []

@@ -44,7 +44,7 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
 
         # Нанесение
         target.current_hp -= final_dmg
-        hit_msg = f"💥 Hit {final_dmg} HP"
+        hit_msg = f"💥 **{target.name}**: Hit {final_dmg} HP"
         if is_stag_hit: hit_msg += " (Stagger x2!)"
         source_ctx.log.append(hit_msg)
 
@@ -68,7 +68,7 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
             mod_mult *= 0.67  # -33% урона
         final_dmg = int(amount * res * mod_mult)
         target.current_stagger -= final_dmg
-        source_ctx.log.append(f"😵 Stagger Dmg {final_dmg}")
+        source_ctx.log.append(f"😵 **{target.name}**: Stagger -{final_dmg}")
 
     # Триггер получения урона
     if final_dmg > 0:

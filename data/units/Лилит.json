@@ -65,7 +65,13 @@
         "engineering": 0,
         "programming": 0
     },
-    "passives": [],
+    "passives": [
+        "wag_tail",
+        "backstreet_demon",
+        "daughter_of_backstreets",
+        "hedonism",
+        "live_fast_die_young"
+    ],
     "talents": [
         "naked_defense",
         "vengeful_payback",
