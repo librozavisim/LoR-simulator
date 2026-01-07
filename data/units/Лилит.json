@@ -18,7 +18,17 @@
         "imp_sp": 0,
         "imp_stg": 0
     },
-    "deck": [],
+    "deck": [
+        "release_steam",
+        "prelude",
+        "puff",
+        "bad_habit",
+        "trip_up",
+        "inhale_exhale",
+        "smoke_arts",
+        "demon_scream",
+        "smoke_silhouette"
+    ],
     "base_stats": {
         "current_hp": 130,
         "current_sp": 77,
