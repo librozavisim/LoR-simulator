@@ -3,6 +3,7 @@ from core.enums import DiceType
 from core.card import Card
 from core.dice import Dice
 
+
 class UnitCombatMixin:
     """
     Боевая логика: броски инициативы, проверки состояния, кулдауны.
@@ -15,7 +16,7 @@ class UnitCombatMixin:
         if self.is_dead():
             return
 
-        # 1. Основные кубики
+        # 1. Основные кубики (расчитанные из статов)
         for (d_min, d_max) in self.computed_speed_dice:
             mod = self.get_status("haste") - self.get_status("slow") - self.get_status("bind")
             val = max(1, random.randint(d_min, d_max) + mod)
@@ -23,19 +24,31 @@ class UnitCombatMixin:
                 'speed': val, 'card': None, 'target_slot': None, 'is_aggro': False
             })
 
-        # 2. Активные способности (Ярость)
-        if self.active_buffs.get("berserker_rage", 0) > 0:
-            d_min, d_max = self.computed_speed_dice[0] if self.computed_speed_dice else (self.base_speed_min, self.base_speed_max)
-            mod = self.get_status("haste") - self.get_status("slow") - self.get_status("bind")
-            val = max(1, random.randint(d_min, d_max) + mod)
+        # 2. [GENERIC] Бонусные кубики от Талантов и Пассивок
+        # (Заменяет хардкоды Frenzy, Berserker Rage и т.д.)
+        extra_dice_count = 0
 
-            self.active_slots.append({
-                'speed': val, 'card': None, 'target_slot': None, 'is_aggro': False,
-                'source_effect': 'Rage 😡'
-            })
+        # Импорт внутри метода во избежание циклов
+        from logic.character_changing.talents import TALENT_REGISTRY
+        from logic.character_changing.passives import PASSIVE_REGISTRY
 
-        # 3. ТАЛАНТ: НЕИСТОВСТВО (Frenzy)
-        if "frenzy" in self.talents:
+        # Проверка Талантов
+        for tid in self.talents:
+            if tid in TALENT_REGISTRY:
+                obj = TALENT_REGISTRY[tid]
+                if hasattr(obj, "get_speed_dice_bonus"):
+                    extra_dice_count += obj.get_speed_dice_bonus(self)
+
+        # Проверка Пассивок
+        for pid in self.passives:
+            if pid in PASSIVE_REGISTRY:
+                obj = PASSIVE_REGISTRY[pid]
+                if hasattr(obj, "get_speed_dice_bonus"):
+                    extra_dice_count += obj.get_speed_dice_bonus(self)
+
+        # Генерация слотов для бонусных кубиков
+        if extra_dice_count > 0:
+            # Используем лучший диапазон скорости (как в ярости)
             if self.computed_speed_dice:
                 d_min, d_max = self.computed_speed_dice[0]
             else:
@@ -43,39 +56,21 @@ class UnitCombatMixin:
 
             mod = self.get_status("haste") - self.get_status("slow") - self.get_status("bind")
 
-            # --- Слот 1: Контр-кубик (5-7) ---
-            val1 = max(1, random.randint(d_min, d_max) + mod)
-            card_frenzy_1 = Card(
-                id="frenzy_counter_1", name="Counter (5-7)", tier=1, card_type="melee",
-                description="Counter Die: Перехватывает односторонние атаки.",
-                dice_list=[Dice(5, 7, DiceType.SLASH, is_counter=True)]
-            )
-            self.active_slots.append({
-                'speed': val1, 'card': card_frenzy_1, 'target_slot': None, 'is_aggro': False,
-                'source_effect': 'Counter ⚡', 'locked': True
-            })
-
-            # --- Слот 2: Если Self-Control > 10 (6-8) ---
-            if self.get_status("self_control") > 10:
-                val2 = max(1, random.randint(d_min, d_max) + mod)
-                card_frenzy_2 = Card(
-                    id="frenzy_counter_2", name="Counter II (6-8)", tier=2, card_type="melee",
-                    description="Counter Die: Перехватывает односторонние атаки.",
-                    dice_list=[Dice(6, 8, DiceType.SLASH, is_counter=True)]
-                )
+            for _ in range(extra_dice_count):
+                val = max(1, random.randint(d_min, d_max) + mod)
                 self.active_slots.append({
-                    'speed': val2, 'card': card_frenzy_2, 'target_slot': None, 'is_aggro': False,
-                    'source_effect': 'Counter+ ⚡', 'locked': True
+                    'speed': val, 'card': None, 'target_slot': None, 'is_aggro': False,
+                    'source_effect': 'Talent 🌟'
                 })
 
-        # 4. СТАТУС: Red Lycoris
+        # 3. СТАТУС: Red Lycoris (Спец. эффект слотов)
         if self.get_status("red_lycoris") > 0:
             for slot in self.active_slots:
                 slot['prevent_redirection'] = True
                 if not slot.get('source_effect'):
                     slot['source_effect'] = "Lycoris 🩸"
 
-        # 5. ТАЛАНТ: МАХНУТЬ ХВОСТИКОМ
+        # 4. ТАЛАНТ: МАХНУТЬ ХВОСТИКОМ (Специфичный слот с картой)
         if "wag_tail" in self.passives:
             if self.computed_speed_dice:
                 d_min, d_max = self.computed_speed_dice[0]
@@ -96,7 +91,7 @@ class UnitCombatMixin:
                 'source_effect': 'Tail Swipe 🐈', 'locked': True, 'consumed': False
             })
 
-        # 6. ТАЛАНТ: ОБОРОНА (ZAFU)
+        # 5. ТАЛАНТ: ОБОРОНА (ZAFU)
         if "defense_zafu" in self.talents:
             zafu_dice_list = []
             zafu_dice_list.append(Dice(5, 7, DiceType.BLOCK, is_counter=False))

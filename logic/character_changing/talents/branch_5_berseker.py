@@ -78,6 +78,12 @@ class TalentBerserkerRage(BasePassive):
             if log_func: log_func(f"😡 **{self.name}**: Активирована! (+1 Слот)")
         return True
 
+    # === [NEW] Универсальный хук для бонусных кубиков ===
+    def get_speed_dice_bonus(self, unit) -> int:
+        # Если бафф ярости активен -> +1 кубик
+        if unit.active_buffs.get(self.id, 0) > 0:
+            return 1
+        return 0
 
 # ==========================================
 # 5.3 (Опц) Встроенная броня 2
@@ -130,14 +136,12 @@ class TalentFrenzy(BasePassive):
     )
     is_active_ability = False
 
-    def get_speed_dice_bonus(self, unit):
+    # === [NEW] Универсальный хук для бонусных кубиков ===
+    def get_speed_dice_bonus(self, unit) -> int:
         bonus = 1  # Базовый бонус
-
-        # Проверка условия "Самообладание > 10" (предполагаем, что это SP или ресурс)
-        # Замените 'self_control' на реальный атрибут, если он отличается (например unit.current_sp)
-        if unit.resources.get("self_control", 0) > 10:
+        # Проверяем статус Самообладания
+        if unit.get_status("self_control") > 10:
             bonus += 1
-
         return bonus
 
 # ==========================================
