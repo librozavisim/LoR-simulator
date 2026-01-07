@@ -3,26 +3,41 @@
 def format_large_number(value) -> str:
     """
     Форматирует большие числа с суффиксами к/М/Б.
-    Округляет ВНИЗ (floor), чтобы не завышать значения.
-    Пример: 1500 -> 1к, 99 999 999 -> 99М.
+    Показывает до 2 знаков после запятой, убирая лишние нули.
+    Примеры:
+      1500 -> 1.5к
+      1 050 000 000 -> 1.05Б
+      1 000 000 -> 1М
     """
     try:
-        val = int(value)
+        val = float(value)
     except (ValueError, TypeError):
         return str(value)
 
-    # Меньше тысячи - показываем как есть
-    if val < 1_000:
-        return str(val)
+    # Меньше 1000 — показываем как целое
+    if abs(val) < 1_000:
+        return f"{int(val)}"
 
-    # Тысячи (к)
-    if val < 1_000_000:
-        return f"{int(val / 1_000)}к"
+    suffix = ""
+    divisor = 1
 
-    # Миллионы (М) - используем "М" или "кк" по вкусу, но "М" профессиональнее
-    # Если нужно "кк", замените "М" на "кк" ниже.
-    if val < 1_000_000_000:
-        return f"{int(val / 1_000_000)}М"
+    if abs(val) >= 1_000_000_000:
+        suffix = "Б"
+        divisor = 1_000_000_000
+    elif abs(val) >= 1_000_000:
+        suffix = "М"
+        divisor = 1_000_000
+    else:
+        suffix = "к"
+        divisor = 1_000
 
-    # Миллиарды (Б)
-    return f"{int(val / 1_000_000_000)}Б"
+    short_val = val / divisor
+
+    # Форматируем с 2 знаками после запятой
+    formatted = f"{short_val:.2f}"
+
+    # Убираем лишние нули и точку в конце (1.50 -> 1.5; 1.00 -> 1)
+    if "." in formatted:
+        formatted = formatted.rstrip("0").rstrip(".")
+
+    return f"{formatted}{suffix}"
