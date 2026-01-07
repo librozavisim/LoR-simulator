@@ -5,6 +5,7 @@ from io import StringIO
 
 from core.card import Card
 from core.library import Library
+from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
 from logic.clash import ClashSystem
 from logic.character_changing.passives import PASSIVE_REGISTRY
 from logic.character_changing.talents import TALENT_REGISTRY
@@ -68,6 +69,9 @@ def set_cooldowns(u):
             wep = WEAPON_REGISTRY[u.weapon_id]
             if wep.passive_id and wep.passive_id in PASSIVE_REGISTRY:
                 PASSIVE_REGISTRY[wep.passive_id].on_combat_start(u, log_dummy, enemies=opponents, allies=my_allies)
+        for aid in u.augmentations:
+            if aid in AUGMENTATION_REGISTRY:
+                AUGMENTATION_REGISTRY[aid].on_combat_start(u, log_dummy, enemies=opponents, allies=my_allies)
 
 def roll_phase():
     """

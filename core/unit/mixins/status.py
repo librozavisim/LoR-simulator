@@ -57,8 +57,18 @@ class UnitStatusMixin:
         if name not in self._status_effects:
             self._status_effects[name] = []
 
-        self._status_effects[name].append({"amount": amount, "duration": duration})
+        POOL_STATUSES = ["smoke", "charge", "satiety", "tremor", "self_control", "poise"]
 
+        if name in POOL_STATUSES and self._status_effects[name]:
+            # Если статус уже есть, просто увеличиваем количество в первом слоте
+            # Это предотвращает создание [1, 1, 1, 1...] для дыма
+            self._status_effects[name][0]["amount"] += amount
+            # Обновляем длительность (берем максимум, для дыма это обычно 99)
+            self._status_effects[name][0]["duration"] = max(self._status_effects[name][0]["duration"], duration)
+        else:
+            # Обычное поведение: добавляем новый отдельный стак (нужно для Силы/Стойкости с разной длительностью)
+            self._status_effects[name].append({"amount": amount, "duration": duration})
+        # ===================================================
         # === ХУК: on_status_applied ===
         if trigger_events:
             for tid in self.talents:

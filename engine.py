@@ -3,6 +3,7 @@ import random
 from core.dice import Dice
 from core.events import EventManager
 from core.unit.unit import Unit
+from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
 from logic.modifiers import RollContext
 from logic.character_changing.passives import PASSIVE_REGISTRY
 from logic.character_changing.talents import TALENT_REGISTRY
@@ -25,6 +26,10 @@ class CombatEngine:
         for pid in unit.talents:
             if pid in TALENT_REGISTRY:
                 self.events.subscribe("BEFORE_ROLL", TALENT_REGISTRY[pid])
+
+        for aid in unit.augmentations:
+            if aid in AUGMENTATION_REGISTRY:
+                self.events.subscribe("BEFORE_ROLL", AUGMENTATION_REGISTRY[aid])
 
     def roll_attack(self, attacker: Unit, defender: Unit, min_d: int, max_d: int):
         # 1. Базовый рандом

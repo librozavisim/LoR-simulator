@@ -1,3 +1,4 @@
+from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
 from logic.character_changing.passives import PASSIVE_REGISTRY
 from logic.character_changing.talents import TALENT_REGISTRY
 from logic.statuses.status_manager import STATUS_REGISTRY
@@ -98,6 +99,9 @@ def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
         if pid in PASSIVE_REGISTRY: PASSIVE_REGISTRY[pid].on_hit(attacker_ctx)
     for pid in attacker.talents:
         if pid in TALENT_REGISTRY: TALENT_REGISTRY[pid].on_hit(attacker_ctx)
+    for aid in attacker.augmentations:
+        if aid in AUGMENTATION_REGISTRY:
+            AUGMENTATION_REGISTRY[aid].on_hit(attacker_ctx)
 
     # === 4. ПАССИВКА ОРУЖИЯ (НОВОЕ) ===
     if attacker.weapon_id in WEAPON_REGISTRY:

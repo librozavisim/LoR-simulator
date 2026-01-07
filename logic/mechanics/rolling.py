@@ -1,5 +1,6 @@
 import random
 from core.enums import DiceType
+from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
 from logic.context import RollContext
 from logic.statuses.status_manager import STATUS_REGISTRY
 from logic.character_changing.passives import PASSIVE_REGISTRY
@@ -147,6 +148,10 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
 
     for pid in source.passives:
         if pid in PASSIVE_REGISTRY: PASSIVE_REGISTRY[pid].on_roll(ctx)
+
+    for aid in source.augmentations:
+        if aid in AUGMENTATION_REGISTRY:
+            AUGMENTATION_REGISTRY[aid].on_roll(ctx)
 
     if source.weapon_id in WEAPON_REGISTRY:
         wep = WEAPON_REGISTRY[source.weapon_id]

@@ -1,3 +1,4 @@
+from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
 from logic.scripts.card_scripts import SCRIPTS_REGISTRY
 from logic.statuses.status_manager import STATUS_REGISTRY
 from logic.character_changing.passives import PASSIVE_REGISTRY
@@ -59,6 +60,10 @@ def trigger_unit_event(event_name, unit, *args, **kwargs):
             handler = getattr(PASSIVE_REGISTRY[wep.passive_id], event_name, None)
             if handler: handler(unit, *args, **kwargs)
     # 3. Таланты
+    for aid in unit.augmentations:
+        if aid in AUGMENTATION_REGISTRY:
+            handler = getattr(AUGMENTATION_REGISTRY[aid], event_name, None)
+            if handler: handler(unit, *args, **kwargs)
     for pid in unit.talents:
         if pid in TALENT_REGISTRY:
             handler = getattr(TALENT_REGISTRY[pid], event_name, None)
