@@ -30,13 +30,20 @@ SKILL_TREE = {
         {"code": "2.9 Б", "id": "always_ready", "req": "know_your_enemy"},
     ],
     "Ветка 3: Неутомимый": [
-        {"code": "3.1", "id": "defense_base", "req": None}, # Заглушка, если есть 3.1
-        {"code": "3.2", "id": "defense_zafu", "req": "defense_base"},
-        {"code": "3.3", "id": None, "req": "defense_zafu"},
-        {"code": "3.4", "id": None, "req": "defense_zafu"},
-        {"code": "3.5", "id": "talent_3_5", "req": "defense_zafu"}, # Улучшение блока
-        {"code": "3.8", "id": "talent_3_8", "req": "talent_3_5"},   # Улучшение блока 2
-        {"code": "3.10", "id": "talent_3_10", "req": "talent_3_8"}, # Контр-блок
+        {"code": "3.1", "id": "big_guy", "req": None},
+        {"code": "3.2", "id": "defense", "req": "big_guy"},
+        {"code": "3.3", "id": "commendable_constitution", "req": "defense"},
+        {"code": "3.3опц", "id": "big_heart", "req": "defense"},
+        {"code": "3.4", "id": "rock", "req": "commendable_constitution"},
+        {"code": "3.5", "id": "despiteAdversities", "req": "rock"},
+        {"code": "3.5опц", "id": "heat_resistant", "req": "rock"},
+        {"code": "3.6", "id": "adaptation_tireless", "req": "despiteAdversities"},
+        {"code": "3.7", "id": "tough_as_steel", "req": "adaptation_tireless"},
+        {"code": "3.7опц", "id": "defender", "req": "adaptation_tireless"},
+        {"code": "3.8", "id": "survivor", "req": "tough_as_steel"},
+        {"code": "3.9", "id": "muscle_overstrain", "req": "survivor"},
+        {"code": "3.9опц", "id": "idol_oath", "req": "survivor"},
+        {"code": "3.10", "id": "surgeOfStrength", "req": "muscle_overstrain"},
     ],
     "Ветка 4: Медик (Развилка)": [
         {"code": "4.1", "id": "no_hippocratic_oath", "req": None},

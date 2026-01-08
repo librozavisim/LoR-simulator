@@ -18,11 +18,13 @@
         "imp_sp": 0,
         "imp_stg": 0
     },
-    "deck": [],
+    "deck": [
+        "имя11_f7dd"
+    ],
     "base_stats": {
-        "current_hp": 114,
-        "current_sp": 60,
-        "current_stagger": 57
+        "current_hp": 126,
+        "current_sp": 92,
+        "current_stagger": 63
     },
     "defense": {
         "armor_name": "Standard Fixer Suit",
@@ -66,7 +68,14 @@
         "programming": 0
     },
     "passives": [],
-    "talents": [],
+    "talents": [
+        "big_guy",
+        "defense",
+        "commendable_constitution",
+        "rock",
+        "despiteAdversities",
+        "adaptation_tireless"
+    ],
     "augmentations": [],
     "level_rolls": {
         "3": {

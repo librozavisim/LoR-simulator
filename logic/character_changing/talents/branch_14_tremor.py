@@ -16,7 +16,6 @@ class TalentFightToTheEnd(BasePassive):
     is_active_ability = False
 
     def on_take_damage(self, unit, amount, dmg_type, log_func=None):
-        # Эмуляция "броска стойкости в RP".
         # Допустим, это пассивная защита от физического урона для танка.
         # В симуляторе просто снизим урон на 10% как заглушку RP эффекта.
         pass

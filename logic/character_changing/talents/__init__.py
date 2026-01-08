@@ -108,19 +108,19 @@ TALENT_REGISTRY = {
 
 # === ВЕТКА 3: НЕУТОМИМЫЙ ===
     "big_guy": TalentBigGuy(),
-    "defense_zafu": TalentDefense(), # Перезаписали старую версию
+    "defense": TalentDefense(), # Перезаписали старую версию
     "commendable_constitution": TalentCommendableConstitution(),
     "big_heart": TalentBigHeart(),
     "rock": TalentRock(),
-    "talent_3_5": TalentDespiteAdversities(), # ID должен совпадать с тем, что в unit_mixins
+    "despiteAdversities": TalentDespiteAdversities(), # ID должен совпадать с тем, что в unit_mixins
     "heat_resistant": TalentHeatResistant(),
     "adaptation_tireless": TalentAdaptationTireless(),
     "tough_as_steel": TalentToughAsSteel(),
     "defender": TalentDefender(),
-    "talent_3_8": TalentSurvivor(),
+    "survivor": TalentSurvivor(),
     "muscle_overstrain": TalentMuscleOverstrain(),
     "idol_oath": TalentIdolOath(),
-    "talent_3_10": TalentSurgeOfStrength(),
+    "surgeOfStrength": TalentSurgeOfStrength(),
 
     # === ВЕТКА 4: ПОЛЕВОЙ МЕДИК ===
     "no_hippocratic_oath": TalentNoHippocraticOath(),

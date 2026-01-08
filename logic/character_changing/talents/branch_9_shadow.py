@@ -26,7 +26,7 @@ class TalentRevenge(BasePassive):
     description = "9.1 Б: После получения урона -> Следующая попавшая атака наносит x1.5 урона."
     is_active_ability = False
 
-    def on_take_damage(self, unit, amount, dmg_type, log_func=None):
+    def on_take_damage(self, unit, amount, source, **kwargs):
         if amount > 0:
             # Просто вешаем статус. Логика урона теперь внутри RevengeDmgUpStatus.
             unit.add_status("revenge_dmg_up", 1, duration=2)

@@ -28,11 +28,27 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_def, inte
 
     active_counter_die = None
 
-    # Пытаемся взять контр-кубик из пула цели, если это возможно
-    # (обычно контр-кубики работают, когда тебя бьют one-sided)
     if target.counter_dice:
-        # Берем первый доступный и удаляем из общего пула (он тратится на эту карту)
-        active_counter_die = target.counter_dice.pop(0)
+
+        # === [NEW] Логика: Можно ли использовать кубик? ===
+        can_use_counter = True
+
+        # 1. Если цель Оглушена (Staggered)
+        if target.is_staggered():
+            can_use_counter = False  # По умолчанию нельзя
+
+            # Но если есть талант 3.5
+            if "despiteAdversities" in target.talents:
+                # Проверяем, является ли первый кубик "Кубиком Обороны" (по флагу)
+                next_die = target.counter_dice[0]
+                flags = getattr(next_die, "flags", [])
+
+                if "talent_defense_die" in flags:
+                    can_use_counter = True  # Разрешаем!
+        # ==================================================
+
+        if can_use_counter:
+            active_counter_die = target.counter_dice.pop(0)
 
     for j, die in enumerate(card.dice_list):
         if source.is_dead() or target.is_dead() or source.is_staggered(): break
@@ -127,14 +143,8 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_def, inte
                 if candidate.dtype in [DiceType.BLOCK, DiceType.EVADE]:
                     def_die = candidate
 
-            # === [NEW] ПРОВЕРКА КОШАЧЬИХ РЕФЛЕКСОВ ===
         if destroy_def and def_die:
-            # Если это Уклонение и есть талант -> Не разрушаем
-            if def_die.dtype == DiceType.EVADE and "cat_reflexes" in target.talents:
-                pass  # Кубик выживает
-            else:
-                def_die = None
-
+            def_die = None
         ctx_atk = engine._create_roll_context(source, target, die, is_disadvantage=adv_atk)
         # Бросок атаки
 
