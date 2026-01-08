@@ -161,6 +161,15 @@ def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
     if dmg_type == "hp":
 
         if convert_to_sp:
+            ment_prot = defender.get_status("mental_protection")
+            if ment_prot > 0:
+                # 25% за стак, макс 50%
+                pct_red = min(0.50, ment_prot * 0.25)
+                reduction = int(final_amt * pct_red)
+                final_amt -= reduction
+                attacker_ctx.log.append(f"🧀 **Edam**: Blocked {reduction} SP dmg")
+            # ================================================
+
             # Наносим SP урон вместо HP
             defender.take_sanity_damage(final_amt)
             attacker_ctx.log.append(f"🧠 **White Dmg**: {final_amt} SP (Converted) [{formula_str}]")

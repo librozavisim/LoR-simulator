@@ -444,11 +444,13 @@ def use_item_action(unit, card):
     """
     Мгновенно применяет эффект предмета.
     """
-    # Логируем действие
-    msg = f"💊 **{unit.name}** uses **{card.name}**!"
 
-    # Запускаем скрипты карты (триггер "on_use")
-    # Создаем список для логов конкретно этого действия
+    current_cd = unit.card_cooldowns.get(card.id, 0)
+    if current_cd > 0:
+        st.toast(f"Предмет {card.name} на перезарядке ({current_cd} х.)!", icon="⏳")
+        return
+
+    msg = f"💊 **{unit.name}** uses **{card.name}**!"
     item_logs = [msg]
 
     # Используем process_card_self_scripts, передавая item_logs как custom_log_list
@@ -456,6 +458,12 @@ def use_item_action(unit, card):
     # Пока считаем, что таблетки пьют сами.
     from logic.mechanics.scripts import process_card_self_scripts
     process_card_self_scripts("on_use", unit, None, logs=None, custom_log_list=item_logs, card_override=card)
+
+    cooldown = max(0, card.tier - 1)
+    if cooldown > 0:
+        unit.card_cooldowns[card.id] = cooldown
+        # Можно добавить лог про кд, если нужно, но обычно это визуально видно
+        # item_logs.append(f"(Cooldown: {cooldown})")
     # Добавляем в общий лог боя
     st.session_state['battle_logs'].append({
         "round": "Item",

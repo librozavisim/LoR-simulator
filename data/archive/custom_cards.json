@@ -1304,3 +1304,19 @@
     }
   ]
 }
+
+
+//    {
+//      "id": "candy_nougat",
+//      "name": "Нуга",
+//      "tier": 5,
+//      "type": "Item",
+//      "description": "+8 Мудрости (Внимательность). (+5 Сытости).",
+//      "scripts": {
+//        "on_use": [
+//          { "script_id": "apply_status", "params": { "status": "satiety", "base": 5, "target": "self", "duration": 99 } },
+//          { "script_id": "restore_resource", "params": { "type": "sp", "base": 0, "target": "self" } }
+//        ]
+//      },
+//      "flags": ["Note: Wisdom bonus is passive if item equipped or active for roll context. Here simulated via placeholder."]
+//    },

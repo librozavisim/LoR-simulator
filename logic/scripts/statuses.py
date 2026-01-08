@@ -31,6 +31,12 @@ def apply_status(ctx: 'RollContext', params: dict):
             ctx.log.append(f"🚫 {u.name} Immune to {status_name}")
             continue
 
+        if status_name == "mental_protection":
+            current = u.get_status("mental_protection")
+            if current >= 2:
+                ctx.log.append(f"🧀 {u.name}: Mental Protection maxed (2)")
+                continue
+
         # ВАЖНО: Считаем стаки для КОНКРЕТНОГО юнита u
         # Если scale_from_target=True, то стат возьмется у u
         stack = _resolve_value(ctx.source, u, calc_params)

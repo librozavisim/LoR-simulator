@@ -1,3 +1,5 @@
+from core.dice import Dice
+from core.enums import DiceType
 from logic.character_changing.passives.base_passive import BasePassive
 
 
@@ -85,11 +87,36 @@ class TalentAerialFoot(BasePassive):
     id = "aerial_foot"
     name = "Воздушная стопа"
     description = (
-        "6.3 Вы получаете пассивную кость Уклонения или Блока (зависит от уровня).\n"
+        "6.3 Вы получаете пассивную кость Уклонения (5-7).\n"
         "Бонус: +1 кость за каждые 5 дыма (макс 2).\n"
-        "С 6.5: Заменяется на Контратакующую кость."
     )
     is_active_ability = False
+
+    def on_round_start(self, unit, log_func, **kwargs):
+        # 1. Базовая кость + Бонус от дыма
+        smoke = unit.get_status("smoke")
+        bonus_dice = min(2, smoke // 5)
+        total_count = 1 + bonus_dice
+
+        # 2. Инициализация списка, если его нет
+        if not hasattr(unit, 'counter_dice'):
+            unit.counter_dice = []
+
+        # 3. Добавление костей
+        # Пока фиксировано даем Уклонение 5-7
+        # Если в будущем нужно будет менять на Атаку (с 6.5), можно добавить проверку talents
+        die_type = DiceType.EVADE
+
+        # Пример проверки на 6.5 (если понадобится в будущем):
+        # if "self_preservation" in unit.talents: die_type = DiceType.SLASH
+
+        for _ in range(total_count):
+            # is_counter=True делает кость "пассивной" (используется при односторонней атаке врага)
+            die = Dice(5, 7, die_type, is_counter=True)
+            unit.counter_dice.append(die)
+
+        if log_func:
+            log_func(f"🦶 **{self.name}**: Добавлено {total_count} контр-уклонений (Smoke: {smoke}).")
 
 
 # ==========================================

@@ -3,16 +3,15 @@
     {
       "id": "tea_dark",
       "name": "Особый тёмный чай",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
-      "description": "Восстанавливает 15% SP (мин 10) и дает +3 Интеллекта (WIP).",
+      "description": "Восстанавливает 15% SP.",
       "scripts": {
         "on_use": [
           {
             "script_id": "restore_resource",
             "params": {
               "type": "sp",
-              "base": 10,
               "stat": "max_sp",
               "factor": 0.15,
               "target": "self"
@@ -24,7 +23,7 @@
     {
       "id": "tea_green",
       "name": "Особый зелёный чай",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
       "description": "Восстанавливает 15% SP и дает 20% временных HP (Barrier).",
       "scripts": {
@@ -35,7 +34,8 @@
               "type": "sp",
               "base": 10,
               "stat": "max_sp",
-              "factor": 0.15
+              "factor": 0.15,
+              "target": "self"
             }
           },
           {
@@ -45,7 +45,8 @@
               "base": 0,
               "stat": "max_hp",
               "factor": 0.20,
-              "duration": 3
+              "duration": 3,
+              "target": "self"
             }
           }
         ]
@@ -54,7 +55,7 @@
     {
       "id": "tea_fruit",
       "name": "Особый Фруктовый чай",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
       "description": "Восстанавливает 15% SP и дает 2 Спешки.",
       "scripts": {
@@ -63,7 +64,6 @@
             "script_id": "restore_resource",
             "params": {
               "type": "sp",
-              "base": 10,
               "stat": "max_sp",
               "factor": 0.15
             }
@@ -72,7 +72,7 @@
             "params":
             { "status": "haste",
               "base": 2,
-              "duration": 2,
+              "duration": 3,
               "target": "self"
             }
           }
@@ -82,7 +82,7 @@
     {
       "id": "tea_ginger",
       "name": "Имбирный чай",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
       "description": "Восстанавливает 15% SP. Дает 1 Ясность (блокирует следующий негативный эффект).",
       "scripts": {
@@ -91,7 +91,6 @@
             "script_id": "restore_resource",
             "params": {
               "type": "sp",
-              "base": 10,
               "stat": "max_sp",
               "factor": 0.15
             }
@@ -101,7 +100,8 @@
             "params": {
               "status": "clarity",
               "base": 1,
-              "duration": 99
+              "duration": 99,
+              "target": "self"
             }
           }
         ]
@@ -112,7 +112,7 @@
       "name": "Чай из листьев сакуры",
       "tier": 2,
       "type": "Item",
-      "description": "Восстанавливает 100% SP. Требует 15 Ловкости.",
+      "description": "Восстанавливает 100% SP. Накладывает 3 Паралича.",
       "scripts": {
         "on_use": [
           {
@@ -120,8 +120,16 @@
             "params": {
               "type": "sp",
               "base": 999,
-              "req_stat": "agility",
-              "req_val": 15
+              "target": "self"
+            }
+          },
+          {
+            "script_id": "apply_status",
+            "params": {
+              "status": "paralysis",
+              "base": 3,
+              "duration": 99,
+              "target": "self"
             }
           }
         ]
@@ -130,7 +138,7 @@
     {
       "id": "tea_berry",
       "name": "Ягодный Чай",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
       "description": "Восстанавливает 15% SP и дает +1 Выдержку.",
       "scripts": {
@@ -139,7 +147,6 @@
             "script_id": "restore_resource",
             "params": {
               "type": "sp",
-              "base": 10,
               "stat": "max_sp",
               "factor": 0.15
             }
@@ -149,7 +156,8 @@
             "params": {
               "status": "endurance",
               "base": 1,
-              "duration": 3
+              "duration": 3,
+              "target": "self"
             }
           }
         ]
@@ -158,7 +166,7 @@
     {
       "id": "tea_red",
       "name": "Красный чай",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
       "description": "Восстанавливает 15% SP и дает +1 Силу.",
       "scripts": {
@@ -167,7 +175,6 @@
             "script_id": "restore_resource",
             "params": {
               "type": "sp",
-              "base": 10,
               "stat": "max_sp",
               "factor": 0.15
             }
@@ -177,7 +184,8 @@
             "params": {
               "status": "strength",
               "base": 1,
-              "duration": 3
+              "duration": 3,
+              "target": "self"
             }
           }
         ]
@@ -186,9 +194,9 @@
     {
       "id": "tea_coffee",
       "name": "Кофе-чай",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
-      "description": "Восстанавливает SP... имеет 1% шанс убить вас.",
+      "description": "Восстанавливает 30 SP... имеет 1% шанс убить вас.",
       "scripts": {
         "on_use": [
           {

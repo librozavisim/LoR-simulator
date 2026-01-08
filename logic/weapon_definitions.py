@@ -84,4 +84,12 @@ WEAPON_REGISTRY = {
         stats={"power_attack": 3},
         weapon_type="medium"
     ),
+    "lilith_scythe": Weapon(
+        id="lilith_scythe",
+        name="Коса 'Sinfoil'",
+        rank=8,
+        description="Легкое. Фирменное оружие Лилит. Длинное лезвие позволяет контролировать дистанцию.",
+        stats={},
+        weapon_type="medium"
+    ),
 }

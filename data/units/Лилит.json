@@ -30,9 +30,9 @@
         "smoke_silhouette"
     ],
     "base_stats": {
-        "current_hp": 18,
+        "current_hp": 130,
         "current_sp": 77,
-        "current_stagger": 14
+        "current_stagger": 65
     },
     "defense": {
         "armor_name": "None",
@@ -47,12 +47,9 @@
             "pierce": 1.0,
             "blunt": 1.0
         },
-        "weapon_id": "none"
+        "weapon_id": "lilith_scythe"
     },
-    "card_cooldowns": {
-        "smoke_silhouette": 1,
-        "inhale_exhale": 1
-    },
+    "card_cooldowns": {},
     "attributes": {
         "strength": 18,
         "endurance": 15,
@@ -92,7 +89,8 @@
         "calm_mind",
         "frenzy",
         "hiding_in_smoke",
-        "smoke_universality"
+        "smoke_universality",
+        "aerial_foot"
     ],
     "augmentations": [
         "aug_blessing_of_wind",
@@ -129,11 +127,9 @@
         }
     },
     "cooldowns": {
-        "berserker_rage": 4
-    },
-    "active_buffs": {
         "berserker_rage": 2
     },
+    "active_buffs": {},
     "resources": {},
     "biography": "",
     "money_log": [

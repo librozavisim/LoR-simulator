@@ -3,7 +3,7 @@
     {
       "id": "cheese_parmesan",
       "name": "Пармезан",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
       "description": "Восстанавливает 20% SP. Накладывает 2 Сытости.",
       "scripts": {
@@ -33,7 +33,7 @@
     {
       "id": "cheese_edam",
       "name": "Эдам",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
       "description": "Получает на 25% меньше урона по SP (макс 50%). Накладывает 4 Сытости.",
       "scripts": {
@@ -62,7 +62,7 @@
     {
       "id": "cheese_cheddar",
       "name": "Чеддер",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
       "description": "Восстанавливает 20% HP. Накладывает 2 Сытости.",
       "scripts": {
@@ -92,7 +92,7 @@
     {
       "id": "cheese_gouda",
       "name": "Гауда",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
       "description": "Снимает 30 Яда (Poison). Накладывает 3 Сытости.",
       "scripts": {
@@ -120,7 +120,7 @@
     {
       "id": "cheese_maasdam",
       "name": "Маасдам",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
       "description": "Повышает бросок характеристик (Сила+1, Стойкость+1). Накладывает 3 Сытости.",
       "scripts": {
@@ -158,7 +158,7 @@
     {
       "id": "cheese_emmental",
       "name": "Эмменталь",
-      "tier": 1,
+      "tier": 5,
       "type": "Item",
       "description": "Восстанавливает 5 HP и дает 2 Защиты. Накладывает 3 Сытости.",
       "scripts": {

@@ -291,10 +291,26 @@ def render_inventory(unit, unit_key):
     if not inventory_cards: return
 
     with st.expander("🎒 Inventory (Consumables)", expanded=False):
+        # Разбиваем на колонки, чтобы было компактнее, если предметов много
         for card in inventory_cards:
             btn_key = f"use_item_{unit_key}_{card.id}"
             desc = card.description if card.description else "No description"
-            if st.button(f"💊 {card.name}", key=btn_key, help=desc, use_container_width=True):
-                from ui.simulator.simulator_logic import use_item_action
-                use_item_action(unit, card)
-                st.rerun()
+
+            # Получаем текущий КД
+            cd_left = unit.card_cooldowns.get(card.id, 0)
+
+            if cd_left > 0:
+                # Кнопка отключена, показываем таймер
+                st.button(
+                    f"⏳ {card.name} ({cd_left})",
+                    key=btn_key,
+                    disabled=True,
+                    use_container_width=True,
+                    help=f"{desc}\n\n(Перезарядка: {cd_left} х.)"
+                )
+            else:
+                # Кнопка активна
+                if st.button(f"💊 {card.name}", key=btn_key, help=desc, use_container_width=True):
+                    from ui.simulator.simulator_logic import use_item_action
+                    use_item_action(unit, card)
+                    st.rerun()
