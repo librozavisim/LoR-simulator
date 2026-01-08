@@ -127,8 +127,14 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_def, inte
                 if candidate.dtype in [DiceType.BLOCK, DiceType.EVADE]:
                     def_die = candidate
 
+            # === [NEW] ПРОВЕРКА КОШАЧЬИХ РЕФЛЕКСОВ ===
         if destroy_def and def_die:
-            def_die = None
+            # Если это Уклонение и есть талант -> Не разрушаем
+            if def_die.dtype == DiceType.EVADE and "cat_reflexes" in target.talents:
+                pass  # Кубик выживает
+            else:
+                def_die = None
+
         ctx_atk = engine._create_roll_context(source, target, die, is_disadvantage=adv_atk)
         # Бросок атаки
 

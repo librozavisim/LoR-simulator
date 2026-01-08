@@ -1,4 +1,7 @@
+import random
+
 from core.enums import DiceType
+from core.tree_data import SKILL_TREE
 from logic.character_changing.passives.base_passive import BasePassive
 from logic.context import RollContext
 
@@ -62,17 +65,74 @@ class TalentFormidablePerson(BasePassive):
         # Даем прямой бонус к навыку
         return {"eloquence": 5}
 
+
 # ==========================================
 # 9.3 А: Разящий Клинок
 # ==========================================
 class TalentSmashingBlade(BasePassive):
     id = "smashing_blade"
-    name = "Разящий Клинок (А) WIP"
+    name = "Разящий Клинок (А)"
     description = (
-        "9.3 А: Внезапные атаки наносят x2.0 урона (вместо x1.5).\n"
-        "Атака из засады (карта): Урон удвоен, накладывает Xd6 Кровотечения (X = кол-во талантов ветки)."
+        "9.3 А: Внезапные атаки наносят x1.5 урона.\n"
+        "Условия: Невидимость, Цель имеет >90% HP.\n"
+        "(Если взят 9.5 А 'Шаг в тень', порог HP снижается до 75%, урон 2х).\n"
+        "При Внезапной атаке: накладывает Xd6 Кровотечения (X = таланты ветки)."
     )
     is_active_ability = False
+
+    def on_roll(self, ctx):
+        unit = ctx.source
+        target = ctx.target
+        if not target: return
+
+        # === 1. ОПРЕДЕЛЕНИЕ "ВНЕЗАПНОСТИ" ===
+        is_sudden = False
+        reasons = []
+
+        # А. Невидимость
+        if unit.get_status("invisibility") > 0:
+            is_sudden = True
+            reasons.append("Invisible")
+
+        # В. Цель полна сил (>90% или >75% с талантом 9.5)
+        # Проверяем наличие улучшения (9.5 А)
+        threshold = 0.90
+        multiplier = 1.5
+        if "step_into_shadow" in unit.talents:
+            threshold = 0.75
+            multiplier = 2
+
+        if target.max_hp > 0:
+            hp_pct = target.current_hp / target.max_hp
+            if hp_pct >= threshold:
+                is_sudden = True
+                reasons.append(f">{int(threshold * 100)}% HP")
+
+        # === 2. ПРИМЕНЕНИЕ ЭФФЕКТОВ ===
+        if is_sudden:
+            # Множитель x2.0
+            ctx.damage_multiplier = max(ctx.damage_multiplier, multiplier)
+
+            # Наложение Кровотечения (Xd6)
+            branch_9_nodes = SKILL_TREE.get("Ветка 9: Тень (А) / Кровь (Б)", [])
+            x_count = 0
+            for node in branch_9_nodes:
+                tid = node.get("id")
+                if tid and (tid in unit.talents or tid in unit.passives):
+                    x_count += 1
+
+            x_count = max(1, x_count)
+
+            bleed_stack = 0
+            rolls = []
+            for _ in range(x_count):
+                r = random.randint(1, 6)
+                bleed_stack += r
+                rolls.append(str(r))
+
+            target.add_status("bleed", bleed_stack, duration=3)
+
+            ctx.log.append(f"🗡️ **Sudden Attack**: x{multiplier} Dmg & {bleed_stack} Bleed ({', '.join(reasons)})")
 
 # ==========================================
 # 9.3 Б Резня (Slaughter)
@@ -114,7 +174,7 @@ class TalentSlaughter(BasePassive):
 # ==========================================
 class TalentTrapmaster(BasePassive):
     id = "trapmaster WIP"
-    name = "Trapmaster"
+    name = "Trapmaster WIP"
     description = "9.3 Опц: Рецепты ловушек. Спас-бросок врага (Int) против вашего (Engineering)."
     is_active_ability = False
 
@@ -127,7 +187,6 @@ class TalentFastAndSilent(BasePassive):
     name = "Быстрый и Тихий (А)"
     description = (
         "9.4 А: Бесшумные шаги (радиус слышимости 0-4м).\n"
-        "Сложность вашего обнаружения +5.\n"
         "Пассивно: +5 к Скорости."
     )
     is_active_ability = False
@@ -159,10 +218,25 @@ class TalentAggressiveParry(BasePassive):
 # 9.5 А: Шаг в тень
 # ==========================================
 class TalentStepIntoShadow(BasePassive):
-    id = "step_into_shadow WIP"
+    id = "step_into_shadow"
     name = "Шаг в тень (А)"
-    description = "9.5 А: Сливается с тенью. При низком освещении -> Статус 'Незаметность'."
-    is_active_ability = False
+    description = (
+        "9.5 А: Активно: Уйти в тень (Невидимость) на 3 раунда. КД: 7 раундов.\n"
+        "Пассивно: Снижает порог HP для 'Разящего Клинка' до 75%, урон внезапной атаки x2."
+    )
+    is_active_ability = True
+    cooldown = 7
+
+    def activate(self, unit, log_func, **kwargs):
+        if unit.cooldowns.get(self.id, 0) > 0:
+            return False
+
+        unit.add_status("invisibility", 1, duration=3)
+        unit.cooldowns[self.id] = self.cooldown
+
+        if log_func:
+            log_func(f"👻 **{self.name}**: Растворился в тени (Невидимость на 3 х.)")
+        return True
 
 
 # ==========================================
@@ -210,10 +284,28 @@ class TalentCatReflexes(BasePassive):
     description = (
         "9.6 А: Кость уклонения +2.\n"
         "Нельзя уничтожить кость уклонения.\n"
-        "Если уклонение пробито -> Можно подставить следующую кость.\n"
-        "После успешного уклонения -> Атакующие кости +2 силы (1 раз)."
+        "После успешного уклонения -> Атакующие кости +2 силы (МАКСИМУМ 1 раз за раунд)."
     )
     is_active_ability = False
+
+    def on_round_start(self, unit, log_func, **kwargs):
+        # Сбрасываем флаг срабатывания в начале каждого раунда
+        unit.memory["cat_reflexes_triggered"] = False
+
+    def on_roll(self, ctx):
+        # +2 к Уклонению
+        if ctx.dice.dtype == DiceType.EVADE:
+            ctx.modify_power(2, "Cat Reflexes")
+
+    def on_clash_win(self, ctx):
+        # Если победили Уклонением и еще не получали бонус
+        if ctx.dice.dtype == DiceType.EVADE:
+            if not ctx.source.memory.get("cat_reflexes_triggered"):
+                ctx.source.memory["cat_reflexes_triggered"] = True
+
+                # Даем +2 Силы (Strength) до конца раунда
+                ctx.source.add_status("strength", 2, duration=3)
+                ctx.log.append("🐱 **Кошачьи рефлексы**: Успешное уклонение! +2 Силы.")
 
 
 # ==========================================
@@ -240,13 +332,16 @@ class TalentEyeForDanger(BasePassive):
     id = "eye_for_danger"
     name = "Глаз на опасность (А)"
     description = (
-        "9.7 А: Интеллект +3.\n"
-        "Бросок против удара в спину / ловушки +10."
+        "9.7 А: Вы нутром чуете ловушки и знаете, как они устроены.\n"
+        "Акробатика +5, Инженерия +10."
     )
     is_active_ability = False
 
     def on_calculate_stats(self, unit) -> dict:
-        return {"intellect": 3}
+        return {
+            "acrobatics": 5,
+            "engineering": 10
+        }
 
 
 # ==========================================
@@ -279,10 +374,29 @@ class TalentCoveringTracks(BasePassive):
     id = "covering_tracks"
     name = "Заметая следы (А)"
     description = (
-        "9.8 А: Полное скрытие следов (Авто-успех Ловкости).\n"
-        "Не оставляете следов при ходьбе, создание фальшивых следов."
+        "9.8 А: Ловкость +7.\n"
+        "Начало боя: Вы получаете Невидимость на 3 раунда.\n"
+        "Успешное уклонение: Враг путается в фальшивых следах (получает 1 Bind)."
     )
     is_active_ability = False
+
+    def on_calculate_stats(self, unit) -> dict:
+        # Аппаем проверку ловкости через стат
+        return {"agility": 7}
+
+    def on_combat_start(self, unit, log_func, **kwargs):
+        # Даем невидимость сразу, чтобы активировать синергию с 9.3 (Разящий Клинок)
+        unit.add_status("invisibility", 1, duration=3)
+        if log_func:
+            log_func(f"👣 **{self.name}**: Следы скрыты (Невидимость на 2 х.)")
+
+    def on_clash_win(self, ctx):
+        # Механика "Фальшивый след"
+        if ctx.dice.dtype == DiceType.EVADE:
+            target = ctx.target
+            if target:
+                target.add_status("bind", 1, duration=3)
+                ctx.log.append(f"👣 **Фальшивый след**: Враг замедлен (Bind 1).")
 
 
 # ==========================================
@@ -315,9 +429,41 @@ class TalentKnifeInBack(BasePassive):
     id = "knife_in_back"
     name = "Нож в спину (А)"
     description = (
-        "9.9 А: После Внезапной атаки -> Враг получает Уязвимость (+50% урона от вас) на 2 раунда."
+        "9.9 А: После Внезапной атаки -> Враг получает 5 Хрупкости (Fragile) и 5 Кровотечения.\n"
+        "(Хрупкость увеличивает входящий урон на 5 при каждом ударе)."
     )
     is_active_ability = False
+
+    def on_hit(self, ctx):
+        unit = ctx.source
+        target = ctx.target
+        if not target: return
+
+        # === ЛОГИКА ОПРЕДЕЛЕНИЯ ВНЕЗАПНОСТИ (копия из 9.3) ===
+        is_sudden = False
+
+        # 1. Невидимость
+        if unit.get_status("invisibility") > 0:
+            is_sudden = True
+
+        # 2. Спец. карта
+        elif unit.current_card and unit.current_card.id == "shadow_ambush_card":
+            is_sudden = True
+
+        # 3. HP Порог (с учетом таланта 9.5)
+        elif target.max_hp > 0:
+            threshold = 0.75 if "step_into_shadow" in unit.talents else 0.90
+            hp_pct = target.current_hp / target.max_hp
+            if hp_pct >= threshold:
+                is_sudden = True
+
+        # === ЭФФЕКТ ===
+        if is_sudden:
+            # Накладываем 5 Хрупкости и 5 Кровотечения
+            target.add_status("fragile", 5, duration=2)  # На этот и след. раунд
+            target.add_status("bleed", 5, duration=3)
+
+            ctx.log.append(f"🔪 **Нож в спину**: Враг открылся! (+5 Fragile, +5 Bleed)")
 
 
 # ==========================================

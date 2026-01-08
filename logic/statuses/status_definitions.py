@@ -1,7 +1,7 @@
 # Импортируем классы из новых модулей
 from logic.statuses.common import (
     StrengthStatus, EnduranceStatus, BleedStatus, ParalysisStatus,
-    ProtectionStatus, FragileStatus, VulnerabilityStatus, BarrierStatus
+    ProtectionStatus, FragileStatus, VulnerabilityStatus, BarrierStatus, BindStatus
 )
 from logic.statuses.custom import (
     SelfControlStatus, SmokeStatus, RedLycorisStatus, SinisterAuraStatus,
@@ -48,4 +48,6 @@ STATUS_REGISTRY = {
     "regen_ganache": RegenGanacheStatus(),
     "revenge_dmg_up": RevengeDmgUpStatus(),
     "taunt": TauntStatus(),
+
+    "bind": BindStatus(),
 }

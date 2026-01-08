@@ -30,8 +30,8 @@
         "not_the_limit_img"
     ],
     "base_stats": {
-        "current_hp": 172,
-        "current_sp": 195,
+        "current_hp": 200,
+        "current_sp": 202,
         "current_stagger": 87
     },
     "defense": {
@@ -50,12 +50,9 @@
         "weapon_id": "cleaver_7"
     },
     "card_cooldowns": {
-        "shadow_extermination": 1,
-        "shadow_block2": 1,
-        "shadow_ziggurat": 1,
-        "shadow_harvest": 2,
-        "shadow_series_punches": 2,
-        "shadow_fortune_strike": 2
+        "warp_img": 1,
+        "series_normal_strikes_img": 1,
+        "not_the_limit_img": 1
     },
     "attributes": {
         "strength": 5,
@@ -91,10 +88,14 @@
     "talents": [
         "keep_it_together",
         "center_of_balance",
-        "revenge",
-        "formidable_person",
-        "slaughter",
-        "aggressive_parry"
+        "athleticism_shadow",
+        "not_great_attention",
+        "smashing_blade",
+        "fast_and_silent",
+        "step_into_shadow",
+        "cat_reflexes",
+        "eye_for_danger",
+        "covering_tracks"
     ],
     "augmentations": [],
     "level_rolls": {

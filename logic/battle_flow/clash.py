@@ -28,6 +28,8 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
     # === [NEW] ПРОВЕРКА ГЕДОНИЗМА (Спасение от поломки) ===
     # Если кубик должен быть уничтожен, но есть Гедонизм -> Отменяем уничтожение, даем Помеху
 
+
+
     if destroy_d and "hedonism" in attacker.passives:
         destroy_d = False
         adv_a = True
@@ -60,7 +62,16 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
         die_a = queue_a[idx_a]
         die_d = queue_d[idx_d]
 
-        # Разрушение кубиков скоростью
+        if destroy_a and die_a and die_a.dtype == DiceType.EVADE and "cat_reflexes" in attacker.talents:
+            destroy_a = False
+            # Можно добавить adv_d = True, если по аналогии с Гедонизмом это дает помеху,
+            # но в описании таланта об этом не сказано, так что просто спасаем кубик.
+
+            # Проверка защиты от разрушения для Защитника
+        if destroy_d and die_d and die_d.dtype == DiceType.EVADE and "cat_reflexes" in defender.talents:
+            destroy_d = False
+
+            # Разрушение кубиков скоростью
         if destroy_a: die_a = None
         if destroy_d: die_d = None
 

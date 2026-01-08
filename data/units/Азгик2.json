@@ -45,7 +45,6 @@
         "candy_praline",
         "candy_marzipan",
         "candy_souffle",
-        "candy_nougat",
         "candy_grillage",
         "candy_ganache",
         "candy_fudge",
@@ -53,7 +52,7 @@
     ],
     "base_stats": {
         "current_hp": 1,
-        "current_sp": 1,
+        "current_sp": 9,
         "current_stagger": 1
     },
     "defense": {

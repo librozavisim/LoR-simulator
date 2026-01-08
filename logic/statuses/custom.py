@@ -142,12 +142,17 @@ class EnrageTrackerStatus(StatusEffect):
 class InvisibilityStatus(StatusEffect):
     id = "invisibility"
 
-    def on_roll(self, ctx: RollContext, stack: int):
-        # Если Азгик атакует - невидимость спадает
-        # Проверяем, что это не защитный кубик
+    def on_hit(self, ctx: RollContext, stack: int):
+        # Раскрываемся ПОСЛЕ попадания (чтобы бонусы за невидимость успели сработать)
         if ctx.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
             ctx.source.remove_status("invisibility", 999)
-            ctx.log.append("👻 **Невидимость**: Раскрыт после атаки!")
+            ctx.log.append("👻 **Невидимость**: Раскрыт после удара!")
+
+    def on_clash_lose(self, ctx: RollContext, stack: int):
+        # Также раскрываемся, если проиграли столкновение атакующим кубиком
+        if ctx.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
+            ctx.source.remove_status("invisibility", 999)
+            ctx.log.append("👻 **Невидимость**: Раскрыт (перехвачен)!")
 
     def on_turn_end(self, unit, stack) -> list[str]:
         return ["👻 Невидимость рассеялась."]

@@ -89,7 +89,7 @@ class TalentConfete(BasePassive):
 
     def on_combat_start(self, unit, log_func, **kwargs):
         candy_ids = [
-            "candy_praline", "candy_marzipan", "candy_souffle", "candy_nougat",
+            "candy_praline", "candy_marzipan", "candy_souffle",
             "candy_grillage", "candy_ganache", "candy_fudge", "candy_waffles"
         ]
 

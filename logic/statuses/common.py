@@ -12,6 +12,9 @@ class StrengthStatus(StatusEffect):
         if ctx.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
             ctx.modify_power(stack, "Strength")
 
+class BindStatus(StatusEffect):
+    id = "bind"
+    pass
 
 class EnduranceStatus(StatusEffect):
     id = "endurance"

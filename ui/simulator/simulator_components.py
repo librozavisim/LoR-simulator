@@ -1,4 +1,5 @@
 import streamlit as st
+from collections import Counter
 from core.library import Library
 from logic.character_changing.passives import PASSIVE_REGISTRY
 from logic.character_changing.talents import TALENT_REGISTRY
@@ -50,25 +51,51 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
     lock_icon = "🔒 " if slot.get('locked') else ""
     label = f"{lock_icon}S{slot_idx + 1} ({spd_label}) | {ui_stat['icon']} {ui_stat['text']} | {card_name_header}"
 
-    # === ФОРМИРОВАНИЕ СПИСКА КАРТ ===
-    available_cards = []
-    if not slot.get('locked'):
-        deck_ids = getattr(unit, 'deck', [])
-        raw_cards = [Library.get_card(cid) for cid in deck_ids] if deck_ids else Library.get_all_cards()
+    # === [UPD] ПОДСЧЕТ ДОСТУПНЫХ КАРТ ===
+    deck_ids = getattr(unit, 'deck', [])
+    deck_counts = Counter(deck_ids)
 
-        for c in raw_cards:
-            if str(c.card_type).lower() == "item": continue
-            cd_left = unit.card_cooldowns.get(c.id, 0)
-            if cd_left > 0:
-                pass
-            else:
-                available_cards.append(c)
+    available_cards = []
+
+    if not slot.get('locked'):
+        if deck_ids:
+            # 1. Считаем, какие карты заняты в ДРУГИХ слотах
+            used_in_others = Counter()
+            for i, s in enumerate(unit.active_slots):
+                if i == slot_idx: continue  # Пропускаем текущий слот
+                if s.get('card'):
+                    used_in_others[s['card'].id] += 1
+
+            # 2. Формируем список доступных
+            unique_ids = sorted(list(set(deck_ids)))
+
+            for cid in unique_ids:
+                # Проверка КД
+                if unit.card_cooldowns.get(cid, 0) > 0: continue
+
+                # Проверка наличия свободных копий
+                total_owned = deck_counts[cid]
+                currently_used_elsewhere = used_in_others[cid]
+
+                # Если (Всего) > (Занято в других), значит одну можно взять сюда
+                if total_owned > currently_used_elsewhere:
+                    c_obj = Library.get_card(cid)
+                    if c_obj and str(c_obj.card_type).lower() != "item":
+                        available_cards.append(c_obj)
+
+        else:
+            # Режим отладки (нет колоды): показываем всю библиотеку без ограничений
+            raw_cards = Library.get_all_cards()
+            for c in raw_cards:
+                if str(c.card_type).lower() != "item":
+                    if unit.card_cooldowns.get(c.id, 0) <= 0:
+                        available_cards.append(c)
 
     # --- 3. ИНТЕРФЕЙС ВЫБОРА (EXPANDER) ---
     with st.expander(label, expanded=False):
         c_tgt, c_sel = st.columns([1, 1])
 
-        # === ЛОГИКА ВЫБОРА ЦЕЛИ ===
+        # === ЛОГИКА ВЫБОРА ЦЕЛИ (Без изменений) ===
         target_options = ["None"]
         is_friendly = False
         if selected_card and "friendly" in selected_card.flags:
@@ -125,9 +152,13 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
         else:
             display_cards = [None] + available_cards
             c_idx = 0
+
+            # Если текущая карта все еще в списке доступных (или была выбрана ранее), ставим её как default
             if selected_card:
                 for idx, c in enumerate(display_cards):
-                    if c and (c.id == selected_card.id or c.name == selected_card.name): c_idx = idx; break
+                    if c and c.id == selected_card.id:
+                        c_idx = idx
+                        break
 
             def format_card_option(x):
                 if not x: return "⛔ Пусто"
@@ -135,10 +166,19 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
                 ctype = str(x.card_type).lower()
                 for k, v in CARD_TYPE_ICONS.items():
                     if k in ctype: emoji = v; break
+
+                # Показываем (xN), если есть колода
+                if deck_ids:
+                    count = deck_counts.get(x.id, 0)
+                    return f"{emoji} [{x.tier}] {x.name} (x{count})"
+
                 return f"{emoji} [{x.tier}] {x.name}"
 
+            # Виджет выбора
             new_card = c_sel.selectbox("Page", display_cards, format_func=format_card_option, index=c_idx,
                                        key=f"{key_prefix}_{unit.name}_card_{slot_idx}", label_visibility="collapsed")
+
+            # Применяем выбор
             slot['card'] = new_card
 
         # === СТРОКА 2: Опции (Чекбоксы с Картинками) ===
@@ -263,9 +303,11 @@ def render_active_abilities(unit, unit_key):
                 btn_label = "Activate";
                 disabled = False
                 if active_dur > 0:
-                    btn_label = f"Active ({active_dur})"; disabled = True
+                    btn_label = f"Active ({active_dur})";
+                    disabled = True
                 elif cd > 0:
-                    btn_label = f"Cooldown ({cd})"; disabled = True
+                    btn_label = f"Cooldown ({cd})";
+                    disabled = True
 
                 if st.button(f"✨ {btn_label}", key=f"act_{unit_key}_{pid}", disabled=disabled,
                              use_container_width=True):
