@@ -19,7 +19,15 @@
         "imp_stg": 0
     },
     "deck": [
-        "имя11_f7dd"
+        "unbridled_cruelty",
+        "unbridled_cruelty",
+        "unbridled_cruelty",
+        "thrill_of_battle",
+        "thrill_of_battle",
+        "thrill_of_battle",
+        "furious_assault",
+        "furious_assault",
+        "furious_assault"
     ],
     "base_stats": {
         "current_hp": 65,
@@ -41,7 +49,10 @@
         },
         "weapon_id": "none"
     },
-    "card_cooldowns": {},
+    "card_cooldowns": {
+        "thrill_of_battle": 1,
+        "furious_assault": 2
+    },
     "attributes": {
         "strength": 30,
         "endurance": 10,

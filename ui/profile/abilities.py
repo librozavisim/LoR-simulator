@@ -1,7 +1,9 @@
 import streamlit as st
+from collections import Counter
 from core.library import Library
 from logic.character_changing.passives import PASSIVE_REGISTRY
 from logic.character_changing.talents import TALENT_REGISTRY
+
 
 def render_abilities(unit, u_key):
     # === DECK ===
@@ -10,23 +12,70 @@ def render_abilities(unit, u_key):
     card_map = {c.id: c for c in all_library_cards}
     all_card_ids = [c.id for c in all_library_cards]
 
-    valid_deck = [cid for cid in unit.deck if cid in card_map]
+    # 1. Считаем текущее количество каждой карты в колоде юнита
+    current_counts = Counter(unit.deck)
 
-    sel_deck = st.multiselect(
-        "Состав колоды:",
+    # Уникальные ID, которые уже есть в колоде (для дефолтного выбора в мультиселекте)
+    # Фильтруем, чтобы не упало, если карты удалили из базы
+    valid_unique_ids = [cid for cid in current_counts.keys() if cid in card_map]
+
+    # 2. Мультиселект для выбора ТИПОВ карт (без дублей)
+    selected_unique_ids = st.multiselect(
+        "Выберите карты для колоды:",
         options=all_card_ids,
-        default=valid_deck,
+        default=valid_unique_ids,
         format_func=lambda x: f"{card_map[x].name} [{card_map[x].tier}]" if x in card_map else x,
         key=f"deck_sel_{u_key}"
     )
-    if sel_deck != unit.deck:
-        unit.deck = sel_deck
 
-    st.caption(f"Всего карт: {len(unit.deck)}")
+    # 3. Настройка КОЛИЧЕСТВА копий (x1, x2, x3)
+    new_deck_list = []
+
+    if selected_unique_ids:
+        st.caption("Настройка количества копий (Макс 3):")
+
+        # Разбиваем на колонки для компактности
+        cols = st.columns(3)
+
+        for idx, cid in enumerate(selected_unique_ids):
+            card_obj = card_map.get(cid)
+            if not card_obj: continue
+
+            col = cols[idx % 3]
+
+            with col:
+                # Получаем текущее кол-во или ставим 1 по умолчанию
+                default_qty = current_counts[cid] if current_counts[cid] > 0 else 1
+
+                qty = st.number_input(
+                    f"{card_obj.name}",
+                    min_value=1,
+                    max_value=3,  # Ограничение как в LoR
+                    value=default_qty,
+                    key=f"qty_{u_key}_{cid}",
+                    label_visibility="visible"
+                )
+
+                # Добавляем в итоговый список нужное количество раз
+                new_deck_list.extend([cid] * qty)
+
+    # 4. Сохранение изменений
+    # Проверяем, изменился ли состав колоды
+    # Сортируем списки для корректного сравнения (порядок не важен для движка, важен состав)
+    if sorted(unit.deck) != sorted(new_deck_list):
+        unit.deck = new_deck_list
+        # Автосохранение происходит при нажатии кнопок или смене фокуса,
+        # но для надежности можно вызвать пересчет
+        # unit.recalculate_stats()
+
+    # Визуализация итогового размера
+    count_color = "green" if len(unit.deck) == 9 else "red"
+    st.markdown(f"**Итого карт: :{count_color}[{len(unit.deck)}]** (Рекомендуется 9)")
 
     st.markdown("---")
 
-    # === ABILITIES ===
+    # === ABILITIES (Talents & Passives) ===
+    # (Оставляем этот блок без изменений, как был у вас)
     st.subheader("🧬 Таланты и Пассивки")
 
     c_tal, c_desc = st.columns([2, 1])
@@ -38,46 +87,37 @@ def render_abilities(unit, u_key):
 
     with c_tal:
         # --- TALENTS ---
-        # 1. Считаем лимит по правилам игры
         bonus_slots = int(unit.modifiers["talent_slots"]["flat"])
         max_talents = (unit.level // 3) + bonus_slots
         if max_talents < 0: max_talents = 0
 
         current_talents = [t for t in unit.talents if t in TALENT_REGISTRY]
-
-        # 2. Получаем текущее состояние виджета (чтобы не крашилось при перерисовке)
         talents_key = f"mt_{u_key}"
         session_selection = st.session_state.get(talents_key, [])
-
-        # 3. Рассчитываем БЕЗОПАСНЫЙ лимит для виджета
-        # Он должен быть не меньше, чем количество уже выбранных элементов,
-        # иначе Streamlit выбросит ошибку StreamlitSelectionCountExceedsMaxError.
         safe_limit = max(max_talents, len(current_talents), len(session_selection))
 
         st.markdown(f"**Таланты ({len(current_talents)} / {max_talents})**")
 
-        # Визуальное предупреждение о перелимите
         if len(current_talents) > max_talents:
-            st.warning(f"⚠️ Лимит превышен! Доступно: {max_talents}, Выбрано: {len(current_talents)}")
+            st.warning(f"⚠️ Лимит превышен! Доступно: {max_talents}")
 
         new_talents = st.multiselect(
             "Список талантов",
             options=sorted(list(TALENT_REGISTRY.keys())),
             default=current_talents,
             format_func=fmt_name,
-            max_selections=safe_limit,  # Используем мягкий лимит
+            max_selections=safe_limit,
             label_visibility="collapsed",
             key=talents_key
         )
 
         if new_talents != current_talents:
-            # Сохраняем логику, оставляя неизвестные (кастомные/удаленные) таланты
             old_unknowns = [t for t in unit.talents if t not in TALENT_REGISTRY]
             unit.talents = new_talents + old_unknowns
             unit.recalculate_stats()
             st.rerun()
 
-        # Passives
+        # --- PASSIVES ---
         st.markdown("**Пассивки**")
         new_passives = st.multiselect(
             "Список пассивок",

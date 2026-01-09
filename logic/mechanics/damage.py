@@ -11,6 +11,7 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
     """Наносит урон (HP или Stagger), учитывая резисты и барьеры."""
     if amount <= 0: return
 
+    # === ХУК ТАЛАНТОВ (Выживший и т.д.) ===
     if hasattr(target, "talents"):
         # Импорт реестра нужен, если таланты хранятся как ID строк
         from logic.character_changing.talents import TALENT_REGISTRY
@@ -20,8 +21,13 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
             if talent and hasattr(talent, "modify_incoming_damage"):
                 # Передаем dmg_type (например "bleed" или DiceType.SLASH)
                 amount = talent.modify_incoming_damage(target, amount, dmg_type)
+    # ======================================
 
     final_dmg = 0
+
+    # Определяем атакующего для передачи в события (нужно для таланта "Скала")
+    # [FIX] Определяем здесь, чтобы переменная была доступна везде
+    source_unit = source_ctx.source if source_ctx else None
 
     # Определяем тип атаки (Slash/Pierce/Blunt)
     dtype_name = "slash"
@@ -37,6 +43,7 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
         # Базовый резист
         res = getattr(target.hp_resists, dtype_name, 1.0)
 
+        # Пробивание резистов (Адаптация Атакующего - Зафиэль)
         if source_ctx and source_ctx.source:
             adapt_stack = source_ctx.source.get_status("adaptation")
             if adapt_stack > 0:
@@ -46,9 +53,9 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
                 # Если резист цели меньше нашего минимума -> повышаем его (цель получает больше урона)
                 if res < min_res:
                     res = min_res
-                    source_ctx.log.append(f"🧬 Adaptation Pierce: Res set to {res}")
+                    source_ctx.log.append(f"🧬 Adaptation Pierce: Res {res:.2f}")
 
-        # === [NEW] МЕХАНИКА STAGGER RESIST (3.5 / 3.10) ===
+        # === МЕХАНИКА STAGGER RESIST (3.5 / 3.10) ===
         is_stag_hit = False
         if target.is_staggered():
             # Базовый множитель по умолчанию
@@ -65,7 +72,7 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
             is_stag_hit = True
         # ===================================================
 
-        # === [NEW] МЕХАНИКА АДАПТАЦИИ (3.6) ===
+        # === МЕХАНИКА АДАПТАЦИИ ЗАЩИТНИКА (3.6) ===
         # Проверяем активную адаптацию из памяти юнита
         active_adapt_type = target.memory.get("adaptation_active_type")
         if active_adapt_type and dice_obj and dice_obj.dtype == active_adapt_type:
@@ -76,25 +83,27 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
 
         final_dmg = int(amount * res)
 
-        # Проверка порога
+        # Проверка порога (Threshold)
+        # ВАЖНО: [FIX] Если урон ниже порога, мы НЕ делаем return, а ставим final_dmg = 0.
+        # Это нужно, чтобы сработал trigger_event_func в конце функции (для таланта "Скала").
         if final_dmg < threshold:
             source_ctx.log.append(f"🛡️ Ignored (<{threshold})")
-            return
+            final_dmg = 0
+        else:
+            # Барьер (считаем только если урон прошел порог)
+            barrier = target.get_status("barrier")
+            if barrier > 0:
+                absorbed = min(barrier, final_dmg)
+                target.remove_status("barrier", absorbed)
+                final_dmg -= absorbed
+                source_ctx.log.append(f"🛡️ Barrier -{absorbed}")
 
-        # Барьер
-        barrier = target.get_status("barrier")
-        if barrier > 0:
-            absorbed = min(barrier, final_dmg)
-            target.remove_status("barrier", absorbed)
-            final_dmg -= absorbed
-            source_ctx.log.append(f"🛡️ Barrier -{absorbed}")
+            # Нанесение
+            target.current_hp = max(0, target.current_hp - final_dmg)  # Безопасное вычитание
 
-        # Нанесение
-        target.current_hp = max(0, target.current_hp - final_dmg)  # Безопасное вычитание
-
-        hit_msg = f"💥 **{target.name}**: Hit {final_dmg} HP"
-        if is_stag_hit: hit_msg += " (Stagger Hit!)"
-        source_ctx.log.append(hit_msg)
+            hit_msg = f"💥 **{target.name}**: Hit {final_dmg} HP"
+            if is_stag_hit: hit_msg += " (Stagger Hit!)"
+            source_ctx.log.append(hit_msg)
 
     elif dmg_type == "stagger":
         res = getattr(target.stagger_resists, dtype_name, 1.0)
@@ -110,14 +119,23 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
         source_ctx.log.append(f"😵 **{target.name}**: Stagger -{final_dmg}")
 
     # Триггер получения урона (Сбор статистики для Адаптации и Скалы)
-    if final_dmg > 0 or amount > 0:  # Триггерим даже при 0, если нужно для "Скалы" (но лучше внутри Скалы проверять amount)
-
-        # Передаем сырой урон (amount) и финальный (final_dmg) для талантов типа "Скала"
+    # Триггерим событие всегда, если был ВХОДЯЩИЙ урон (amount > 0), даже если final_dmg стал 0.
+    if amount > 0:
         extra_args = {"raw_amount": amount}
         if dice_obj: extra_args["damage_type"] = dice_obj.dtype
 
         log_wrapper = lambda msg: source_ctx.log.append(msg)
-        trigger_event_func("on_take_damage", target, final_dmg, source=source_ctx, dmg_type=dmg_type, log_func=log_wrapper, **extra_args)
+
+        # Передаем source_unit как 3-й позиционный аргумент (source), чтобы TalentRock его поймал
+        trigger_event_func(
+            "on_take_damage",
+            target,
+            final_dmg,  # amount (может быть 0, если сработал threshold или барьер)
+            source_unit,  # source (Unit объект)
+            log_func=log_wrapper,
+            dmg_type=dmg_type,  # передаем тип в kwargs
+            **extra_args
+        )
 
 
 def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
