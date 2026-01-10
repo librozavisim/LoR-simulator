@@ -67,37 +67,6 @@ class UnitCombatMixin:
                 if not slot.get('source_effect'):
                     slot['source_effect'] = "Lycoris 🩸"
 
-        # 6. ТАЛАНТ: ОБОРОНА (ZAFU) - Тоже карта в слоте
-        # if "defense_zafu" in self.talents:
-        #     zafu_dice_list = []
-        #     zafu_dice_list.append(Dice(5, 7, DiceType.BLOCK, is_counter=False))
-        #
-        #     if "talent_3_5" in self.talents:
-        #         zafu_dice_list.append(Dice(5, 7, DiceType.BLOCK, is_counter=False))
-        #     if "talent_3_8" in self.talents:
-        #         zafu_dice_list.append(Dice(5, 7, DiceType.BLOCK, is_counter=False))
-        #     if "talent_3_10" in self.talents:
-        #         zafu_dice_list.append(Dice(5, 7, DiceType.BLOCK, is_counter=True))
-        #
-        #     card_zafu_block = Card(
-        #         id="zafu_block_card", name="Зафу: Оборона", tier=1, card_type="melee",
-        #         description="Неизменяемая защита.", flags=["unchangeable"],
-        #         dice_list=zafu_dice_list
-        #     )
-        #
-        #     if self.computed_speed_dice:
-        #         d_min, d_max = self.computed_speed_dice[0]
-        #     else:
-        #         d_min, d_max = self.base_speed_min, self.base_speed_max
-        #
-        #     mod = self.get_status("haste") - self.get_status("slow") - self.get_status("bind")
-        #     val_spd = max(1, random.randint(d_min, d_max) + mod)
-        #
-        #     self.active_slots.append({
-        #         'speed': val_spd, 'card': card_zafu_block, 'target_slot': None, 'is_aggro': False,
-        #         'source_effect': 'Defense 🛡️', 'locked': True
-        #     })
-
     def is_staggered(self) -> bool:
         if self.get_status("red_lycoris") > 0:
             return False

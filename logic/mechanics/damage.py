@@ -221,16 +221,27 @@ def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
             if attacker_ctx.dice:
                 dtype = attacker_ctx.dice.dtype.value.lower()
             res_stg = getattr(defender.stagger_resists, dtype, 1.0)
-            stg_dmg = int(final_amt * res_stg)
+
+            # === [FIX START] Получаем защиту для Stagger ===
+            # Считаем защиту так же, как для HP (Protection, Tough Skin и т.д.)
+            # Или берем только damage_take, если Protection не должен работать на Stagger
+
+            # Вариант 1: Полная защита (как у HP)
+            status_def = defender.get_status("protection") - defender.get_status("fragile") - defender.get_status(
+                "vulnerability")
+            skin_def = get_modded_value(0, "damage_take", defender.modifiers)  # Крепкая кожа
+
+            total_def = status_def + skin_def
+
+            # Применяем защиту к базе (не может быть меньше 0)
+            base_stg_dmg = max(0, final_amt - total_def)
+            # === [FIX END] ===
+
+            stg_dmg = int(base_stg_dmg * res_stg)  # Используем base_stg_dmg вместо final_amt
 
             stg_take_pct = defender.modifiers["stagger_take"]["pct"]
             if stg_take_pct != 0:
                 mod_mult = 1.0 + (stg_take_pct / 100.0)
                 stg_dmg = int(stg_dmg * mod_mult)
-
-            if defender.memory.get("adaptation_active_type") and \
-                    attacker_ctx.dice and \
-                    attacker_ctx.dice.dtype == defender.memory.get("adaptation_active_type"):
-                stg_dmg = int(stg_dmg * 0.75)
 
             defender.current_stagger = max(0, defender.current_stagger - stg_dmg)

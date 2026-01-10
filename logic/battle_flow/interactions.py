@@ -26,8 +26,12 @@ def resolve_interaction(engine, winner_ctx, loser_ctx, diff: int):
             engine._apply_damage(winner_ctx, loser_ctx, "hp")
         elif l_is_blk:
             # Атака vs Блок -> Урон снижен на значение блока (damage = diff)
-            damage_amt = diff
-            engine._deal_direct_damage(winner_ctx, loser_ctx.source, damage_amt, "hp")
+            original_val = winner_ctx.final_value
+            winner_ctx.final_value = diff
+
+            engine._apply_damage(winner_ctx, loser_ctx, "hp")
+
+            winner_ctx.final_value = original_val  # Возвращаем как было
         elif l_is_evd:
             # Атака vs Уворот (Провал уворота) -> Полный урон
             engine._apply_damage(winner_ctx, loser_ctx, "hp")

@@ -32,9 +32,9 @@
         "блант_aafe"
     ],
     "base_stats": {
-        "current_hp": 300,
+        "current_hp": 264,
         "current_sp": 102,
-        "current_stagger": 150
+        "current_stagger": 102
     },
     "defense": {
         "armor_name": "Standard Fixer Suit",
@@ -51,13 +51,7 @@
         },
         "weapon_id": "none"
     },
-    "card_cooldowns": {
-        "ближе_к_делу_3166": 1,
-        "знаешь,_ты_мне_нравишься_cbbd": 1,
-        "не_спрашивай_-_делай!_f7bd": 2,
-        "скоро_прибудет_поезд_1338": 2,
-        "остатки_памяти_5609": 2
-    },
+    "card_cooldowns": {},
     "attributes": {
         "strength": 30,
         "endurance": 0,
@@ -83,7 +77,9 @@
         "engineering": 0,
         "programming": 0
     },
-    "passives": [],
+    "passives": [
+        "adaptation"
+    ],
     "talents": [],
     "augmentations": [],
     "level_rolls": {
