@@ -15,6 +15,10 @@ class TalentHidingInSmoke(BasePassive):
     )
     is_active_ability = False
 
+    def on_combat_start(self, unit, log_func, **kwargs):
+        # Ставим флаг: Дым теперь дает защиту, а не уязвимость
+        unit.memory["smoke_is_defensive"] = True
+
 
 # ==========================================
 # 6.2 Универсальность дыма (Smoke Universality)

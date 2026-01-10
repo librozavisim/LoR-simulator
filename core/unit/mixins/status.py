@@ -3,6 +3,7 @@ from typing import Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     pass
 
+
 class UnitStatusMixin:
     def _ensure_status_storage(self):
         if not hasattr(self, "_status_effects"): self._status_effects = {}
@@ -22,31 +23,20 @@ class UnitStatusMixin:
         self._ensure_status_storage()
         if amount <= 0: return False, None
 
-        # 1. Проверка через таланты (on_before_status_add)
-        from logic.character_changing.talents import TALENT_REGISTRY
-        for tid in self.talents:
-            if tid in TALENT_REGISTRY:
-                if hasattr(TALENT_REGISTRY[tid], "on_before_status_add"):
-                    res = TALENT_REGISTRY[tid].on_before_status_add(self, name, amount)
-                    if isinstance(res, tuple):
-                        allowed, msg = res
-                    else:
-                        allowed, msg = res, None
-                    if not allowed:
-                        return False, msg
+        if hasattr(self, "iter_mechanics"):
+            for mech in self.iter_mechanics():
+                if hasattr(mech, "on_before_status_add"):
+                    res = mech.on_before_status_add(self, name, amount)
 
-        # 2. Проверка через пассивки
-        from logic.character_changing.passives import PASSIVE_REGISTRY
-        for pid in self.passives:
-            if pid in PASSIVE_REGISTRY:
-                if hasattr(PASSIVE_REGISTRY[pid], "on_before_status_add"):
-                    res = PASSIVE_REGISTRY[pid].on_before_status_add(self, name, amount)
+                    # Обработка результата (bool или tuple)
                     if isinstance(res, tuple):
                         allowed, msg = res
                     else:
                         allowed, msg = res, None
+
                     if not allowed:
                         return False, msg
+        # =========================================================================
 
         if delay > 0:
             self.delayed_queue.append({
@@ -61,23 +51,18 @@ class UnitStatusMixin:
 
         if name in POOL_STATUSES and self._status_effects[name]:
             # Если статус уже есть, просто увеличиваем количество в первом слоте
-            # Это предотвращает создание [1, 1, 1, 1...] для дыма
             self._status_effects[name][0]["amount"] += amount
-            # Обновляем длительность (берем максимум, для дыма это обычно 99)
+            # Обновляем длительность (берем максимум)
             self._status_effects[name][0]["duration"] = max(self._status_effects[name][0]["duration"], duration)
         else:
-            # Обычное поведение: добавляем новый отдельный стак (нужно для Силы/Стойкости с разной длительностью)
+            # Обычное поведение: добавляем новый отдельный стак
             self._status_effects[name].append({"amount": amount, "duration": duration})
-        # ===================================================
-        # === ХУК: on_status_applied ===
-        if trigger_events:
-            for tid in self.talents:
-                if tid in TALENT_REGISTRY and hasattr(TALENT_REGISTRY[tid], "on_status_applied"):
-                    TALENT_REGISTRY[tid].on_status_applied(self, name, amount, duration=duration)
 
-            for pid in self.passives:
-                if pid in PASSIVE_REGISTRY and hasattr(PASSIVE_REGISTRY[pid], "on_status_applied"):
-                    PASSIVE_REGISTRY[pid].on_status_applied(self, name, amount, duration=duration)
+        # === [ОПТИМИЗАЦИЯ] 2. ХУК: on_status_applied ===
+        if trigger_events and hasattr(self, "trigger_mechanics"):
+            # Вызывает метод on_status_applied у всех активных механик
+            self.trigger_mechanics("on_status_applied", self, name, amount, duration=duration)
+        # ==============================================
 
         return True, None
 

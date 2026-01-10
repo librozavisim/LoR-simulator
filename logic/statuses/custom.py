@@ -33,10 +33,10 @@ class SmokeStatus(StatusEffect):
 
     def get_damage_modifier(self, unit, stack) -> float:
         eff_stack = min(10, stack)
-        if "hiding_in_smoke" in unit.talents:
-            return -(eff_stack * 0.03)
+        if unit.memory.get("smoke_is_defensive"):
+            return -(eff_stack * 0.03)  # Снижение урона (-30% макс)
         else:
-            return eff_stack * 0.05
+            return eff_stack * 0.05  # Увеличение урона (+50% макс)
 
     def on_turn_end(self, unit, stack) -> list[str]:
         msgs = []
@@ -53,6 +53,15 @@ class SmokeStatus(StatusEffect):
 
 class RedLycorisStatus(StatusEffect):
     id = "red_lycoris"
+
+    prevents_stagger = True
+    prevents_death = True
+
+    # 3. Замена логики в roll_speed_dice
+    def modify_active_slot(self, unit, slot):
+        slot['prevent_redirection'] = True
+        if not slot.get('source_effect'):
+            slot['source_effect'] = "Lycoris 🩸"
 
     def on_calculate_stats(self, unit) -> dict:
         return {"initiative": 999, "damage_take": 9999}

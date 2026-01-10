@@ -14,22 +14,8 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
     """
     if amount <= 0: return
 
-    # === ХУК ТАЛАНТОВ ===
-    # === ХУК ТАЛАНТОВ (Модификация входящего числа урона) ===
-    if hasattr(target, "talents"):
-        from logic.character_changing.talents import TALENT_REGISTRY
-        for talent_id in target.talents:
-            talent = TALENT_REGISTRY.get(talent_id)
-            if talent:
-                amount = talent.modify_incoming_damage(target, amount, dmg_type)
-
-    # Также проверяем пассивки (на всякий случай, для единообразия)
-    if hasattr(target, "passives"):
-        from logic.character_changing.passives import PASSIVE_REGISTRY
-        for passive_id in target.passives:
-            passive = PASSIVE_REGISTRY.get(passive_id)
-            if passive:
-                amount = passive.modify_incoming_damage(target, amount, dmg_type)
+    if hasattr(target, "apply_mechanics_filter"):
+        amount = target.apply_mechanics_filter("modify_incoming_damage", amount, damage_type=dmg_type)
 
     final_dmg = 0
     source_unit = source_ctx.source if source_ctx else None
@@ -84,18 +70,9 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
         if target.is_staggered():
             stagger_mult = 2.0
 
-            # Вместо хардкода if "despiteAdversities" in target.talents...
-            # Просим таланты изменить множитель
-            from logic.character_changing.talents import TALENT_REGISTRY
-            for tid in target.talents:
-                if tid in TALENT_REGISTRY:
-                    stagger_mult = TALENT_REGISTRY[tid].modify_stagger_damage_multiplier(target, stagger_mult)
-
-            # Просим пассивки изменить множитель
-            from logic.character_changing.passives import PASSIVE_REGISTRY
-            for pid in target.passives:
-                if pid in PASSIVE_REGISTRY:
-                    stagger_mult = PASSIVE_REGISTRY[pid].modify_stagger_damage_multiplier(target, stagger_mult)
+            if hasattr(target, "apply_mechanics_filter"):
+                # Передаем текущий множитель (2.0) и просим всех изменить его при желании
+                stagger_mult = target.apply_mechanics_filter("modify_stagger_damage_multiplier", stagger_mult)
 
             res *= stagger_mult
             is_stag_hit = True
@@ -172,20 +149,10 @@ def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
         attacker_ctx.log.append(f"🚫 {defender.name} Immune (Lycoris)")
         return
 
-    # Trigger On Hit effects
-    for status_id, stack in list(attacker.statuses.items()):
-        if status_id in STATUS_REGISTRY: STATUS_REGISTRY[status_id].on_hit(attacker_ctx, stack)
-    for pid in attacker.passives:
-        if pid in PASSIVE_REGISTRY: PASSIVE_REGISTRY[pid].on_hit(attacker_ctx)
-    for pid in attacker.talents:
-        if pid in TALENT_REGISTRY: TALENT_REGISTRY[pid].on_hit(attacker_ctx)
-    for aid in attacker.augmentations:
-        if aid in AUGMENTATION_REGISTRY: AUGMENTATION_REGISTRY[aid].on_hit(attacker_ctx)
-
-    if attacker.weapon_id in WEAPON_REGISTRY:
-        wep = WEAPON_REGISTRY[attacker.weapon_id]
-        if wep.passive_id and wep.passive_id in PASSIVE_REGISTRY:
-            PASSIVE_REGISTRY[wep.passive_id].on_hit(attacker_ctx)
+    # === [ОПТИМИЗАЦИЯ] Trigger On Hit effects ===
+    if hasattr(attacker, "trigger_mechanics"):
+        attacker.trigger_mechanics("on_hit", attacker_ctx)
+    # ============================================
 
     if script_runner_func: script_runner_func("on_hit", attacker_ctx)
 

@@ -1,12 +1,8 @@
 import random
 from core.enums import DiceType
-from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
 from logic.context import RollContext
-from logic.statuses.status_manager import STATUS_REGISTRY
-from logic.character_changing.passives import PASSIVE_REGISTRY
-from logic.character_changing.talents import TALENT_REGISTRY
 from logic.mechanics.scripts import process_card_scripts
-# Импортируем функцию для чтения новой структуры модов
+# Импортируем функцию для чтения модов
 from logic.calculations.formulas import get_modded_value
 from logic.weapon_definitions import WEAPON_REGISTRY
 
@@ -23,7 +19,16 @@ def safe_randint(min_val: int, max_val: int) -> int:
 def create_roll_context(source, target, die, is_disadvantage=False) -> RollContext:
     if not die: return None
 
-    # === 1. БАЗОВЫЙ БРОСОК (Advantage / Disadvantage) ===
+    # === [ОПТИМИЗАЦИЯ] 1. Модификация границ кубика ===
+    # Позволяет эффектам менять мин/макс значения ПЕРЕД броском
+    base_min = die.min_val
+    base_max = die.max_val
+
+    if hasattr(source, "apply_mechanics_filter"):
+        base_min = source.apply_mechanics_filter("modify_dice_min", base_min, die=die)
+        base_max = source.apply_mechanics_filter("modify_dice_max", base_max, die=die)
+
+    # === 2. БАЗОВЫЙ БРОСОК (Advantage / Disadvantage) ===
     has_advantage = source.get_status("advantage") > 0
     roll = 0
     base_val = 0
@@ -34,15 +39,15 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
 
     if is_disadvantage and has_advantage:
         # Взаимопоглощение -> Обычный бросок
-        roll = safe_randint(die.min_val, die.max_val)
+        roll = safe_randint(base_min, base_max)
         base_val = roll
         log_prefix = "⚖️ **Advantage + Disadvantage** -> Normal"
         source.remove_status("advantage", 1)
 
     elif is_disadvantage:
         # Помеха (Худший из 2)
-        r1 = safe_randint(die.min_val, die.max_val)
-        r2 = safe_randint(die.min_val, die.max_val)
+        r1 = safe_randint(base_min, base_max)
+        r2 = safe_randint(base_min, base_max)
         roll = min(r1, r2)
         base_val = roll
         log_prefix = f"📉 **Помеха!** ({r1}, {r2})"
@@ -50,8 +55,8 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
 
     elif has_advantage:
         # Преимущество (Лучший из 2)
-        r1 = safe_randint(die.min_val, die.max_val)
-        r2 = safe_randint(die.min_val, die.max_val)
+        r1 = safe_randint(base_min, base_max)
+        r2 = safe_randint(base_min, base_max)
         roll = max(r1, r2)
         base_val = roll
         log_prefix = f"🍀 **Преимущество!** ({r1}, {r2})"
@@ -59,7 +64,7 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
 
     else:
         # Обычный
-        roll = safe_randint(die.min_val, die.max_val)
+        roll = safe_randint(base_min, base_max)
         base_val = roll
 
     # Создаем контекст с base_value
@@ -75,7 +80,7 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
     if log_prefix:
         ctx.log.append(f"{log_prefix} -> Base: {base_val}")
 
-    # === 2. НЕИЗМЕНЯЕМОСТЬ ===
+    # === 3. НЕИЗМЕНЯЕМОСТЬ ===
     if source.current_card and "unchangeable" in source.current_card.flags:
         ctx.log.append("🔒 Unchangeable (Mods ignored)")
         process_card_scripts("on_roll", ctx)
@@ -84,7 +89,7 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
             ctx.log.insert(0, ctx.get_formatted_roll_log())
         return ctx
 
-    # === 3. МОДИФИКАТОРЫ (ОБНОВЛЕНО) ===
+    # === 4. МОДИФИКАТОРЫ (ОБНОВЛЕНО) ===
     mods = source.modifiers
 
     # Атака
@@ -93,7 +98,7 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
         p_atk = get_modded_value(0, "power_attack", mods)
         if p_atk: ctx.modify_power(p_atk, "Сила")
 
-        # === ИСПРАВЛЕНИЕ: БОНУС ОРУЖИЯ ===
+        # === БОНУС ОРУЖИЯ ===
         # Определяем тип текущего оружия
         current_weapon_id = getattr(source, "weapon_id", "none")
         weapon_type = "light"  # По дефолту (кулаки)
@@ -102,21 +107,17 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
             weapon_type = WEAPON_REGISTRY[current_weapon_id].weapon_type
 
         # Карта маппинга типа оружия на ключ модификатора
-        # Эти ключи заполняются в formulas.py -> apply_skill_effects
         type_to_mod = {
-            "light": "power_light",  # Навык Легкого оружия
-            "medium": "power_medium",  # Навык Среднего оружия
-            "heavy": "power_heavy",  # Навык Тяжелого оружия
-            "ranged": "power_ranged"  # Навык Огнестрела
+            "light": "power_light",
+            "medium": "power_medium",
+            "heavy": "power_heavy",
+            "ranged": "power_ranged"
         }
 
         target_mod_key = type_to_mod.get(weapon_type, "power_light")
-
-        # Берем значение только ОДНОГО нужного навыка
         w_bonus = get_modded_value(0, target_mod_key, mods)
 
         if w_bonus != 0:
-            # Красивое название для лога
             ru_names = {
                 "light": "Легкое ор.",
                 "medium": "Среднее ор.",
@@ -125,7 +126,6 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
             }
             reason = ru_names.get(weapon_type, "Оружие")
             ctx.modify_power(w_bonus, reason)
-        # =================================
 
         # Бонус конкретного типа атаки (Slash/Pierce/Blunt)
         type_key = f"power_{die.dtype.value.lower()}"
@@ -142,29 +142,15 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
         p_evd = get_modded_value(0, "power_evade", mods)
         if p_evd: ctx.modify_power(p_evd, "Ловкость")
 
-    # === 4. СОБЫТИЯ ON_ROLL ===
-    for status_id, stack in list(source.statuses.items()):
-        if status_id in STATUS_REGISTRY: STATUS_REGISTRY[status_id].on_roll(ctx, stack)
-
-    for pid in source.passives:
-        if pid in PASSIVE_REGISTRY: PASSIVE_REGISTRY[pid].on_roll(ctx)
-
-    for aid in source.augmentations:
-        if aid in AUGMENTATION_REGISTRY:
-            AUGMENTATION_REGISTRY[aid].on_roll(ctx)
-
-    if source.weapon_id in WEAPON_REGISTRY:
-        wep = WEAPON_REGISTRY[source.weapon_id]
-        if wep.passive_id and wep.passive_id in PASSIVE_REGISTRY:
-            PASSIVE_REGISTRY[wep.passive_id].on_roll(ctx)
-
-    for pid in source.talents:
-        if pid in TALENT_REGISTRY: TALENT_REGISTRY[pid].on_roll(ctx)
+    # === [ОПТИМИЗАЦИЯ] 5. СОБЫТИЯ ON_ROLL ===
+    # Заменяем ручной перебор на trigger_mechanics
+    if hasattr(source, "trigger_mechanics"):
+        source.trigger_mechanics("on_roll", ctx)
 
     process_card_scripts("on_roll", ctx)
     process_card_scripts("on_play", ctx)
 
-    # === 5. ФИНАЛИЗАЦИЯ ЛОГА ===
+    # === 6. ФИНАЛИЗАЦИЯ ЛОГА ===
     if hasattr(ctx, 'get_formatted_roll_log'):
         ctx.log.insert(0, ctx.get_formatted_roll_log())
 
