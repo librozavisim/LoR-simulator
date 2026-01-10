@@ -9,6 +9,11 @@ def render_abilities(unit, u_key):
     # === DECK ===
     st.subheader("🃏 Боевая колода")
     all_library_cards = Library.get_all_cards()
+
+    # === [ДОБАВЛЕНО] Сортировка: Сначала по Тиру (1->5), потом по Имени ===
+    all_library_cards.sort(key=lambda x: (x.tier, x.name))
+    # ======================================================================
+
     card_map = {c.id: c for c in all_library_cards}
     all_card_ids = [c.id for c in all_library_cards]
 

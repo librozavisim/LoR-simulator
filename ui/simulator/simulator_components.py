@@ -91,6 +91,7 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
                     if unit.card_cooldowns.get(c.id, 0) <= 0:
                         available_cards.append(c)
 
+    available_cards.sort(key=lambda x: (x.tier, x.name))
     # --- 3. ИНТЕРФЕЙС ВЫБОРА (EXPANDER) ---
     with st.expander(label, expanded=False):
         c_tgt, c_sel = st.columns([1, 1])
