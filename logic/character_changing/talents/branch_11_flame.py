@@ -1,5 +1,12 @@
 from logic.character_changing.passives.base_passive import BasePassive
 
+# Список ID талантов ветки 11 (используется для расчёта прокачки)
+BRANCH_11_IDS = [
+    "strike_iron_hot", "spark", "cauterization", "hot_talent",
+    "body_adaptation", "hearth_of_power", "ashes_to_ashes", "hellfire",
+    "wildfire", "fiery_temper", "ifrit", "phoenix", "firestorm", "burn_me_down"
+]
+
 
 # ==========================================
 # 11.1 Куй железо пока горячо
@@ -36,9 +43,75 @@ class TalentSpark(BasePassive):
         if unit.cooldowns.get(self.id, 0) > 0: return False
 
         # Логика подсчета талантов ветки 11 для скалирования
-        # Заглушка атаки
+        # Count talents in this branch excluding 11.1 (strike_iron_hot) and 11.2 (spark)
+        branch_count = 0
+        if hasattr(unit, "talents"):
+            for t in unit.talents:
+                if t in BRANCH_11_IDS and t not in ("strike_iron_hot", "spark"):
+                    branch_count += 1
+
+        # Базовое Горение = 4, за каждые 2 таланта +2 к Горению
+        burn_amount = 4 + 2 * (branch_count // 2)
+        # Применяем Горение к цели, если она передана в kwargs
+        target = kwargs.get("target")
+        if target:
+            target.add_status("burn", burn_amount, duration=99)
+            if log_func:
+                log_func(f"🔥 {unit.name} used Spark on {target.name}: +{burn_amount} Burn")
+        else:
+            if log_func:
+                log_func(f"🔥 {unit.name} used Spark: no target provided. (+{burn_amount} Burn would be applied)")
+
+        # --- Create or update the Spark attack card dynamically and register it ---
+        try:
+            from core.card import Card
+            from core.dice import Dice
+            from core.enums import DiceType
+            from core.library import Library
+
+            # Calculate roll scaling: min increases by 1 per 2 talents (branch_count//2)
+            min_roll = max(1, 1 + (branch_count // 2))
+            # Scale max by level (simple rule): max = min + 4 + level//2
+            max_roll = min_roll + 4 + max(0, unit.level // 2)
+
+            # Build script to apply burn on hit
+            burn_script = {
+                "on_hit": [
+                    {"script_id": "apply_status", "params": {"status": "burn", "base": burn_amount, "duration": 99, "target": "target"}}
+                ]
+            }
+
+            spark_card_id = "spark_attack"
+            spark_card = Card(
+                id=spark_card_id,
+                name="Spark Attack",
+                tier=1,
+                card_type="Melee",
+                description=f"Spark attack: deals burn +{burn_amount}",
+                dice_list=[Dice(min_roll, max_roll, DiceType.BLUNT, scripts=burn_script)],
+                scripts={}
+            )
+
+            Library.register(spark_card)
+        except Exception:
+            # If dynamic creation fails, ignore — card fallback handled elsewhere
+            pass
+
+        # Добавляем карту-атаку в колоду (выдача карты игроку при использовании)
+        spark_card_id = "spark_attack"
+        if hasattr(unit, "deck") and spark_card_id not in unit.deck:
+            unit.deck.append(spark_card_id)
+            if log_func:
+                log_func(f"🃏 {unit.name} received card: {spark_card_id}")
+
+        # Ifrit улучшение: временная иммунизация к урону от Горения на следующий раунд
+        if "ifrit" in getattr(unit, "talents", []):
+            unit.active_buffs["ifrit_burn_immunity"] = unit.active_buffs.get("ifrit_burn_immunity", 0) + 1
+            if log_func:
+                log_func("✨ Ifrit: next round immune to Burn damage.")
+
         unit.cooldowns[self.id] = self.cooldown
-        if log_func: log_func("🔥 **Искра**: Атака проведена! (Эффекты зависят от прокачки).")
+        if log_func: log_func("🔥 **Искра**: Атака проведена!")
         return True
 
 
@@ -171,8 +244,10 @@ class TalentFieryTemper(BasePassive):
         # 1. Извлекаем функцию логгирования (вернет None, если её нет)
         log_func = kwargs.get("log_func")
         if unit.get_status("burn") > 0:
-            # Эмулируем ответный огонь (нужен доступ к attacker, пока заглушка)
-            if log_func: log_func(f"🔥 **{self.name}**: Враг обжегся (2 Burn)!")
+            if source and hasattr(source, "add_status"):
+                source.add_status("burn", 2, duration=99)
+                if log_func:
+                    log_func(f"🔥 **{self.name}**: {source.name} receives 2 Burn (retaliation)")
 
 
 # ==========================================
@@ -186,6 +261,32 @@ class TalentIfrit(BasePassive):
         "Улучшение Искры: После использования нет урона от Горения на след. раунд."
     )
     is_active_ability = False
+
+    def modify_incoming_damage(self, unit, amount: int, damage_type: str, stack=0) -> int:
+        """
+        При получении урона от Горения: восстанавливаем часть Выдержки (stagger)
+        и, при наличии временной иммунизации, поглощаем урон.
+        """
+        if damage_type != "burn" or amount <= 0:
+            return amount
+
+        # Если есть временная иммунизация от Искры — поглощаем урон и сбрасываем флаг
+        immunity = unit.active_buffs.get("ifrit_burn_immunity", 0)
+        if immunity > 0:
+            unit.active_buffs["ifrit_burn_immunity"] = max(0, immunity - 1)
+            # Восстанавливаем выдержку на 1/3 от потенциального урона
+            heal = amount // 3
+            if heal > 0:
+                unit.current_stagger = min(unit.max_stagger, unit.current_stagger + heal)
+            return 0
+
+        # Иначе — восстанавливаем 1/3 от урона в Stagger и пропускаем оставшийся урон
+        heal = amount // 3
+        if heal > 0:
+            unit.current_stagger = min(unit.max_stagger, unit.current_stagger + heal)
+
+        # Возвращаем оригинальный урон (не уменьшаем здесь — это делает burn_me_down)
+        return amount
 
 
 # ==========================================
@@ -221,6 +322,35 @@ class TalentFirestorm(BasePassive):
             if log_func: log_func("🌪️ **Огненный шторм**: Активирован (Аура).")
         return True
 
+    def on_round_start(self, unit, log_func, enemies=None, allies=None, **kwargs):
+        """
+        Если аура активна, накладывает 3 Горения на всех существ вокруг вас
+        в начале раунда (исключая вас самого).
+        """
+        if not unit.active_buffs.get("firestorm_aura"):
+            return
+
+        # Собираем цели (враги + союзники), избегая дубликатов
+        targets = []
+        if enemies:
+            targets.extend(enemies)
+        if allies:
+            targets.extend(allies)
+
+        applied = []
+        seen = set()
+        for t in targets:
+            if not t or t is unit: continue
+            if t.is_dead(): continue
+            if id(t) in seen: continue
+            seen.add(id(t))
+            # Накладываем 3 Горения с постоянной длительностью
+            t.add_status("burn", 3, duration=99)
+            applied.append(t.name)
+
+        if applied and log_func:
+            log_func(f"🌪️ Огненный шторм: +3 Burn -> {', '.join(applied)}")
+
 
 # ==========================================
 # 11.10 Сожги меня дотла
@@ -239,7 +369,15 @@ class TalentBurnMeDown(BasePassive):
     def activate(self, unit, log_func, **kwargs):
         if unit.cooldowns.get(self.id, 0) > 0: return False
 
-        unit.add_status("burn", 50)
+        unit.add_status("burn", 50, duration=99)
         unit.cooldowns[self.id] = self.cooldown
         if log_func: log_func("🔥 **Огненный смерч**: Вы получили 50 Горения. Атака всем врагам!")
         return True
+
+    def modify_incoming_damage(self, unit, amount: int, damage_type: str, stack=0) -> int:
+        """
+        Уменьшает входящий урон от Горения вдвое.
+        """
+        if damage_type == "burn" and amount > 0:
+            return amount // 2
+        return amount

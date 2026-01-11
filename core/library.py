@@ -21,7 +21,12 @@ class Library:
         for card in cls._cards.values():
             if card.name == key:
                 return copy.deepcopy(card)
-        return Card("Unknown", 0, [])
+        # Fallback: return a minimal, well-formed Card using the key as name
+        try:
+            name = str(key)
+        except Exception:
+            name = "Unknown"
+        return Card(name=name, dice_list=[], description="", id="unknown")
 
     @classmethod
     def get_all_cards(cls):

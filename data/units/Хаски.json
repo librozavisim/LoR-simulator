@@ -1,0 +1,158 @@
+{
+    "name": "Хаски",
+    "level": 45,
+    "rank": 2,
+    "avatar": "data/avatars/Unit_10.png",
+    "base_intellect": 1,
+    "total_xp": 0,
+    "pct_mods": {
+        "imp_hp": 0,
+        "imp_sp": 0,
+        "imp_stg": 0,
+        "tal_hp": 0,
+        "tal_sp": 0,
+        "tal_stg": 0
+    },
+    "flat_mods": {
+        "imp_hp": 0,
+        "imp_sp": 0,
+        "imp_stg": 0
+    },
+    "deck": [
+        "death_dragonfist_a395",
+        "death_dragonfist_a395",
+        "death_dragonfist_a395"
+    ],
+    "base_stats": {
+        "current_hp": 135,
+        "current_sp": 165,
+        "current_stagger": 97
+    },
+    "defense": {
+        "armor_name": "Standard Fixer Suit",
+        "armor_type": "Medium",
+        "hp_resists": {
+            "slash": 1.0,
+            "pierce": 1.0,
+            "blunt": 1.0
+        },
+        "stagger_resists": {
+            "slash": 1.0,
+            "pierce": 1.0,
+            "blunt": 1.0
+        },
+        "weapon_id": "none"
+    },
+    "card_cooldowns": {},
+    "attributes": {
+        "strength": 20,
+        "endurance": 10,
+        "agility": 27,
+        "wisdom": 6,
+        "psych": 6
+    },
+    "skills": {
+        "strike_power": 15,
+        "medicine": 0,
+        "willpower": 15,
+        "luck": 0,
+        "acrobatics": 15,
+        "shields": 6,
+        "tough_skin": 15,
+        "speed": 30,
+        "light_weapon": 0,
+        "medium_weapon": 30,
+        "heavy_weapon": 0,
+        "firearms": 0,
+        "eloquence": 15,
+        "forging": 0,
+        "engineering": 0,
+        "programming": 0
+    },
+    "passives": [],
+    "talents": [
+        "strike_iron_hot",
+        "spark",
+        "cauterization",
+        "body_adaptation",
+        "hearth_of_power",
+        "hellfire",
+        "wildfire",
+        "fiery_temper",
+        "ifrit",
+        "phoenix",
+        "firestorm",
+        "burn_me_down"
+    ],
+    "augmentations": [],
+    "level_rolls": {
+        "3": {
+            "hp": 1,
+            "sp": 3
+        },
+        "6": {
+            "hp": 1,
+            "sp": 2
+        },
+        "9": {
+            "hp": 2,
+            "sp": 2
+        },
+        "12": {
+            "hp": 1,
+            "sp": 5
+        },
+        "15": {
+            "hp": 5,
+            "sp": 4
+        },
+        "18": {
+            "hp": 3,
+            "sp": 1
+        },
+        "21": {
+            "hp": 4,
+            "sp": 4
+        },
+        "24": {
+            "hp": 3,
+            "sp": 2
+        },
+        "27": {
+            "hp": 2,
+            "sp": 2
+        },
+        "30": {
+            "hp": 5,
+            "sp": 2
+        },
+        "33": {
+            "hp": 3,
+            "sp": 4
+        },
+        "36": {
+            "hp": 5,
+            "sp": 4
+        },
+        "39": {
+            "hp": 3,
+            "sp": 2
+        },
+        "42": {
+            "hp": 2,
+            "sp": 4
+        },
+        "45": {
+            "hp": 4,
+            "sp": 2
+        }
+    },
+    "cooldowns": {
+        "spark": 1,
+        "burn_me_down": 98
+    },
+    "active_buffs": {},
+    "resources": {},
+    "biography": "",
+    "money_log": []
+}

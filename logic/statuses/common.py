@@ -105,6 +105,12 @@ class DeepWoundStatus(StatusEffect):
         if ctx.dice and ctx.dice.dtype in [DiceType.BLOCK, DiceType.EVADE]:
             # === FIX: Прямое изменение HP вместо take_damage ===
             dmg = stack
+
+            # Allow mechanics (talents/passives/etc.) to modify incoming burn damage
+            if hasattr(ctx.source, "apply_mechanics_filter"):
+                dmg = ctx.source.apply_mechanics_filter("modify_incoming_damage", dmg, "burn", stack=stack)
+
+            # Apply damage to HP
             ctx.source.current_hp = max(0, ctx.source.current_hp - dmg)
             # ==================================================
 
@@ -137,4 +143,41 @@ class SlowStatus(StatusEffect):
     id = "slow"
     name = "Замедление"
     pass
-# TEST 
+
+
+class BurnStatus(StatusEffect):
+    id = "burn"
+
+    def on_round_end(self, unit, log_func, stack: int = 0, **kwargs):
+        if stack <= 0:
+            return []
+
+        msgs = []
+
+        dmg = stack
+
+        # Allow mechanics (talents/passives/etc.) to modify incoming burn damage
+        if hasattr(unit, "apply_mechanics_filter"):
+            dmg = unit.apply_mechanics_filter("modify_incoming_damage", dmg, "burn", stack=stack)
+
+        # Apply damage to HP
+        unit.current_hp = max(0, unit.current_hp - dmg)
+        if log_func:
+            log_func(f"🔥 Burn: {unit.name} takes {dmg} dmg")
+        msgs.append(f"🔥 Burn: -{dmg} HP")
+
+        # Trigger on_take_damage hooks so talents can respond to the damage
+        try:
+            if hasattr(unit, "trigger_mechanics"):
+                unit.trigger_mechanics("on_take_damage", unit, dmg, None, log_func=log_func)
+        except Exception:
+            pass
+
+        # Halve the remaining stack (integer division)
+        new_stack = stack // 2
+        remove_amt = stack - new_stack
+        if remove_amt > 0:
+            unit.remove_status("burn", remove_amt)
+            msgs.append(f"🔥 Burn reduced: {stack} -> {new_stack}")
+
+        return msgs
