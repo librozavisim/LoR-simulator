@@ -63,6 +63,7 @@ class TalentTacticalAnalysis(BasePassive):
 # ==========================================
 # 2.4 Изучение Поведения
 # ==========================================
+#TODO Опять посмотреть
 class TalentBehaviorStudy(BasePassive):
     id = "behavior_study"
     name = "Изучение Поведения"

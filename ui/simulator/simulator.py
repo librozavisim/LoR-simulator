@@ -11,35 +11,57 @@ from ui.simulator.simulator_components import render_slot_strip, render_active_a
 def render_simulator_page():
     # Инициализация фазы
     if 'phase' not in st.session_state: st.session_state['phase'] = 'roll'
+    if 'round_number' not in st.session_state: st.session_state['round_number'] = 1
 
     # === ОБНОВЛЕННЫЕ СТИЛИ (CSS) ===
-    st.markdown("""
-    <style>
-        .block-container { padding-top: 1rem !important; padding-bottom: 2rem !important; }
+    st.markdown(f"""
+        <style>
+            /* Контейнер для счетчика, встроенный в поток страницы */
+            .turn-counter-static {{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
 
-        /* Стили для карточек боя */
-        .clash-card-left { text-align: right; padding-right: 10px; }
-        .clash-card-right { text-align: left; padding-left: 10px; }
+                /* Отступы для визуального отделения */
+                margin: 0 auto 20px auto; 
+                padding: 10px 40px;
 
-        /* === НАСТРОЙКА КАРТИНОК (АВАТАРОК) === */
-        /* Картинка растягивается на всю ширину своей колонки */
-        [data-testid="stImage"] img {
-            width: 100% !important;
-            height: auto !important;
-            max-height: 250px;            
-            object-fit: cover;            
-            border-radius: 8px;
-            margin: 0 auto;
-        }
+                /* Ширина подстраивается под контент */
+                width: fit-content;
+                min-width: 150px;
 
-        /* Центрирование внутри колонки */
-        [data-testid="stImage"] {
-            display: flex;
-            justify_content: center;
-            align-items: flex-start;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+                /* Визуальный стиль */
+                background: linear-gradient(135deg, rgba(35, 37, 46, 1) 0%, rgba(20, 20, 25, 1) 100%);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            }}
+
+            .counter-label {{
+                font-family: sans-serif;
+                font-size: 11px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: #8d99ae;
+                margin-bottom: 4px;
+            }}
+
+            .counter-value {{
+                font-family: 'Courier New', monospace;
+                font-size: 32px;
+                font-weight: 700;
+                color: #edf2f4;
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+                line-height: 1;
+            }}
+        </style>
+
+        <div class="turn-counter-static">
+            <div class="counter-label">ACT / SCENE</div>
+            <div class="counter-value">{st.session_state['round_number']}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.header("⚔️ Mass Battle Simulator")
 

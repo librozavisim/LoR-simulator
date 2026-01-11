@@ -269,7 +269,7 @@ def finish_round_logic():
         # 4. Техническая очистка
         u.tick_cooldowns()
         u.active_slots = []
-
+    st.session_state['round_number'] = st.session_state.get('round_number', 1) + 1
     st.session_state['turn_message'] = " ".join(msg) if msg else "Round Complete."
     st.session_state['phase'] = 'roll'
     st.session_state['turn_phase'] = 'done'
@@ -300,6 +300,7 @@ def reset_game():
     st.session_state['script_logs'] = ""
     st.session_state['turn_message'] = "Game Reset. Press 'Roll Initiative'."
     st.session_state['phase'] = 'roll'
+    st.session_state['round_number'] = 1
 
 
 def sync_state_from_widgets(team_left: list, team_right: list):
