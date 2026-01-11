@@ -8,13 +8,13 @@ class TalentAthletic(BasePassive):
     id = "athletic"
     name = "Атлетичный"
     description = (
-        "8.1 haste +1 (после 1 хода).\n"
+        "8.1 haste +1.\n"
         "Вы можете перенаправлять атаки при РАВНОЙ скорости (обычно нужно строго больше)."
     )
     is_active_ability = False
 
-    def on_combat_end(self, unit, log_func, **kwargs):
-        unit.add_status("haste", 1, 2)
+    def on_round_start(self, unit, log_func, **kwargs):
+        unit.add_status("haste", 1, 1)
 
     def can_redirect_on_equal_speed(self, unit) -> bool:
         return True

@@ -123,8 +123,6 @@ class TalentMindPower(BasePassive):
     }
 
     def activate(self, unit, log_func, choice_key=None, **kwargs):
-
-
         # Проверка кулдауна
         if unit.cooldowns.get(self.id, 0) > 0:
             return False

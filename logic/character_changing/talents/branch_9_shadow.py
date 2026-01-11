@@ -27,6 +27,7 @@ class TalentRevenge(BasePassive):
     is_active_ability = False
 
     def on_take_damage(self, unit, amount, source, **kwargs):
+        log_func = kwargs.get("log_func")
         if amount > 0:
             # Просто вешаем статус. Логика урона теперь внутри RevengeDmgUpStatus.
             unit.add_status("revenge_dmg_up", 1, duration=2)
@@ -320,7 +321,7 @@ class TalentCatReflexes(BasePassive):
 # ==========================================
 class TalentEnduranceLessons(BasePassive):
     id = "endurance_lessons"
-    name = "Уроки выдержки (Б)"
+    name = "Уроки выдержки (Б) wip"
     description = "9.6 Б: Пассивно восстанавливает 2% от Макс. HP (Выдержки?) в раунд."
     is_active_ability = False
 
@@ -382,7 +383,7 @@ class TalentCoveringTracks(BasePassive):
     name = "Заметая следы (А)"
     description = (
         "9.8 А: Ловкость +7.\n"
-        "Начало боя: Вы получаете Невидимость на 3 раунда.\n"
+        "Начало боя: Вы получаете Невидимость на 1 раунд.\n"
         "Успешное уклонение: Враг путается в фальшивых следах (получает 1 Bind)."
     )
     is_active_ability = False
@@ -392,14 +393,12 @@ class TalentCoveringTracks(BasePassive):
         return {"agility": 7}
 
     def on_combat_start(self, unit, log_func, **kwargs):
-        # Даем невидимость сразу, чтобы активировать синергию с 9.3 (Разящий Клинок)
-        unit.add_status("invisibility", 1, duration=3)
+        unit.add_status("invisibility", 1, duration=1)
         if log_func:
             log_func(f"👣 **{self.name}**: Следы скрыты (Невидимость на 2 х.)")
 
     def on_clash_win(self, ctx, **kwargs):
         stack = kwargs.get("stack", 0)
-        # Механика "Фальшивый след"
         if ctx.dice.dtype == DiceType.EVADE:
             target = ctx.target
             if target:

@@ -61,11 +61,8 @@ class TalentRedLycoris(BasePassive):
             if log_func: log_func(f"❌ {self.name}: Выдержка слишком высока ({int(stagger_pct * 100)}%)")
             return False
 
-        # === [ИЗМЕНЕНО] Умная очистка (Только негативные статусы) ===
         removed_list = []
 
-        # 1. Очищаем активные негативные статусы
-        # Используем список ключей, чтобы безопасно удалять во время итерации
         current_statuses = list(unit.statuses.keys())
         for status_id in current_statuses:
             if status_id in NEGATIVE_STATUSES:

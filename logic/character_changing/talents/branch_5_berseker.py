@@ -32,7 +32,7 @@ class TalentVengefulPayback(BasePassive):
     description = "5.2 За каждые 10 потерянных HP вы получаете 1 Силу на следующий раунд (единожды при потере)."
     is_active_ability = False
 
-    def on_round_end(self, unit, log_func, **kwargs):
+    def on_round_start(self, unit, log_func, **kwargs):
         lost_hp = min(max(0, unit.max_hp - unit.current_hp), unit.max_hp)
         current_chunks = lost_hp // 10
 

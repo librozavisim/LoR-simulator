@@ -106,7 +106,7 @@ class TalentCommendableConstitution(BasePassive):
     def on_calculate_stats(self, unit) -> dict:
         return {"endurance": 3}
 
-    def on_combat_end(self, unit, log_func, **kwargs):
+    def on_round_start(self, unit, log_func, **kwargs):
         amt = 1
         if "survivor" in unit.talents:  # 3.8
             amt += 1
@@ -235,8 +235,6 @@ class TalentAdaptationTireless(BasePassive):
     is_active_ability = False
 
     def on_round_start(self, unit, log_func, **kwargs):
-        # 1. Сбрасываем счетчик полученного урона для НОВОГО раунда
-        # (Но не сбрасываем active_adaptation, так как он должен работать в этом раунде)
         unit.memory["adaptation_stats"] = {
             DiceType.SLASH: 0,
             DiceType.PIERCE: 0,
@@ -279,7 +277,7 @@ class TalentAdaptationTireless(BasePassive):
             if damage_type in stats:
                 stats[damage_type] += amount
 
-    def on_combat_end(self, unit, log_func, **kwargs):
+    def on_round_end(self, unit, log_func, **kwargs):
         """
         Подводим итоги раунда и выбираем тип для адаптации.
         """
