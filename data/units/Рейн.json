@@ -1,10 +1,10 @@
 {
     "name": "Рейн",
-    "level": 31,
+    "level": 32,
     "rank": 6,
     "avatar": "data/avatars/Рейн.png",
     "base_intellect": 6,
-    "total_xp": 17563648,
+    "total_xp": 2165047296,
     "pct_mods": {
         "imp_hp": 0,
         "imp_sp": 0,
@@ -150,6 +150,10 @@
         {
             "amount": 7889000,
             "reason": ""
+        },
+        {
+            "amount": 250000,
+            "reason": "Собачка Макимы"
         }
     ]
 }

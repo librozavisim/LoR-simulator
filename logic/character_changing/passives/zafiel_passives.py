@@ -22,17 +22,7 @@ class PassiveAdaptation(BasePassive):
     name = "Адаптация"
     description = "Накапливает уровни (стаки) статуса 'Адаптация'. Ур 1-5. Дает пробивание резистов и игнор урона."
 
-    def on_combat_start(self, unit, log_func, **kwargs):
-        # Старт боя: Даем 1 уровень. Длительность 99 (почти вечно).
-        # Функция add_status сама создаст статус или добавит к существующему.
-        # Но нам нужно ровно 1 на старте, поэтому можно проверить.
-        current = unit.get_status("adaptation")
-        if current == 0:
-            unit.add_status("adaptation", 1, duration=99)
-            if log_func: log_func(f"🧬 Адаптация: Активация (Уровень 1)")
-
-    def on_round_end(self, unit, log_func, **kwargs):
-        # Конец раунда: Повышаем уровень, если меньше 5
+    def on_round_start(self, unit, log_func, **kwargs):
         current = unit.get_status("adaptation")
         if current < 5:
             unit.add_status("adaptation", 1, duration=99)

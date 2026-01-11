@@ -9,7 +9,7 @@ class PassiveSCells(BasePassive):
     name = "S-клетки"
     description = "В начале боя восстанавливает 10 HP за каждый имеющийся слот скорости."
 
-    def on_round_start(self, unit, log_func, **kwargs):
+    def on_speed_rolled(self, unit, log_func, **kwargs):
         # Считаем количество активных слотов (кубиков скорости)
         dice_count = len(unit.active_slots)
 
@@ -94,7 +94,7 @@ class TalentRedLycoris(BasePassive):
             log_func(f"🩸 {self.name}: Активирован! Иммунитет к негативу и синхронизация.")
         return True
 
-    def on_round_start(self, unit, log_func, **kwargs):
+    def on_speed_rolled(self, unit, log_func, **kwargs):
         # Если статус активен, запускаем регенерацию
         if unit.get_status("red_lycoris") > 0:
             dice_count = len(unit.active_slots)
