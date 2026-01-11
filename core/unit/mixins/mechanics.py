@@ -53,7 +53,49 @@ class UnitMechanicsMixin:
         Запускает метод method_name у всех механик, если он существует.
         Пример: unit.trigger_mechanics("on_combat_start", unit, log_func)
         """
-        for mech in self.iter_mechanics():
+        from logic.character_changing.passives import PASSIVE_REGISTRY
+        from logic.character_changing.talents import TALENT_REGISTRY
+        from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
+        from logic.statuses.status_manager import STATUS_REGISTRY
+        from logic.weapon_definitions import WEAPON_REGISTRY
+
+        # === 1. СТАТУСЫ (Передаем stack) ===
+        if hasattr(self, "statuses"):
+            for status_id, stack in self.statuses.items():
+                if status_id in STATUS_REGISTRY:
+                    mech = STATUS_REGISTRY[status_id]
+                    if hasattr(mech, method_name):
+                        # Передаем stack как именованный аргумент.
+                        # Методы статусов (on_roll, on_hit) должны принимать stack.
+                        # Методы вроде on_combat_start должны принимать **kwargs, куда упадет stack.
+                        getattr(mech, method_name)(*args, stack=stack, **kwargs)
+
+        # === 2. ОСТАЛЬНЫЕ МЕХАНИКИ (Без stack) ===
+        other_mechanics = []
+
+        # Пассивки
+        if hasattr(self, "passives"):
+            for pid in self.passives:
+                if pid in PASSIVE_REGISTRY: other_mechanics.append(PASSIVE_REGISTRY[pid])
+
+        # Таланты
+        if hasattr(self, "talents"):
+            for tid in self.talents:
+                if tid in TALENT_REGISTRY: other_mechanics.append(TALENT_REGISTRY[tid])
+
+        # Аугментации
+        if hasattr(self, "augmentations"):
+            for aid in self.augmentations:
+                if aid in AUGMENTATION_REGISTRY: other_mechanics.append(AUGMENTATION_REGISTRY[aid])
+
+        # Оружие
+        if hasattr(self, "weapon_id") and self.weapon_id in WEAPON_REGISTRY:
+            wep = WEAPON_REGISTRY[self.weapon_id]
+            if wep.passive_id and wep.passive_id in PASSIVE_REGISTRY:
+                other_mechanics.append(PASSIVE_REGISTRY[wep.passive_id])
+
+        # Запуск для остальных
+        for mech in other_mechanics:
             if hasattr(mech, method_name):
                 getattr(mech, method_name)(*args, **kwargs)
 

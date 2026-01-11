@@ -11,6 +11,17 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_def, inte
     # Контр-кубики обычно игнорируют speed difference в односторонних атаках (они реактивны)
     adv_atk, adv_def, _, destroy_def = calculate_speed_advantage(spd_atk, spd_def, intent_atk, True)
 
+    defender_breaks_attacker = False
+    if not def_card:  # Слот пуст
+        # Проверяем разницу скорости (Защитник должен быть быстрее на 8)
+        if spd_def - spd_atk >= 8:
+            # Проверяем наличие таланта
+            defender_breaks_attacker = False
+            if hasattr(target, "iter_mechanics"):
+                for mech in target.iter_mechanics():
+                    if hasattr(mech, "can_break_empty_slot") and mech.can_break_empty_slot(target):
+                        defender_breaks_attacker = True
+                        break
     # [PASSIVE] Гедонизм
     prevent_dest = False
     if hasattr(source, "iter_mechanics"):
@@ -64,6 +75,24 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_def, inte
 
         detail_logs = []
         if j == 0 and on_use_logs: detail_logs.extend(on_use_logs)
+
+        if defender_breaks_attacker:
+            # Кубик атакующего уничтожается без броска
+            outcome = "🚫 Broken (Speed)"
+
+            # Если это был Counter у атакующего - он тоже ломается
+            # Если это обычная атака - она не наносит урона
+
+            # Лог
+            r_dice_show = "Empty (Speed)"
+            report.append({
+                "type": "onesided",
+                "round": f"{round_label} (Break)",
+                "left": {"unit": source.name, "card": card.name, "dice": "🚫 Broken", "val": 0, "range": "-"},
+                "right": {"unit": target.name, "card": "-", "dice": "⚡ Break", "val": 0, "range": "-"},
+                "outcome": outcome, "details": detail_logs + ["Def Speed > 8: Die Destroyed"]
+            })
+            continue  # Переходим к следующему кубику (он тоже сломается, если условие глобально для слота)
 
         # --- A. ЕСЛИ ЕСТЬ КОНТР-КУБИК -> CLASH ---
         if active_counter_die:

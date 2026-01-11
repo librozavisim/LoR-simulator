@@ -4,10 +4,12 @@ from core.unit.unit_data import UnitData
 from core.unit.mixins.status import UnitStatusMixin
 from core.unit.mixins.combat import UnitCombatMixin
 from core.unit.mixins.lifecycle import UnitLifecycleMixin
+# 1. ИМПОРТ МИКСИНА
 from core.unit.mixins.mechanics import UnitMechanicsMixin
 
+
 @dataclass
-class Unit(UnitData, UnitStatusMixin, UnitCombatMixin, UnitLifecycleMixin):
+class Unit(UnitData, UnitStatusMixin, UnitCombatMixin, UnitLifecycleMixin, UnitMechanicsMixin):
     """
     Основной класс Юнита.
     Объединяет данные (UnitData) и логику (Mixins).
