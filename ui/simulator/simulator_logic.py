@@ -129,20 +129,20 @@ def roll_phase():
                 s['force_clash'] = False
 
             # === 3. SPEED ROLLED EVENTS (Баффы от слотов) ===
-        for u in all_units:
-            opponents = r_team if u in l_team else l_team
-            my_allies = l_team if u in l_team else r_team
+    for u in all_units:
+        opponents = r_team if u in l_team else l_team
+        my_allies = l_team if u in l_team else r_team
 
-            def log_speed(msg):
-                if 'battle_logs' not in st.session_state: st.session_state['battle_logs'] = []
-                st.session_state['battle_logs'].append({
-                    "round": "Speed Roll", "rolls": "Passive", "details": f"⚡ **{u.name}**: {msg}"
-                })
+        def log_speed(msg):
+            if 'battle_logs' not in st.session_state: st.session_state['battle_logs'] = []
+            st.session_state['battle_logs'].append({
+                "round": "Speed Roll", "rolls": "Passive", "details": f"⚡ **{u.name}**: {msg}"
+            })
 
-            # Запускаем новый триггер
-            if hasattr(u, "trigger_mechanics"):
-                u.trigger_mechanics("on_speed_rolled", u, log_speed,
-                                    enemies=opponents, allies=my_allies)
+        # Запускаем новый триггер
+        if hasattr(u, "trigger_mechanics"):
+            u.trigger_mechanics("on_speed_rolled", u, log_speed,
+                                enemies=opponents, allies=my_allies)
 
         for u in all_units:
             u.recalculate_stats()
