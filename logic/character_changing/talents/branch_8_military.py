@@ -128,7 +128,8 @@ class TalentFindVulnerability(BasePassive):
     )
     is_active_ability = False
 
-    def on_hit(self, ctx):
+    def on_hit(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Нужно проверить, первая ли это атака за раунд.
         # Используем память юнита.
         if not ctx.target: return

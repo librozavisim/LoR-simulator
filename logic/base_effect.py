@@ -12,7 +12,6 @@ class BaseEffect:
     description = ""
 
     # === БАЗОВЫЕ СОБЫТИЯ (Lifecycle) ===
-    # Используем **kwargs для гибкости (туда могут прилететь allies, enemies, stack и т.д.)
     def on_combat_start(self, unit, log_func, **kwargs): pass
 
     def on_combat_end(self, unit, log_func, **kwargs): pass
@@ -24,18 +23,17 @@ class BaseEffect:
     def on_turn_end(self, unit, stack=0) -> list[str]: return []
 
     # === БОЕВЫЕ ТРИГГЕРЫ ===
-    # Добавляем stack=0, чтобы методы можно было вызывать и как on_roll(ctx), и как on_roll(ctx, stack=5)
-    def on_roll(self, ctx: RollContext, stack=0): pass
+    def on_roll(self, ctx: RollContext, **kwargs): pass
 
-    def on_clash_win(self, ctx: RollContext, stack=0): pass
+    def on_clash_win(self, ctx: RollContext, **kwargs): pass
 
-    def on_clash_lose(self, ctx: RollContext, stack=0): pass
+    def on_clash_lose(self, ctx: RollContext, **kwargs): pass
 
-    def on_clash_draw(self, ctx: RollContext, stack=0): pass
+    def on_clash_draw(self, ctx: RollContext, **kwargs): pass
 
-    def on_hit(self, ctx: RollContext, stack=0): pass
+    def on_hit(self, ctx: RollContext, **kwargs): pass
 
-    def on_take_damage(self, unit, amount, source, stack=0, **kwargs): pass
+    def on_take_damage(self, unit, amount, source, **kwargs): pass
 
     # === АКТИВНЫЕ СПОСОБНОСТИ ===
     def activate(self, unit, log_func, **kwargs): return False
@@ -46,8 +44,6 @@ class BaseEffect:
     def modify_clash_interaction(self, ctx, interaction, loser_ctx): pass
 
     def modify_clash_interaction_loser(self, ctx, interaction, winner_ctx): pass
-
-    def get_virtual_defense_die(self, unit, incoming_die, stack=0): return None
 
     def on_calculate_stats(self, unit, stack=0) -> dict: return {}
 
@@ -68,18 +64,14 @@ class BaseEffect:
         return amount
 
     def on_before_status_add(self, unit, status_id, amount, stack=0):
-        # Возвращает (Allowed: bool, Reason: str/None)
         return True, None
 
-    # Хук для реакции на наложение статуса (например, Witness of Gro-Goroth)
     def on_status_applied(self, unit, status_id, amount, duration=1, stack=0, **kwargs): pass
 
-    # Для статусов (legacy)
     def get_damage_modifier(self, unit, stack=0) -> float: return 0.0
 
     def apply_heal_reduction(self, unit, amount: int) -> int: return amount
 
-    # === ЛОГИЧЕСКИЕ ФЛАГИ (Boolean Checks) ===
     def can_redirect_on_equal_speed(self, unit) -> bool: return False
 
     def prevents_dice_destruction_by_speed(self, unit) -> bool: return False

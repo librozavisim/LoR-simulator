@@ -16,7 +16,8 @@ class PassiveAnnihilator(BasePassive):
 
         if log_func: log_func("🐭 **Аннигилятор**: Заводная мышь готова (1 патрон).")
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Проверяем, что это атака
         if ctx.dice.dtype not in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
             return
@@ -37,7 +38,8 @@ class PassiveBanganrang(BasePassive):
     name = "Мех: Банганранг"
     description = "+5 к роллам. Весь наносимый красный урон (HP) становится белым (SP)."
 
-    def on_hit(self, ctx):
+    def on_hit(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Ставим флаг конвертации урона в контекст броска
         # Логика обработки будет в damage.py
         ctx.convert_hp_to_sp = True
@@ -93,7 +95,8 @@ class PassiveLimagun(BasePassive):
     name = "Мех: ЛИМАГАН"
     description = "+666% урона по целям с именем 'Лима'."
 
-    def on_hit(self, ctx):
+    def on_hit(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         if not ctx.target: return
 
         name = ctx.target.name.lower()

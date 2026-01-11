@@ -80,7 +80,8 @@ class TalentSmashingBlade(BasePassive):
     )
     is_active_ability = False
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         unit = ctx.source
         target = ctx.target
         if not target: return
@@ -204,7 +205,8 @@ class TalentAggressiveParry(BasePassive):
     description = "9.4 Б: При ничьей (Draw) в столкновении -> Наносит урон Выдержке врага (Половина вашего броска)."
     is_active_ability = False
 
-    def on_clash_draw(self, ctx):
+    def on_clash_draw(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Считаем урон (половина броска)
         dmg = ctx.final_value // 2
 
@@ -292,12 +294,14 @@ class TalentCatReflexes(BasePassive):
         # Сбрасываем флаг срабатывания в начале каждого раунда
         unit.memory["cat_reflexes_triggered"] = False
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # +2 к Уклонению
         if ctx.dice.dtype == DiceType.EVADE:
             ctx.modify_power(2, "Cat Reflexes")
 
-    def on_clash_win(self, ctx):
+    def on_clash_win(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Если победили Уклонением и еще не получали бонус
         if ctx.dice.dtype == DiceType.EVADE:
             if not ctx.source.memory.get("cat_reflexes_triggered"):
@@ -394,7 +398,8 @@ class TalentCoveringTracks(BasePassive):
             log_func(f"👣 **{self.name}**: Следы скрыты (Невидимость на 2 х.)")
             #TODO переделать комбат старт проверить когда работает, добавить норм единоразовый эффект
 
-    def on_clash_win(self, ctx):
+    def on_clash_win(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Механика "Фальшивый след"
         if ctx.dice.dtype == DiceType.EVADE:
             target = ctx.target
@@ -438,7 +443,8 @@ class TalentKnifeInBack(BasePassive):
     )
     is_active_ability = False
 
-    def on_hit(self, ctx):
+    def on_hit(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         unit = ctx.source
         target = ctx.target
         if not target: return

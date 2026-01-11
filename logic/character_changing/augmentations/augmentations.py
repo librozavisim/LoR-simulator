@@ -24,7 +24,8 @@ class AugBlessingOfWind(Augmentation):
         unit.memory['smoke_limit_bonus'] = 5
         if log_func: log_func(f"🌬️ **{self.name}**: Лимит дыма увеличен до 15")
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         smoke = ctx.source.get_status("smoke")
         # Если дыма меньше 5, бонуса нет
         if smoke < 5: return

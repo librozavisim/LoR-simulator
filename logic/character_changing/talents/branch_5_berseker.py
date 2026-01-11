@@ -116,7 +116,8 @@ class TalentCalmMind(BasePassive):
     description = "5.4 Ваши атаки накладывают на вас +1 Самообладание (Self-Control)."
     is_active_ability = False
 
-    def on_hit(self, ctx):
+    def on_hit(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         bonus = 1
         # Если активна Полная Сосредоточенность (5.6 Б), бонус удваивается
         if ctx.source.active_buffs.get("full_concentration", 0) > 0:
@@ -209,7 +210,8 @@ class TalentFullConcentration(BasePassive):
         if log_func: log_func(f"🧘 **{self.name}**: Мин = Макс! Самообладание x2.")
         return True
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Если бафф активен, мин. значение = макс. значению
         if ctx.source.active_buffs.get(self.id, 0) > 0:
             if ctx.dice:
@@ -268,7 +270,8 @@ class TalentSteadyHand(BasePassive):
     description = "5.8 +1 к значению костей за каждые 10 зарядов Самообладания (Макс +2)."
     is_active_ability = False
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         stacks = ctx.source.get_status("self_control")
         bonus = min(2, stacks // 10)
         if bonus > 0:
@@ -306,7 +309,8 @@ class TalentSecondWindBerserk(BasePassive):
     )
     is_active_ability = False
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         unit = ctx.source
         if unit.max_hp > 0 and (unit.current_hp / unit.max_hp) < 0.25:
             ctx.modify_power(1, "Second Wind (<25%)")
@@ -326,7 +330,8 @@ class TalentDieHard(BasePassive):
     )
     is_active_ability = False
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Реализуем "Иммунитет к негативу"
         # Если куб абсолютный (эмулируем каждый 3-й куб или просто рандомно 33%)
         # Для простоты: 33% шанс что куб "Абсолютный"

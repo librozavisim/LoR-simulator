@@ -119,7 +119,8 @@ class PassiveFoodLover(BasePassive):
             return {"hp_pct": -25, "sp_pct": -25}
         return {}
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Штраф к проверкам за голод
         if ctx.source.get_status("satiety") <= 0:
             ctx.modify_power(-5, "Hunger")

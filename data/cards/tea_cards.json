@@ -110,7 +110,7 @@
     {
       "id": "tea_sakura",
       "name": "Чай из листьев сакуры",
-      "tier": 2,
+      "tier": 5,
       "type": "Item",
       "description": "Восстанавливает 100% SP. Накладывает 3 Паралича.",
       "scripts": {

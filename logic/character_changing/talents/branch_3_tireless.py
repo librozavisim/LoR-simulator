@@ -64,7 +64,8 @@ class TalentDefense(BasePassive):
         if log_func:
             log_func(f"🛡️ **{self.name}**: Добавлено {count} контр-кубиков Блока (5-7).")
 
-    def on_clash_win(self, ctx):
+    def on_clash_win(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Используем безопасную проверку флагов (getattr)
         if ctx.dice:
             flags = getattr(ctx.dice, "flags", [])
@@ -75,7 +76,8 @@ class TalentDefense(BasePassive):
                     ctx.source.add_status("protection", 1, duration=3)
                     ctx.log.append(f"🛡️ **{self.name}**: Победа -> +1 Защита")
 
-    def on_clash_lose(self, ctx):
+    def on_clash_lose(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Используем безопасную проверку флагов (getattr)
         if ctx.dice:
             flags = getattr(ctx.dice, "flags", [])
@@ -151,7 +153,7 @@ class TalentRock(BasePassive):
     )
     is_active_ability = False
 
-    def on_take_damage(self, unit, amount: int, source, **kwargs):
+    def on_take_damage(self, unit, amount, source, **kwargs):
         """
         Срабатывает после расчета урона, когда HP уже (не) отнялось.
         amount - это ИТОГОВЫЙ урон (который прошел через резисты).
@@ -261,10 +263,11 @@ class TalentAdaptationTireless(BasePassive):
 
         return amount
 
-    def on_take_damage(self, unit, amount, source, damage_type=None, **kwargs):
+    def on_take_damage(self, unit, amount, source, **kwargs):
         """
         Считаем полученный урон для статистики (чтобы выбрать адаптацию на СЛЕДУЮЩИЙ раунд).
         """
+        damage_type = None
         if amount > 0 and damage_type:
             stats = unit.memory.get("adaptation_stats")
             # Если по какой-то причине stats нет (первый удар в бою до старта раунда), создаем
@@ -313,7 +316,8 @@ class TalentToughAsSteel(BasePassive):
     def on_calculate_stats(self, unit) -> dict:
         return {"max_hp_pct": 20}
 
-    def on_clash_win(self, ctx):
+    def on_clash_win(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         if ctx.dice.dtype == DiceType.BLOCK:
             target = ctx.target  # Тот, с кем столкновение (атакующий)
             if target:

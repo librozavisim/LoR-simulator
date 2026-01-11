@@ -41,7 +41,8 @@ class PassiveBackstreetDemon(BasePassive):
     description = "Сильная сторона: Уворот наносит урон. Слабая: Блок врага наносит вам урон."
 
     # --- СИЛЬНАЯ СТОРОНА (Победа Уворотом) ---
-    def on_clash_win(self, ctx):
+    def on_clash_win(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # 1. Проверяем, что выиграли УВОРОТОМ
         if ctx.dice.dtype != DiceType.EVADE:
             return
@@ -61,7 +62,8 @@ class PassiveBackstreetDemon(BasePassive):
         ctx.log.append(f"😈 **{self.name}**: Уворот! Враг получает {counter_dmg} урона (50% от {loser.final_value})")
 
     # --- СЛАБАЯ СТОРОНА (Проигрыш против Блока) ---
-    def on_clash_lose(self, ctx):
+    def on_clash_lose(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # ctx.source - это Лилит (Проигравшая)
 
         # 1. Получаем контекст победителя (Врага)

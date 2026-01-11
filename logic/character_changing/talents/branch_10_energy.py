@@ -272,7 +272,8 @@ class TalentRuptureApplication(BasePassive):
     description = "10.8 Пассивно: Попадание по врагу без Разрыва -> Накладывает 1 Разрыв (Кол-во 2)."
     is_active_ability = False
 
-    def on_hit(self, ctx):
+    def on_hit(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         if ctx.target and ctx.target.get_status("rupture") <= 0:
             # Накладываем статус (заглушка, так как rupture имеет стаки и каунт)
             # В движке rupture - это int. Эмуляция Count сложнее.

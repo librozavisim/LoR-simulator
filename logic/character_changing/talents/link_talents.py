@@ -50,7 +50,8 @@ class TalentArdentDefense(BasePassive):
     )
     is_active_ability = False
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         unit = ctx.source
         # Проверяем статусы берсерка
         # (Ярость обычно вешает бафф berserker_rage или raging_fury, концентрация full_concentration)
@@ -111,7 +112,8 @@ class TalentScorchingMastery(BasePassive):
     )
     is_active_ability = False
 
-    def on_clash_win(self, ctx):
+    def on_clash_win(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Счетчик
         count = ctx.source.memory.get("scorching_mastery_count", 0) + 1
         ctx.source.memory["scorching_mastery_count"] = count

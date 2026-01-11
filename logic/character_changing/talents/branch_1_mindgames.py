@@ -16,7 +16,8 @@ class TalentKeepItTogether(BasePassive):
     def on_calculate_stats(self, unit) -> dict:
         return {"sp_pct": 20}
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         if ctx.source.current_sp <= 0:
             bonus = ctx.source.max_sp // 50
             if bonus > 0:
@@ -198,7 +199,8 @@ class TalentPeakSanity(BasePassive):
         if log_func:
             log_func(f"✨ **Ясность**: Получено {max_c} зарядов (Максимум).")
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Бонус: Если SP > 50%, подтягиваем минимальные значения
         if ctx.source.max_sp > 0:
             ratio = ctx.source.current_sp / ctx.source.max_sp
@@ -261,7 +263,8 @@ class TalentPsychicStrain(BasePassive):
     )
     is_active_ability = False
 
-    def on_hit(self, ctx):
+    def on_hit(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # 1. Проверяем, есть ли цель
         if not ctx.target: return
 
@@ -405,7 +408,8 @@ class TalentEmotionalStorm(BasePassive):
             if log_func:
                 log_func(f"🌪️ **Эмоции (Ур. {lvl})**: Баффы активированы ({', '.join(buffs)}).")
 
-    def on_roll(self, ctx):
+    def on_roll(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         # Макс/Мин ролл -> Монета
         if not ctx.dice: return
 
@@ -414,10 +418,12 @@ class TalentEmotionalStorm(BasePassive):
         elif ctx.base_value == ctx.dice.min_val:
             self._gain_coin(ctx.source, "neg", ctx)
 
-    def on_clash_win(self, ctx):
+    def on_clash_win(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         self._gain_coin(ctx.source, "pos", ctx)
 
-    def on_clash_lose(self, ctx):
+    def on_clash_lose(self, ctx, **kwargs):
+        stack = kwargs.get("stack", 0)
         self._gain_coin(ctx.source, "neg", ctx)
 
     def on_round_end(self, unit, log_func, **kwargs):
