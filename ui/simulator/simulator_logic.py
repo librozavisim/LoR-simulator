@@ -77,16 +77,20 @@ def set_cooldowns(u):
 
 def roll_phase():
     """
-    Фаза броска скорости.
-    Теперь включает в себя Triggers: Combat Start -> Round Start -> Recalc Stats -> Roll Speed.
-    """
+        Фаза броска скорости.
+        Порядок:
+        1. Combat/Round Start (Баффы скорости)
+        2. Recalc (Применение скорости)
+        3. Roll Speed (Генерация слотов)
+        4. Speed Rolled Events (Баффы от слотов)
+        5. Recalc (Применение баффов от слотов)
+        """
     l_team, r_team = get_teams()
     all_units = l_team + r_team
 
     # === 1. TRIGGERS (События начала) ===
     for u in all_units:
-        # A. Combat Start (Инициализация)
-        # Внутри set_cooldowns стоит защита, так что on_combat_start сработает только 1 раз в начале игры.
+        u.recalculate_stats()
         set_cooldowns(u)
 
         # B. Round Start (Каждый раунд)
@@ -106,9 +110,7 @@ def roll_phase():
             u.trigger_mechanics("on_round_start", u, log_round,
                                 enemies=opponents, allies=my_allies)
 
-    # === 2. STATS & ROLL (Пересчет и Бросок) ===
     for u in all_units:
-        # Пересчитываем статы ПОСЛЕ наложения баффов от Round Start
         u.recalculate_stats()
 
         if u.is_staggered():
@@ -119,12 +121,31 @@ def roll_phase():
             }]
         else:
             u.roll_speed_dice()
-            # Инициализация полей цели для каждого слота
+            # Init fields
             for s in u.active_slots:
-                s['target_unit_idx'] = -1
-                s['target_slot_idx'] = -1
-                s['is_aggro'] = False
+                s['target_unit_idx'] = -1;
+                s['target_slot_idx'] = -1;
+                s['is_aggro'] = False;
                 s['force_clash'] = False
+
+            # === 3. SPEED ROLLED EVENTS (Баффы от слотов) ===
+        for u in all_units:
+            opponents = r_team if u in l_team else l_team
+            my_allies = l_team if u in l_team else r_team
+
+            def log_speed(msg):
+                if 'battle_logs' not in st.session_state: st.session_state['battle_logs'] = []
+                st.session_state['battle_logs'].append({
+                    "round": "Speed Roll", "rolls": "Passive", "details": f"⚡ **{u.name}**: {msg}"
+                })
+
+            # Запускаем новый триггер
+            if hasattr(u, "trigger_mechanics"):
+                u.trigger_mechanics("on_speed_rolled", u, log_speed,
+                                    enemies=opponents, allies=my_allies)
+
+        for u in all_units:
+            u.recalculate_stats()
 
     # 2. Авто-таргетинг (Auto-Targeting)
     # По умолчанию левые бьют первых живых правых, и наоборот.

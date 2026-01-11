@@ -20,6 +20,8 @@ class BaseEffect:
     # Round: 1 раз за каждый раунд (ход)
     def on_round_start(self, unit, log_func, **kwargs): pass
 
+    def on_speed_rolled(self, unit, log_func, **kwargs): pass
+
     def on_round_end(self, unit, log_func, **kwargs): pass
 
     # === БОЕВЫЕ ТРИГГЕРЫ ===

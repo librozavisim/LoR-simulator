@@ -142,6 +142,8 @@ class TalentFrenzy(BasePassive):
     def on_round_start(self, unit, log_func, **kwargs):
         # Добавляем базовый контр-кубик
         base_die = Dice(5, 7, DiceType.SLASH, is_counter=True)
+        if not hasattr(unit, 'counter_dice'):
+            unit.counter_dice = []
         unit.counter_dice.append(base_die)
         msg = "Frenzy (+1 Counter 5-7)"
 

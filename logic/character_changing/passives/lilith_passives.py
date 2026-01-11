@@ -116,18 +116,15 @@ class PassiveHedonism(BasePassive):
 # ==========================================
 # Живи быстро, умирай молодым (Live Fast, Die Young)
 # ==========================================
-#TODO CHECK THIS
 class PassiveLiveFastDieYoung(BasePassive):
     id = "live_fast_die_young"
     name = "Живи быстро, умирай молодым"
     description = "Каждый кубик скорости даёт +1 к Силе и Стойкости в начале сцены. +1 Дым за победу в столкновении атакой."
 
-    def on_round_start(self, unit, log_func, **kwargs):
-        # Если юнит в оглушении, бонусов за скорость нет
+    def on_speed_rolled(self, unit, log_func, **kwargs):
         if unit.is_staggered():
             return
 
-        # Считаем реальные активные слоты (включая бонусы от Ярости и т.д.)
         slots_count = len(unit.active_slots) if unit.active_slots else 0
 
         if slots_count > 0:
