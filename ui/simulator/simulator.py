@@ -63,8 +63,6 @@ def render_simulator_page():
         </div>
         """, unsafe_allow_html=True)
 
-    st.header("⚔️ Mass Battle Simulator")
-
     # Сайдбар с кнопкой сброса
     with st.sidebar:
         st.divider()

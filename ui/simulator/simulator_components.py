@@ -96,53 +96,115 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
     with st.expander(label, expanded=False):
         c_tgt, c_sel = st.columns([1, 1])
 
-        # === ЛОГИКА ВЫБОРА ЦЕЛИ (Без изменений) ===
+        # =========================================================
+        # === [NEW] ЛОГИКА ВЫБОРА ЦЕЛИ (ВРАГИ / СОЮЗНИКИ) ===
+        # =========================================================
         target_options = ["None"]
-        is_friendly = False
-        if selected_card and "friendly" in selected_card.flags:
-            is_friendly = True;
-            slot['is_ally_target'] = True
-        else:
-            slot['is_ally_target'] = False
 
-        team_to_show = my_team if is_friendly else opposing_team
-        has_taunt = any(
-            u.get_status("taunt") > 0 for u in team_to_show if not u.is_dead()) if not is_friendly else False
+        # 1. Определяем, кого показывать в списке
+        show_allies = False
+        show_enemies = True  # По умолчанию (обычная атака)
 
-        for t_idx, target_unit in enumerate(team_to_show):
-            if target_unit.is_dead(): continue
-            if target_unit.get_status("invisibility") > 0: continue
-            if has_taunt and target_unit.get_status("taunt") <= 0: continue
+        if selected_card:
+            # Безопасное получение флагов
+            flags = selected_card.flags if hasattr(selected_card, 'flags') and selected_card.flags else []
 
-            for s_i, slot_obj in enumerate(target_unit.active_slots):
-                t_spd = slot_obj['speed']
-                extra = "😵" if slot_obj.get('stunned') else f"Spd {t_spd}"
-                tag = "(Ally)" if is_friendly else ""
-                display_u = t_idx + 1
-                display_s = s_i + 1
-                target_options.append(f"{display_u}:{display_s} | {target_unit.name} {tag} S{display_s} ({extra})")
+            has_friendly = "friendly" in flags
+            has_offensive = "offensive" in flags
 
+            if has_friendly and has_offensive:
+                # ОБА ФЛАГА: Показываем и врагов, и союзников
+                show_allies = True
+                show_enemies = True
+            elif has_friendly:
+                # Только поддержка
+                show_allies = True
+                show_enemies = False
+            else:
+                # Только атака
+                show_allies = False
+                show_enemies = True
+
+        # 2. Формируем список опций
+
+        # --- ВРАГИ ---
+        if show_enemies:
+            # Проверка провокации (Taunt) - если есть таунт, бить можно только его
+            alive_enemies = [u for u in opposing_team if not u.is_dead()]
+            has_taunt = any(u.get_status("taunt") > 0 for u in alive_enemies)
+
+            for t_idx, target_unit in enumerate(opposing_team):
+                if target_unit.is_dead(): continue
+                if target_unit.get_status("invisibility") > 0: continue
+                # Фильтр таунта
+                if has_taunt and target_unit.get_status("taunt") <= 0: continue
+
+                for s_i, slot_obj in enumerate(target_unit.active_slots):
+                    t_spd = slot_obj['speed']
+                    extra = "😵" if slot_obj.get('stunned') else f"Spd {t_spd}"
+                    display_s = s_i + 1
+                    # Маркер E| (Enemy) + Иконка меча
+                    target_options.append(f"E|{t_idx}:{s_i} | ⚔️ {target_unit.name} S{display_s} ({extra})")
+
+        # --- СОЮЗНИКИ ---
+        if show_allies:
+            for t_idx, target_unit in enumerate(my_team):
+                if target_unit.is_dead(): continue
+
+                for s_i, slot_obj in enumerate(target_unit.active_slots):
+                    t_spd = slot_obj['speed']
+                    extra = "😵" if slot_obj.get('stunned') else f"Spd {t_spd}"
+                    display_s = s_i + 1
+                    # Маркер A| (Ally) + Иконка щита
+                    target_options.append(f"A|{t_idx}:{s_i} | 🛡️ {target_unit.name} S{display_s} ({extra})")
+
+        # 3. Восстановление текущего выбора из session state
         cur_t_unit = slot.get('target_unit_idx', -1)
         cur_t_slot = slot.get('target_slot_idx', -1)
+        cur_is_ally = slot.get('is_ally_target', False)
+
         current_val_str = "None"
+
         if cur_t_unit != -1 and cur_t_slot != -1:
-            prefix = f"{cur_t_unit}:{cur_t_slot}"
+            # Ищем опцию, которая совпадает по ID и Типу (A или E)
+            prefix_type = "A" if cur_is_ally else "E"
+            search_prefix = f"{prefix_type}|{cur_t_unit}:{cur_t_slot}"
+
             for opt in target_options:
-                if opt.startswith(prefix): current_val_str = opt; break
+                if opt.startswith(search_prefix):
+                    current_val_str = opt
+                    break
 
-        selected_tgt_str = c_tgt.selectbox("Target", target_options, index=target_options.index(
-            current_val_str) if current_val_str in target_options else 0,
-                                           key=f"{key_prefix}_{unit.name}_tgt_{slot_idx}", label_visibility="collapsed")
+        idx_sel = target_options.index(current_val_str) if current_val_str in target_options else 0
 
+        selected_tgt_str = c_tgt.selectbox(
+            "Target",
+            target_options,
+            index=idx_sel,
+            key=f"{key_prefix}_{unit.name}_tgt_{slot_idx}",
+            label_visibility="collapsed"
+        )
+
+        # 4. Сохранение выбора в слот
         if selected_tgt_str == "None":
             slot['target_unit_idx'] = -1
             slot['target_slot_idx'] = -1
+            slot['is_ally_target'] = False  # Сброс
         else:
             try:
-                parts = selected_tgt_str.split('|')[0].strip().split(':')
-                slot['target_unit_idx'] = int(parts[0]) - 1
-                slot['target_slot_idx'] = int(parts[1]) - 1
+                # Разбираем строку вида "E|0:0 | ⚔️ Enemy..."
+                meta_part, label_part = selected_tgt_str.split('|', 1)
+                team_type = meta_part.strip()  # "A" или "E"
+                coords = label_part.split('|')[0].strip().split(':')
+
+                slot['target_unit_idx'] = int(coords[0])
+                slot['target_slot_idx'] = int(coords[1])
+
+                # Устанавливаем флаг: если тип "A", значит это союзник
+                slot['is_ally_target'] = (team_type == "A")
+
             except:
+                # Если что-то пошло не так при парсинге
                 slot['target_unit_idx'] = -1
                 slot['target_slot_idx'] = -1
 
@@ -182,50 +244,62 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
             # Применяем выбор
             slot['card'] = new_card
 
-        # === СТРОКА 2: Опции (Чекбоксы с Картинками) ===
-        can_redirect = True
-        enemy_spd_val = 0
-        has_athletic = ("athletic" in unit.talents) or ("athletic" in unit.passives)
+            # === СТРОКА 2: Опции (Чекбоксы с Картинками) ===
+            can_redirect = True
+            enemy_spd_val = 0
+            has_athletic = ("athletic" in unit.talents) or ("athletic" in unit.passives)
 
-        if selected_tgt_str != "None":
-            try:
-                import re
-                match = re.search(r"Spd (\d+)", selected_tgt_str)
-                if match:
-                    enemy_spd_val = int(match.group(1))
-                    if has_athletic:
-                        if speed < enemy_spd_val: can_redirect = False
-                    else:
-                        if speed <= enemy_spd_val: can_redirect = False
-            except:
-                pass
+            if selected_tgt_str != "None":
+                try:
+                    import re
+                    match = re.search(r"Spd (\d+)", selected_tgt_str)
+                    if match:
+                        enemy_spd_val = int(match.group(1))
+                        if has_athletic:
+                            if speed < enemy_spd_val: can_redirect = False
+                        else:
+                            if speed <= enemy_spd_val: can_redirect = False
+                except:
+                    pass
 
-        _, c_opt1, c_opt2 = st.columns([2.5, 1, 1])
+            _, c_opt1, c_opt2 = st.columns([2.5, 1, 1])
 
-        aggro_val = slot.get('is_aggro', False)
-        with c_opt1:
-            icon_aggro = get_icon_html("dice_slot", width=30)
-            st.markdown(f"<div style='text-align:center; height:30px;'>{icon_aggro}</div>", unsafe_allow_html=True)
-            if can_redirect:
-                c_opt1.checkbox("Aggro", value=aggro_val, key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}",
-                                help=f"Перехватить (Моя Spd {speed} > Врага {enemy_spd_val})",
-                                label_visibility="collapsed")
-            else:
-                c_opt1.checkbox("Aggro", value=False, disabled=True, key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}",
-                                help=f"Слишком медленный для перехвата! ({speed} <= {enemy_spd_val})",
-                                label_visibility="collapsed")
-                if aggro_val: slot['is_aggro'] = False
+            aggro_val = slot.get('is_aggro', False)
+            with c_opt1:
+                icon_aggro = get_icon_html("dice_slot", width=30)
+                st.markdown(f"<div style='text-align:center; height:30px;'>{icon_aggro}</div>", unsafe_allow_html=True)
 
-        slot_destroy = slot.get('destroy_on_speed', True)
-        with c_opt2:
-            icon_broken = get_icon_html("dice_broken", width=30)
-            st.markdown(f"<div style='text-align:center; height:30px;'>{icon_broken}</div>", unsafe_allow_html=True)
-            new_destroy = st.checkbox("Break", value=slot_destroy, key=f"{key_prefix}_{unit.name}_destroy_{slot_idx}",
-                                      help="Разрушать карту врага при разнице скорости 8+? (Если выключено -> Враг получит Помеху)",
-                                      label_visibility="collapsed")
-            slot['destroy_on_speed'] = new_destroy
+                # === [NEW] ЛОГИКА ЧЕКБОКСА AGGRO ===
+                if slot.get('is_ally_target'):
+                    # 1. Если цель - союзник, перехват невозможен
+                    c_opt1.checkbox("Aggro", value=False, disabled=True,
+                                    key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}",
+                                    help="Нельзя перехватить союзника", label_visibility="collapsed")
+                    # Сбрасываем флаг, если он был случайно включен
+                    if aggro_val: slot['is_aggro'] = False
 
-        st.divider()
+                elif can_redirect:
+                    # 2. Если цель - враг и скорости достаточно -> Можно
+                    c_opt1.checkbox("Aggro", value=aggro_val, key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}",
+                                    help=f"Перехватить (Моя Spd {speed} > Врага {enemy_spd_val})",
+                                    label_visibility="collapsed")
+                else:
+                    # 3. Если цель - враг, но скорости мало -> Нельзя
+                    c_opt1.checkbox("Aggro", value=False, disabled=True,
+                                    key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}",
+                                    help=f"Слишком медленный для перехвата! ({speed} <= {enemy_spd_val})",
+                                    label_visibility="collapsed")
+                    if aggro_val: slot['is_aggro'] = False
+
+            slot_destroy = slot.get('destroy_on_speed', True)
+            with c_opt2:
+                icon_broken = get_icon_html("dice_broken", width=30)
+                st.markdown(f"<div style='text-align:center; height:30px;'>{icon_broken}</div>", unsafe_allow_html=True)
+                new_destroy = st.checkbox("Break", value=slot_destroy,
+                                          key=f"{key_prefix}_{unit.name}_destroy_{slot_idx}",
+                                          help="Разрушать карту врага при разнице скорости 8+?",
+                                          label_visibility="collapsed")
+                slot['destroy_on_speed'] = new_destroy
 
         # === 4. ИНФОРМАЦИЯ О КАРТЕ (С ИКОНКАМИ) ===
         if selected_card:

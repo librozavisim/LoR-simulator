@@ -16,19 +16,20 @@ from ui.editor.callbacks import (
     edit_dice_script, delete_dice_script
 )
 
+
 def render_editor_page():
     st.markdown("### 🛠️ Универсальный Редактор Карт")
 
     if "ed_script_list" not in st.session_state: st.session_state["ed_script_list"] = []
     if "ed_flags" not in st.session_state: st.session_state["ed_flags"] = []
 
-    # ... (Загрузка и Основные параметры без изменений) ...
     # ЗАГРУЗКА
     all_cards = Library.get_all_cards()
     all_cards.sort(key=lambda x: x.name)
     card_options = {"(Создать новую)": None}
     for c in all_cards:
         card_options[f"{c.name} ({c.id[:4]}..)"] = c
+
     c_load_sel, c_load_btn = st.columns([3, 1])
     selected_option = c_load_sel.selectbox("Шаблон", list(card_options.keys()), label_visibility="collapsed")
     if c_load_btn.button("📥 Загрузить", use_container_width=True):
@@ -40,8 +41,40 @@ def render_editor_page():
         c1, c2, c3 = st.columns([3, 1, 1])
         name = c1.text_input("Название карты", key="ed_name")
         tier = c2.selectbox("Tier (Ранг)", [1, 2, 3, 4, 5], key="ed_tier")
-        ctype = c3.selectbox("Тип", ["Melee", "Offensive", "Ranged", "Mass Summation", "Mass Individual", "On Play", "Item"], key="ed_type")
-        flags = st.multiselect("Флаги", ["friendly", "offensive", "unchangeable", "exhaust"], key="ed_flags")
+        ctype = c3.selectbox("Тип", ["Melee", "Offensive", "Ranged", "Mass Summation", "Mass Individual", "On Play",
+                                     "Item"], key="ed_type")
+
+        # === [NEW] СЕКЦИЯ ФЛАГОВ С ПРЕДПРОСМОТРОМ ЦЕЛИ ===
+        c_flags, c_preview = st.columns([3, 2])
+
+        with c_flags:
+            flags = st.multiselect("Флаги", ["friendly", "offensive", "unchangeable", "exhaust"], key="ed_flags")
+
+        with c_preview:
+            # Анализируем выбранные флаги для отображения режима
+            has_friendly = "friendly" in flags
+            has_offensive = "offensive" in flags
+
+            tgt_icon = "⚔️"
+            tgt_text = "Враги (Default)"
+            tgt_color = "red"  # Цвет Streamlit (red, green, orange, blue, violet)
+
+            if has_friendly and has_offensive:
+                tgt_icon = "⚔️+🛡️"
+                tgt_text = "Гибрид (Враги и Союзники)"
+                tgt_color = "orange"
+            elif has_friendly:
+                tgt_icon = "🛡️"
+                tgt_text = "Только Союзники (Buff)"
+                tgt_color = "green"
+            elif has_offensive:
+                tgt_icon = "⚔️"
+                tgt_text = "Только Враги"
+                tgt_color = "red"
+
+            st.markdown("**Режим прицеливания:**")
+            st.markdown(f":{tgt_color}[## {tgt_icon} {tgt_text}]")
+
         desc = st.text_area("Описание", key="ed_desc", height=68)
 
     # --- 2. ЭФФЕКТЫ КАРТЫ (ГЛОБАЛЬНЫЕ) ---
@@ -85,7 +118,7 @@ def render_editor_page():
 
     def_dice = 0 if ctype == "Item" else 1
     if "ed_num_dice" not in st.session_state: st.session_state["ed_num_dice"] = def_dice
-    num_dice = st.number_input("Кол-во кубиков", 0, 5, key="ed_num_dice")
+    num_dice = st.number_input("Кол-во кубиков", 0, 10, key="ed_num_dice")
 
     dice_objects = []
 
