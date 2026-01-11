@@ -35,7 +35,7 @@ class TalentCenterOfBalance(BasePassive):
     )
     is_active_ability = False
 
-    def on_combat_start(self, unit, log_func, **kwargs):
+    def on_round_start(self, unit, log_func, **kwargs):
         allies = kwargs.get("allies", [unit])  # По умолчанию только себя
 
         # Формула: 2 + (Макс СП / 20)
@@ -297,7 +297,7 @@ class TalentUnbearablePresence(BasePassive):
     )
     is_active_ability = False
 
-    def on_combat_start(self, unit, log_func, **kwargs):
+    def on_round_start(self, unit, log_func, **kwargs):
         # 1. Проверка на невидимость
         # Если есть статус stealth или invisible - аура не работает
         if unit.get_status("stealth") > 0 or unit.get_status("invisible") > 0:
@@ -367,7 +367,7 @@ class TalentEmotionalStorm(BasePassive):
             if ctx and hasattr(ctx, 'log') and ctx.log is not None:
                 ctx.log.append("🔴 **Эмоции**: +1 Негативная монета")
 
-    def on_combat_start(self, unit, log_func, **kwargs):
+    def on_round_start(self, unit, log_func, **kwargs):
         # 1. ИНИЦИАЛИЗАЦИЯ (Только один раз за весь бой)
         # Используем флаг в memory, который переживает раунды
         if not unit.memory.get("emotional_storm_initialized"):

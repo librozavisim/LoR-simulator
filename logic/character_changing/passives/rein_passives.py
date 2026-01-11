@@ -9,7 +9,7 @@ class PassiveSCells(BasePassive):
     name = "S-клетки"
     description = "В начале боя восстанавливает 10 HP за каждый имеющийся слот скорости."
 
-    def on_combat_start(self, unit, log_func, **kwargs):
+    def on_round_start(self, unit, log_func, **kwargs):
         # Считаем количество активных слотов (кубиков скорости)
         dice_count = len(unit.active_slots)
 
@@ -27,7 +27,6 @@ class PassiveNewDiscovery(BasePassive):
     description = "Пассивно: Мудрость +10, Интеллект +2.\nАвтоматически открывает 'Тактический анализ'."
     is_active_ability = False
 
-    # ВМЕСТО ХАРДКОДА В CALCULATIONS:
     def on_calculate_stats(self, unit) -> dict:
         return {
             "wisdom": 10,

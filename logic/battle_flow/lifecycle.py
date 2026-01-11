@@ -21,9 +21,6 @@ def prepare_turn(engine, team_left: list, team_right: list):
         opp_ref = next((e for e in opponents if not e.is_dead()), None)
         my_allies = team_left if u in team_left else team_right
 
-        engine._trigger_unit_event("on_combat_start", unit=u, log_func=engine.log,
-                                   opponent=opp_ref, enemies=opponents, allies=my_allies)
-
         engine._trigger_unit_event("on_round_start", unit=u, log_func=engine.log,
                                    opponent=opp_ref, enemies=opponents, allies=my_allies)
 
@@ -82,9 +79,6 @@ def finalize_turn(engine, all_units: list):
     """
     engine.logs = []
     report = []
-
-    for u in all_units:
-        engine._trigger_unit_event("on_combat_end", unit=u, log_func=engine.log)
 
     if engine.logs:
         report.append({"round": "End", "rolls": "Events", "details": " | ".join(engine.logs)})

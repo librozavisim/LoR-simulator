@@ -229,7 +229,7 @@ class TalentFullConcentration(BasePassive):
 # ==========================================
 class TalentNakedDefense3(BasePassive):
     id = "naked_defense_3"
-    name = "Встроенная броня 3"
+    name = "Встроенная броня 3 WIP"
     description = "5.7 Еще -0.25 к двум резистам без брони."
     is_active_ability = False
 

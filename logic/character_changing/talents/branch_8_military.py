@@ -46,7 +46,7 @@ class TalentFastHands(BasePassive):
 # ==========================================
 class TalentLeader(BasePassive):
     id = "leader"
-    name = "Лидер"
+    name = "Лидер WIP"
     description = (
         "8.3 Увеличение урона за каждого активного союзника (макс +3).\n"
         "Союзники получают 2 Защиты.\n"
@@ -181,7 +181,7 @@ class TalentIronFormation(BasePassive):
 # ==========================================
 class TalentLastHope(BasePassive):
     id = "last_hope"
-    name = "Последняя надежда"
+    name = "Последняя надежда WIP"
     description = (
         "8.10 Если вы последний выживший: +2 Стойкость, +2 Сила, +2 Защита.\n"
         "+2 Патрона каждый раунд."

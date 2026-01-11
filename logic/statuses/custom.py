@@ -15,7 +15,7 @@ class SelfControlStatus(StatusEffect):
             ctx.log.append(f"💨 CRIT! ({chance}%) x2 DMG")
             ctx.source.remove_status("self_control", 20)
 
-    def on_turn_end(self, unit, stack) -> list[str]:
+    def on_round_end(self, unit, log_func, **kwargs):
         unit.remove_status("self_control", 20)
         return [f"💨 Self-Control decayed"]
 
@@ -38,7 +38,7 @@ class SmokeStatus(StatusEffect):
         else:
             return eff_stack * 0.05  # Увеличение урона (+50% макс)
 
-    def on_turn_end(self, unit, stack) -> list[str]:
+    def on_round_end(self, unit, log_func, **kwargs):
         msgs = []
         unit.remove_status("smoke", 1)
         msgs.append("💨 Smoke decayed (-1)")
@@ -66,7 +66,7 @@ class RedLycorisStatus(StatusEffect):
     def on_calculate_stats(self, unit) -> dict:
         return {"initiative": 999, "damage_take": 9999}
 
-    def on_turn_end(self, unit, stack) -> list[str]:
+    def on_round_end(self, unit, log_func, **kwargs):
         return []
 
 
@@ -100,7 +100,7 @@ class AdaptationStatus(StatusEffect):
             "damage_threshold_flat": threshold
         }
 
-    def on_turn_end(self, unit, stack) -> list[str]:
+    def on_round_end(self, unit, log_func, **kwargs):
         return []
 
 class BulletTimeStatus(StatusEffect):
@@ -121,7 +121,7 @@ class BulletTimeStatus(StatusEffect):
 class ClarityStatus(StatusEffect):
     id = "clarity"
     # Просто отображение, логика в таланте
-    def on_turn_end(self, unit, stack) -> list[str]:
+    def on_round_end(self, unit, log_func, **kwargs):
         return [] # Не исчезает сам по себе (duration 99)
 
 
@@ -137,7 +137,7 @@ class EnrageTrackerStatus(StatusEffect):
             if log_func:
                 log_func(f"😡 **Разозлить**: Получено {amount} урона -> +{amount} Силы!")
 
-    def on_turn_end(self, unit, stack) -> list[str]:
+    def on_round_end(self, unit, log_func, **kwargs):
         return []  # Исчезает сам по duration
 
 
@@ -156,7 +156,7 @@ class InvisibilityStatus(StatusEffect):
             ctx.source.remove_status("invisibility", 999)
             ctx.log.append("👻 **Невидимость**: Раскрыт (перехвачен)!")
 
-    def on_turn_end(self, unit, stack) -> list[str]:
+    def on_round_end(self, unit, log_func, **kwargs):
         return ["👻 Невидимость рассеялась."]
 
 
@@ -167,7 +167,7 @@ class WeaknessStatus(StatusEffect):
     # Либо этот статус просто наследует Vulnerability, если движок это позволяет,
     # но лучше прописать явно в damage.py
 
-    def on_turn_end(self, unit, stack) -> list[str]:
+    def on_round_end(self, unit, log_func, **kwargs):
         # Уменьшаем стаки на 1 в конце хода (или снимаем все, как решите)
         unit.remove_status("weakness", 1)
         return ["🔻 Слабость уменьшилась (-1)"]
@@ -203,7 +203,8 @@ class SatietyStatus(StatusEffect):
 
         return penalties
 
-    def on_turn_end(self, unit, stack) -> list[str]:
+    def on_round_end(self, unit, log_func, **kwargs):
+        stack = kwargs.get("stack")
         msgs = []
 
         # Базовый порог
@@ -255,7 +256,7 @@ class RegenGanacheStatus(StatusEffect):
             unit.heal_hp(heal)
             if log_func: log_func(f"🍫 **Ганаш**: Регенерация +{heal} HP")
 
-    def on_turn_end(self, unit, stack) -> list[str]:
+    def on_round_end(self, unit, log_func, **kwargs):
         return []
 
 
@@ -270,7 +271,7 @@ class RevengeDmgUpStatus(StatusEffect):
         # Снимаем статус полностью после использования
         ctx.source.remove_status("revenge_dmg_up", 999)
 
-    def on_turn_end(self, unit, stack) -> list[str]:
+    def on_round_end(self, unit, log_func, **kwargs):
         # Статус сам исчезнет по длительности (duration=2),
         # но на всякий случай можно вернуть пустой список
         return []

@@ -107,7 +107,7 @@ class TalentOwnTremor(BasePassive):
 # ==========================================
 class TalentReadinessForEverything(BasePassive):
     id = "readiness_for_everything"
-    name = "Готовность ко всему"
+    name = "Готовность ко всему WIP"
     description = (
         "14.6 -25% урона от Внезапных атак.\n"
         "Начало боя: +15 Сотрясения на себе.\n"

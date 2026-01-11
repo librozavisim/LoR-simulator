@@ -80,7 +80,7 @@ class TalentProgrammingLanguages(BasePassive):
 # ==========================================
 class TalentPortableShield(BasePassive):
     id = "portable_shield"
-    name = "Переносной щит"
+    name = "Переносной щит WIP"
     description = (
         "12.5 Создание щита. Дает Барьер (% от HP) и Резисты в зависимости от ранга материала.\n"
         "Восстанавливает % Барьера каждый раунд.\n"

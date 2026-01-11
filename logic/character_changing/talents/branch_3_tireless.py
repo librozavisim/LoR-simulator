@@ -234,7 +234,7 @@ class TalentAdaptationTireless(BasePassive):
     )
     is_active_ability = False
 
-    def on_combat_start(self, unit, log_func, **kwargs):
+    def on_round_start(self, unit, log_func, **kwargs):
         # 1. Сбрасываем счетчик полученного урона для НОВОГО раунда
         # (Но не сбрасываем active_adaptation, так как он должен работать в этом раунде)
         unit.memory["adaptation_stats"] = {
@@ -330,7 +330,7 @@ class TalentToughAsSteel(BasePassive):
 # ==========================================
 class TalentDefender(BasePassive):
     id = "defender"
-    name = "Защитник"
+    name = "Защитник WIP"
     description = (
         "3.7 Опц: Союзники получают 4 Защиты в первом раунде.\n"
         "Можно перехватывать удары за союзников без костей блока (получая +1 Силу за каждый удар)."

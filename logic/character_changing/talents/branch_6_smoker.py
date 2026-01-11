@@ -190,7 +190,7 @@ class TalentCleansing(BasePassive):
 # ==========================================
 class TalentExperiencedSmoker(BasePassive):
     id = "experienced_smoker"
-    name = "Опытный курильщик"
+    name = "Опытный курильщик WIP"
     description = (
         "6.6 Вне боя: входящий урон -20%.\n"
         "Начало боя: +5 Дыма.\n"

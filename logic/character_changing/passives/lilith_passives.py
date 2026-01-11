@@ -124,7 +124,6 @@ class PassiveLiveFastDieYoung(BasePassive):
     name = "Живи быстро, умирай молодым"
     description = "Каждый кубик скорости даёт +1 к Силе и Стойкости в начале сцены. +1 Дым за победу в столкновении атакой."
 
-    # === [UPD] Используем on_round_start вместо on_combat_start ===
     def on_round_start(self, unit, log_func, **kwargs):
         # Если юнит в оглушении, бонусов за скорость нет
         if unit.is_staggered():

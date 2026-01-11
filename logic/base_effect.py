@@ -12,15 +12,15 @@ class BaseEffect:
     description = ""
 
     # === БАЗОВЫЕ СОБЫТИЯ (Lifecycle) ===
+    # Combat: 1 раз за весь бой
     def on_combat_start(self, unit, log_func, **kwargs): pass
 
     def on_combat_end(self, unit, log_func, **kwargs): pass
 
+    # Round: 1 раз за каждый раунд (ход)
     def on_round_start(self, unit, log_func, **kwargs): pass
 
     def on_round_end(self, unit, log_func, **kwargs): pass
-
-    def on_turn_end(self, unit, stack=0) -> list[str]: return []
 
     # === БОЕВЫЕ ТРИГГЕРЫ ===
     def on_roll(self, ctx: RollContext, **kwargs): pass

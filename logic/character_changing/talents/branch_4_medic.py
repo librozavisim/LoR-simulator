@@ -160,7 +160,7 @@ class TalentMadGoodDoctor(BasePassive):
 
 class TalentToxicologyWeapon(BasePassive):
     id = "toxicology_weapon"
-    name = "Токсикология (Оружие)"
+    name = "Токсикология (Оружие) WIP"
     description = (
         "4.2 (Плохой) Оружие покрыто ядом.\n"
         "При попадании: +2 Яда.\n"
