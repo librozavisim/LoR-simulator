@@ -137,3 +137,4 @@ class SlowStatus(StatusEffect):
     id = "slow"
     name = "Замедление"
     pass
+# TEST 
