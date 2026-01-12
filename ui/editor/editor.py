@@ -22,19 +22,59 @@ def render_editor_page():
 
     if "ed_script_list" not in st.session_state: st.session_state["ed_script_list"] = []
     if "ed_flags" not in st.session_state: st.session_state["ed_flags"] = []
+    if "ed_source_file" not in st.session_state: st.session_state["ed_source_file"] = "custom_cards.json"
 
-    # ЗАГРУЗКА
+    # === ЗАГРУЗКА (С ФИЛЬТРОМ ПО ПАПКАМ) ===
     all_cards = Library.get_all_cards()
-    all_cards.sort(key=lambda x: x.name)
-    card_options = {"(Создать новую)": None}
-    for c in all_cards:
-        card_options[f"{c.name} ({c.id[:4]}..)"] = c
 
-    c_load_sel, c_load_btn = st.columns([3, 1])
-    selected_option = c_load_sel.selectbox("Шаблон", list(card_options.keys()), label_visibility="collapsed")
-    if c_load_btn.button("📥 Загрузить", use_container_width=True):
-        load_card_to_state(card_options[selected_option])
-        st.rerun()
+    # 1. Получаем список всех файлов-источников
+    unique_sources = set()
+    for c in all_cards:
+        src = Library.get_source(c.id)
+        if src: unique_sources.add(src)
+
+    sorted_sources = sorted(list(unique_sources))
+    sorted_sources.insert(0, "All")
+
+    # 2. Интерфейс выбора
+    c_filter, c_card_sel, c_load_btn = st.columns([1.5, 2.5, 1])
+
+    with c_filter:
+        selected_source = st.selectbox("📁 Источник", sorted_sources, key="ed_file_filter")
+
+    # 3. Фильтрация списка карт
+    filtered_cards = []
+    if selected_source == "All":
+        filtered_cards = all_cards
+    else:
+        filtered_cards = [c for c in all_cards if Library.get_source(c.id) == selected_source]
+
+    # Сортировка: Сначала по файлу, потом по имени
+    filtered_cards.sort(key=lambda x: (Library.get_source(x.id) or "", x.name))
+
+    # Формирование опций
+    card_options = {"(Создать новую)": None}
+    for c in filtered_cards:
+        src = Library.get_source(c.id)
+        # Если смотрим "Все", добавляем префикс файла для ясности
+        label = c.name
+        if selected_source == "All" and src:
+            label = f"[{src}] {c.name}"
+
+        # Добавляем ID для уникальности
+        label += f" ({c.id[:4]}..)"
+        card_options[label] = c
+
+    with c_card_sel:
+        selected_option = st.selectbox("Шаблон", list(card_options.keys()))
+
+    with c_load_btn:
+        # Отступ для выравнивания с селектами
+        st.write("")
+        st.write("")
+        if st.button("📥 Загрузить", use_container_width=True):
+            load_card_to_state(card_options[selected_option])
+            st.rerun()
 
     # ПАРАМЕТРЫ
     with st.container(border=True):
@@ -76,7 +116,8 @@ def render_editor_page():
             st.markdown(f":{tgt_color}[## {tgt_icon} {tgt_text}]")
 
         desc = st.text_area("Описание", key="ed_desc", height=68)
-
+        save_file = st.session_state.get("ed_source_file", "custom_cards.json")
+        st.caption(f"📂 Файл сохранения: `{save_file}`")
     # --- 2. ЭФФЕКТЫ КАРТЫ (ГЛОБАЛЬНЫЕ) ---
     with st.expander("✨ Эффекты карты (Global Scripts)", expanded=True):
         ce_col1, ce_col2 = st.columns([1, 2])
@@ -206,8 +247,11 @@ def render_editor_page():
                 scripts=final_global_scripts,
                 flags=st.session_state["ed_flags"]
             )
-            Library.save_card(new_card)
-            st.toast(f"Карта {name} сохранена!", icon="✅")
+            # [NEW] Используем сохраненное имя файла
+            target_file = st.session_state.get("ed_source_file", "custom_cards.json")
+
+            Library.save_card(new_card, filename=target_file)
+            st.toast(f"Карта {name} сохранена в {target_file}!", icon="✅")
 
     if st.session_state.get("ed_loaded_id"):
         if c_del.button("🗑️ Удалить"):

@@ -1,5 +1,7 @@
 import streamlit as st
 
+from core.library import Library
+
 
 def reset_editor_state():
     """
@@ -21,7 +23,7 @@ def reset_editor_state():
     st.session_state["ed_type"] = "Melee"
     st.session_state["ed_num_dice"] = 2
     st.session_state["ed_flags"] = []
-
+    st.session_state["ed_source_file"] = "custom_cards.json"
     # Список глобальных скриптов (пустой)
     st.session_state["ed_script_list"] = []
 
@@ -48,7 +50,11 @@ def load_card_to_state(card):
     st.session_state["ed_tier"] = card.tier
     st.session_state["ed_loaded_id"] = card.id
     st.session_state["ed_flags"] = card.flags if card.flags else []
-
+    source = Library.get_source(card.id)
+    if source:
+        st.session_state["ed_source_file"] = source
+    else:
+        st.session_state["ed_source_file"] = "custom_cards.json"
     # Приводим тип карты к красивому виду (например, "melee" -> "Melee")
     # Список валидных типов для селекта в редакторе
     valid_types = ["Melee", "Offensive", "Ranged", "Mass Summation", "Mass Individual", "On Play", "Item"]

@@ -49,7 +49,7 @@ class TalentRedLycoris(BasePassive):
     )
     is_active_ability = True
     cooldown = 7
-    duration = 4
+    duration = 1
 
     def activate(self, unit, log_func):
         if unit.cooldowns.get(self.id, 0) > 0:

@@ -7,7 +7,7 @@ from logic.scripts.statuses import (
     apply_status, steal_status, multiply_status, remove_status_script,
     remove_all_positive, apply_status_by_roll
 )
-from logic.scripts.luck import add_luck_bonus_roll, scale_roll_by_luck, add_power_by_luck
+from logic.scripts.luck import add_luck_bonus_roll, scale_roll_by_luck, add_power_by_luck, repeat_dice_by_luck
 
 # Реестр скриптов для использования в JSON карт
 SCRIPTS_REGISTRY = {
@@ -33,5 +33,6 @@ SCRIPTS_REGISTRY = {
     "add_luck_bonus_roll": add_luck_bonus_roll,
     "scale_roll_by_luck": scale_roll_by_luck,
     "add_power_by_luck": add_power_by_luck,
-    "convert_status_to_power": convert_status_to_power
+    "convert_status_to_power": convert_status_to_power,
+    "repeat_dice_by_luck": repeat_dice_by_luck,
 }

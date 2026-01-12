@@ -9,8 +9,8 @@
       "dice": [
         {
           "type": "slash",
-          "base_min": 6,
-          "base_max": 16,
+          "base_min": 7,
+          "base_max": 15,
           "scripts": {}
         }
       ]
@@ -56,14 +56,14 @@
       "name": "Тяжкое Бремя",
       "tier": 2,
       "type": "melee",
-      "description": "При использовании накладывает 5 Защиты персонажу и 4 Защиты союзникам на 2 сцены.",
+      "description": "При использовании накладывает 1 Защиты себе и 4 Защиты всем союзникам (включая себя) на 2 сцены.",
       "scripts": {
         "on_use": [
           {
             "script_id": "apply_status",
             "params": {
               "status": "protection",
-              "base": 5,
+              "base": 1,
               "duration": 2,
               "target": "self"
             }
@@ -82,14 +82,14 @@
       "dice": [
         {
           "type": "block",
-          "base_min": 7,
-          "base_max": 13,
+          "base_min": 5,
+          "base_max": 7,
           "scripts": {}
         },
         {
           "type": "block",
-          "base_min": 7,
-          "base_max": 14,
+          "base_min": 4,
+          "base_max": 5,
           "scripts": {}
         }
       ]
@@ -130,13 +130,13 @@
         },
         {
           "type": "pierce",
-          "base_min": 3,
-          "base_max": 10,
+          "base_min": 4,
+          "base_max": 6,
           "scripts": {}
         },
         {
           "type": "pierce",
-          "base_min": 3,
+          "base_min": 4,
           "base_max": 6,
           "scripts": {}
         }
@@ -165,19 +165,19 @@
       "dice": [
         {
           "type": "slash",
-          "base_min": 3,
-          "base_max": 10,
+          "base_min": 5,
+          "base_max": 7,
           "scripts": {}
         },
         {
           "type": "evade",
-          "base_min": 9,
-          "base_max": 13,
+          "base_min": 4,
+          "base_max": 6,
           "scripts": {}
         },
         {
           "type": "slash",
-          "base_min": 3,
+          "base_min": 4,
           "base_max": 6,
           "scripts": {}
         }
@@ -192,14 +192,14 @@
       "dice": [
         {
           "type": "evade",
-          "base_min": 5,
-          "base_max": 17,
+          "base_min": 8,
+          "base_max": 12,
           "scripts": {}
         },
         {
           "type": "block",
-          "base_min": 9,
-          "base_max": 13,
+          "base_min": 8,
+          "base_max": 12,
           "scripts": {
             "on_clash_win": [
               {
@@ -216,8 +216,8 @@
         },
         {
           "type": "slash",
-          "base_min": 7,
-          "base_max": 15,
+          "base_min": 1,
+          "base_max": 4,
           "scripts": {
             "on_hit": [
               {
@@ -235,30 +235,36 @@
       ]
     },
     {
-      "id": "series_normal_strikes_img",
-      "name": "Серия обычных ударов",
-      "tier": 3,
-      "type": "melee",
-      "description": "Бросок повторяется за каждые 10 удачи владельца. Значения складываются к силе броска. Лимит: 10.",
-      "dice": [
-        {
-          "type": "slash",
-          "base_min": 6,
-          "base_max": 6,
-          "scripts": {
-            "on_roll": [
-              {
-                "script_id": "scale_roll_by_luck",
-                "params": {
-                  "step": 10,
-                  "limit": 10
-                }
-              }
-            ]
-          }
+  "id": "series_normal_strikes_img",
+  "name": "Серия обычных ударов",
+  "tier": 3,
+  "type": "melee",
+  "description": "При использовании: Добавляет +1 атакующий кубик за каждые 10 Удачи (Макс 10).",
+      "flags": [
+        "unchangeable"
+      ],
+  "scripts": {
+    "on_use": [
+      {
+        "script_id": "repeat_dice_by_luck",
+        "params": {
+          "step": 30,
+          "limit": 5
         }
-      ]
-    },
+      }
+    ]
+  },
+  "dice": [
+    {
+      "type": "slash",
+      "base_min": 7,
+      "base_max": 15,
+      "scripts": {
+         "on_roll": []
+      }
+    }
+  ]
+},
     {
       "id": "not_the_limit_img",
       "name": "Это не предел возможностей",
@@ -268,8 +274,8 @@
       "dice": [
         {
           "type": "slash",
-          "base_min": 1,
-          "base_max": 66,
+          "base_min": 12,
+          "base_max": 25,
           "scripts": {}
         }
       ]
