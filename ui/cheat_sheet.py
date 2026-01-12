@@ -10,7 +10,20 @@ def render_cheat_sheet_page():
     tab_speed, tab_hp, tab_power, tab_eco, tab_mech, tab_balance = st.tabs([
         "💨 Скорость", "❤️ Здоровье", "⚔️ Сила", "💰 Экономика", "💀 Механики", "⚖️ Конструктор"
     ])
-
+    base_rolls_data = [
+        (0, "Крысы", 1, 3),
+        (6, "Слухи (Rank 9)", 3, 5),
+        (12, "Миф (Rank 8)", 4, 6),
+        (18, "Легенда (Rank 7)", 5, 7),
+        (24, "Легенда+ (Rank 6)", 7, 10),
+        (30, "Чума (Rank 5)", 9, 13),
+        (36, "Чума+ (Rank 4)", 11, 16),
+        (43, "Кошмар (Rank 3)", 14, 19),
+        (50, "Кошмар+ (Rank 2)", 17, 22),
+        (65, "Звезда (Rank 1)", 21, 27),
+        (80, "Цвет (Color)", 25, 32),
+        (90, "Несовершенство", 30, 40),
+    ]
     # === ТАБ 1: СКОРОСТЬ ===
     with tab_speed:
         st.header("Скорость и Кубики Скорости")
@@ -174,24 +187,25 @@ def render_cheat_sheet_page():
         # === ТАБ 6: БАЛАНС (КОНСТРУКТОР) ===
     with tab_balance:
         st.header("⚖️ Конструктор Баланса Карт")
-        st.caption("Калькулятор справедливых значений для создания карт.")
+        st.caption("Калькулятор значений на основе ваших базовых роллов.")
 
         # --- 1. Таблица базовых бюджетов ---
         with st.expander("📊 Таблица Бюджетов (Power Budget)", expanded=True):
-            budget_data = [
-                {"Rank": 1, "Budget": 14, "Max Dice": 3, "Avg Roll/Die (1d)": "12-14", "Avg Roll/Die (2d)": "6-7",
-                 "Avg Roll/Die (3d)": "3-4"},
-                {"Rank": 2, "Budget": 20, "Max Dice": 4, "Avg Roll/Die (1d)": "18-20", "Avg Roll/Die (2d)": "8-10",
-                 "Avg Roll/Die (3d)": "5-6"},
-                {"Rank": 3, "Budget": 28, "Max Dice": 4, "Avg Roll/Die (1d)": "26-28", "Avg Roll/Die (2d)": "12-14",
-                 "Avg Roll/Die (3d)": "7-9"},
-                {"Rank": 4, "Budget": 38, "Max Dice": 5, "Avg Roll/Die (1d)": "36-38", "Avg Roll/Die (2d)": "16-18",
-                 "Avg Roll/Die (3d)": "10-12"},
-                {"Rank": 5, "Budget": 50, "Max Dice": 5, "Avg Roll/Die (1d)": "48-50", "Avg Roll/Die (2d)": "22-24",
-                 "Avg Roll/Die (3d)": "14-16"},
-            ]
-            st.table(pd.DataFrame(budget_data))
-            st.caption("*Budget = Ориентировочная сумма средних значений всех кубиков карты.*")
+            budget_rows = []
+            for _, rank_name, b_min, b_max in base_rolls_data:
+                avg = (b_min + b_max) / 2
+                budget_rows.append({
+                    "Rank": rank_name,
+                    "Base Roll": f"{b_min}-{b_max}",
+                    "Avg (1 Die)": f"{avg:.1f}",
+                    "Budget 2d": f"{avg * 2:.1f}",
+                    "Budget 3d": f"{avg * 3:.1f}",
+                    "Budget 4d": f"{avg * 4:.1f}",
+                    "Budget 5d": f"{avg * 5:.1f}",
+                })
+
+            st.table(pd.DataFrame(budget_rows))
+            st.caption("*Budget = (Base Avg) × (Dice Count).*")
 
         st.divider()
 
@@ -200,91 +214,103 @@ def render_cheat_sheet_page():
 
         with c_set:
             st.subheader("🛠️ Настройка")
-            rank = st.selectbox("Ранг карты", [1, 2, 3, 4, 5], index=0)
-            ctype = st.selectbox("Тип карты",
-                                 ["Melee (100%)", "Offensive (115%)", "Ranged (125%)", "Mass Attack (135%)"],
-                                 index=0)
-            dice_count = st.slider("Количество дайсов", 1, 5, 2)
+
+            # 1. Выбор персонажа (Базовая сила)
+            base_avg = 2.0  # Fallback
+            char_level_display = 0
+
+            if 'roster' in st.session_state and st.session_state['roster']:
+                roster_names = list(st.session_state['roster'].keys())
+                sel_char = st.selectbox("Персонаж", roster_names, key="bal_char_sel")
+
+                unit = st.session_state['roster'][sel_char]
+                char_level_display = unit.level
+
+                # Поиск в справочнике
+                found_stat = base_rolls_data[0]
+                for row in base_rolls_data:
+                    if char_level_display >= row[0]:
+                        found_stat = row
+                    else:
+                        break
+
+                b_min, b_max = found_stat[2], found_stat[3]
+                base_avg = (b_min + b_max) / 2
+
+                st.caption(f"Lvl {char_level_display} ({found_stat[1]}) -> Base: {b_min}-{b_max} (Avg {base_avg})")
+            else:
+                st.warning("Создайте персонажа для расчета!")
+
+            # 2. Ранг Карты (Определяет "Стандартное кол-во дайсов")
+            # Rank 1 = 1 die budget, Rank 5 = 5 dice budget
+            card_rank = st.selectbox("Ранг карты (Tier)", [1, 2, 3, 4, 5], index=0, key="bal_card_rank")
+            standard_dice_capacity = card_rank
+
+            # 3. Тип и Дайсы
+            type_opts = {
+                "Melee (100%)": 1.0,
+                "Offensive (115%)": 1.15,
+                "Ranged (125%)": 1.25,
+                "Mass Attack (140%)": 1.40
+            }
+            ctype_label = st.selectbox("Тип карты", list(type_opts.keys()), index=0, key="bal_type")
+            type_mult = type_opts[ctype_label]
+
+            dice_count = st.slider("Количество дайсов", 1, 5, 2, key="bal_count")
 
             st.markdown("**Модификаторы:**")
-            effects_count = st.number_input("Кол-во накладываемых эффектов (-15% power)", 0, 5, 0,
-                                            help="Bleed, Burn, Buffs etc.")
-            cond_hard = st.number_input("Сложные условия (+20% power)", 0, 3, 0, help="On Hit, High Roll req.")
-            cond_easy = st.number_input("Легкие условия (-10% power)", 0, 3, 0, help="On Use, Combat Start.")
+            effects_count = st.number_input("Кол-во эффектов (-15%)", 0, 5, 0)
+            cond_hard = st.number_input("Сложные условия (+20%)", 0, 3, 0)
+            cond_easy = st.number_input("Легкие условия (-10%)", 0, 3, 0)
 
-            variance = st.slider("Разброс (Variance)", 0, 20, 4,
-                                 help="Разница между Min и Max. Малый разброс стоит дороже!")
+            variance = st.slider("Разброс (Variance)", 0, 20, 4)
 
         with c_res:
             st.subheader("🎯 Результат")
 
-            # 1. Base Budget
-            base_budgets = {1: 14, 2: 20, 3: 28, 4: 38, 5: 50}
-            budget = base_budgets[rank]
+            # 1. Расчет Бюджета Карты
+            # Budget = (Base Avg) * (Rank Capacity) * TypeMult
+            # Пример: Rank 3 Melee -> Budget = Base * 3 * 1.0
+            total_budget = base_avg * standard_dice_capacity * type_mult
 
-            # 2. Type Penalty (Cost)
-            type_mult = 1.0
-            if "Offensive" in ctype: type_mult = 1.15
-            if "Ranged" in ctype: type_mult = 1.25
-            if "Mass" in ctype: type_mult = 1.35
-
-            # 3. Effect Penalty (Снижает бюджет)
+            # 2. Модификаторы эффективности
             eff_pen = effects_count * 0.15
-
-            # 4. Condition Bonus/Penalty
             cond_mod = (cond_hard * 0.20) - (cond_easy * 0.10)
-
-            # Итоговый множитель эффективности
-            # (1 - Штрафы за эффекты + Бонусы за условия)
             power_mod = 1.0 - eff_pen + cond_mod
 
-            # Доступный бюджет с учетом типа карты (делим, т.к. "дороже" значит меньше статов)
-            # И умножаем на модификаторы силы
-            final_budget = (budget / type_mult) * power_mod
+            # Бюджет с учетом модов
+            effective_budget = total_budget * power_mod
 
-            # 5. Dice Split Logic (User: "1 die is stronger")
-            # Если дайсов много, бюджет делится, но есть "налог на разделение" или наоборот бонус за синергию?
-            # В LoR много дайсов = круто (много клэшей). Поэтому каждый отдельный дайс должен быть слабее.
-            # Просто делим бюджет на кол-во дайсов.
-            avg_val_per_die = final_budget / dice_count
+            # 3. Деление на дайсы + Правило "Концентрации"
+            # Если берем меньше дайсов, чем положено рангу -> Бонус 20%
+            avg_per_die = effective_budget / dice_count
 
-            # 6. Variance Adjustment (Reliability Cost)
-            # Надежность стоит дорого.
-            # Если разброс (Variance) маленький (0-3), это дорого -> Avg должен быть ниже.
-            # Если разброс большой (10+), это дешево -> Avg может быть выше.
+            split_bonus_applied = False
+            if dice_count < standard_dice_capacity:
+                avg_per_die *= 1.2
+                split_bonus_applied = True
 
-            # Базовый разброс ~4.
-            # Если user выбрал 10 -> Variance Bonus +X% to Avg.
-            # Если user выбрал 0 -> Variance Penalty -Y% to Avg.
+            # 4. Variance Adjustment (+2% силы за единицу разброса > 4)
+            var_factor = 1.0 + ((variance - 4) * 0.02)
+            final_avg_die = avg_per_die * var_factor
 
-            var_factor = 1.0 + ((variance - 4) * 0.02)  # +2% за каждую единицу разброса выше 4
+            # 5. Min/Max
+            d_min = int(final_avg_die - (variance / 2))
+            d_max = int(final_avg_die + (variance / 2))
 
-            final_avg = avg_val_per_die * var_factor
-
-            # Расчет Min/Max
-            # Min = Avg - (Var/2)
-            # Max = Avg + (Var/2)
-
-            d_min = int(final_avg - (variance / 2))
-            d_max = int(final_avg + (variance / 2))
-
-            # Fix negative
-            if d_min < 1:
-                d_min = 1
-                d_max = 1 + variance
+            if d_min < 1: d_min = 1; d_max = 1 + variance
 
             with st.container(border=True):
-                st.metric("Среднее значение", f"{final_avg:.1f}")
-                st.markdown(f"### 🎲 Рекомендованный дайс:")
-                st.markdown(f"# **{d_min} ~ {d_max}**")
+                st.metric("Среднее (1 кубик)", f"{final_avg_die:.1f}")
+                st.markdown(f"### 🎲 {d_min} ~ {d_max}")
 
-                st.caption(f"Budget: {final_budget:.1f} | Var Factor: {var_factor:.2f}")
+                bonus_text = " (+20% Bonus)" if split_bonus_applied else ""
+                st.caption(f"Rank Cap: {standard_dice_capacity} dice | Split: {dice_count}{bonus_text}")
 
-            st.info("""
-                **Логика:**
-                * **Масс/Рендж** атаки имеют меньшие значения (-25-35%).
-                * **Эффекты** (Кровотечение и т.д.) снижают силу кубика.
-                * **Сложные условия** (On Hit) позволяют сделать кубик сильнее.
-                * **Большой разброс** (1~20) позволяет иметь более высокое среднее/макс значение, так как это риск.
-                * **Фиксированный урон** (5~5) стоит очень дорого, поэтому значение будет низким.
+            st.info(f"""
+                    **Логика:**
+                    * **Base**: {base_avg} (Lvl {char_level_display})
+                    * **Rank Budget**: x{standard_dice_capacity} (Tier {card_rank})
+                    * **Split**: /{dice_count} {'(+20% Boost)' if split_bonus_applied else ''}
+                    * **Mods**: {int(power_mod * 100)}%
                 """)
