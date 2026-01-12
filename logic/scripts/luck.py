@@ -1,3 +1,4 @@
+import copy
 from typing import TYPE_CHECKING
 from logic.scripts.utils import _check_conditions
 
@@ -59,3 +60,38 @@ def add_power_by_luck(ctx: 'RollContext', params: dict):
 
     if bonus > 0:
         ctx.modify_power(bonus, f"Fortune ({bonus})")
+
+
+def repeat_dice_by_luck(ctx: 'RollContext', params: dict):
+    """
+    Добавляет копии кубиков в карту в зависимости от Удачи.
+    Работает на триггере 'on_use'.
+    """
+    step = int(params.get("step", 10))  # Каждые 10 удачи
+    limit = int(params.get("limit", 10))  # Максимум 10 доп. ударов
+
+    # Получаем удачу
+    luck = ctx.source.resources.get("luck", 0)
+
+    # Считаем сколько раз повторить
+    if step <= 0: step = 1
+    repeats = luck // step
+    repeats = min(repeats, limit)
+
+    if repeats <= 0:
+        return
+
+    card = ctx.source.current_card
+    if not card or not card.dice_list:
+        return
+
+    # Берем первый кубик как шаблон (или можно усложнить логику для многокубовых карт)
+    template_die = card.dice_list[0]
+
+    # Добавляем копии
+    for _ in range(repeats):
+        # Создаем глубокую копию, чтобы скрипты и статы были независимы
+        new_die = copy.deepcopy(template_die)
+        card.dice_list.append(new_die)
+
+    ctx.log.append(f"🍀 **Серия ударов**: Удача {luck} дала +{repeats} доп. кубиков!")

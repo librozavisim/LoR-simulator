@@ -84,7 +84,8 @@
       "type": "On Play",
       "description": "ЗАЩИЩАТЬ СВОИХ. Все союзники получают Барьер (25% от их Макс. HP).",
       "flags": [
-        "friendly"
+        "friendly",
+        "offensive"
       ],
       "scripts": {
         "on_use": [
@@ -162,61 +163,61 @@
       "dice": []
     },
     {
-  "id": "azgick_expose_weakness",
-  "name": "Указать на слабость никчемного",
-  "tier": 2,
-  "type": "Melee",
-  "description": "🧪 Наложить 7 Fragile",
-  "flags": [],
-  "scripts": {
-    "on_use": [
-      {
-        "script_id": "apply_status",
-        "params": {
-          "status": "fragile",
-          "base": 7,
-          "target": "target",
-          "duration": 1,
-          "delay": 0
-        }
-      }
-    ]
-  },
-  "dice": []
-},
-{
-  "id": "azgick_enrage",
-  "name": "Разозлить",
-  "tier": 2,
-  "type": "On Play",
-  "description": "🧪 Наложить 12 Strength",
-  "flags": [
-    "friendly"
-  ],
-  "scripts": {
-    "on_use": [
-      {
-        "script_id": "restore_resource",
-        "params": {
-          "type": "hp",
-          "base": -12,
-          "target": "target"
-        }
+      "id": "azgick_expose_weakness",
+      "name": "Указать на слабость никчемного",
+      "tier": 2,
+      "type": "Melee",
+      "description": "🧪 Наложить 7 Fragile",
+      "flags": [],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "apply_status",
+            "params": {
+              "status": "fragile",
+              "base": 7,
+              "target": "target",
+              "duration": 1,
+              "delay": 0
+            }
+          }
+        ]
       },
-      {
-        "script_id": "apply_status",
-        "params": {
-          "status": "strength",
-          "base": 12,
-          "target": "target",
-          "duration": 1,
-          "delay": 0
-        }
-      }
-    ]
-  },
-  "dice": []
-},
+      "dice": []
+    },
+    {
+      "id": "azgick_enrage",
+      "name": "Разозлить",
+      "tier": 2,
+      "type": "On Play",
+      "description": "🧪 Наложить 12 Strength",
+      "flags": [
+        "friendly"
+      ],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "restore_resource",
+            "params": {
+              "type": "hp",
+              "base": -12,
+              "target": "target"
+            }
+          },
+          {
+            "script_id": "apply_status",
+            "params": {
+              "status": "strength",
+              "base": 12,
+              "target": "target",
+              "duration": 1,
+              "delay": 0
+            }
+          }
+        ]
+      },
+      "dice": []
+    },
     {
       "id": "azgick_smile",
       "name": "Ослепительная гнилозубая улыбка",

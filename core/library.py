@@ -7,6 +7,7 @@ from core.card import Card
 
 class Library:
     _cards = {}  # Тут хранятся ВСЕ карты (из всех файлов) для игры
+    _sources = {}  # [NEW] Словарь: card_id -> filename
 
     @classmethod
     def register(cls, card: Card):
@@ -32,6 +33,12 @@ class Library:
     def get_all_cards(cls):
         return list(cls._cards.values())
 
+    # === [NEW] МЕТОД ПОЛУЧЕНИЯ ИСТОЧНИКА ===
+    @classmethod
+    def get_source(cls, card_id: str) -> str:
+        """Возвращает имя файла, откуда карта была загружена."""
+        return cls._sources.get(card_id)
+
     # === ЗАГРУЗКА (ЧИТАЕТ ВСЮ ПАПКУ) ===
     @classmethod
     def load_all(cls, path="data/cards"):
@@ -56,11 +63,18 @@ class Library:
             cards_list = data.get("cards", []) if isinstance(data, dict) else data
 
             count = 0
+            filename = os.path.basename(filepath)  # Берем только имя файла
+
             for card_data in cards_list:
                 card = Card.from_dict(card_data)
                 cls.register(card)
+
+                # [NEW] Запоминаем источник
+                if card.id:
+                    cls._sources[card.id] = filename
+
                 count += 1
-            print(f"✔ {os.path.basename(filepath)}: {count} шт.")
+            print(f"✔ {filename}: {count} шт.")
         except Exception as e:
             print(f" Ошибка {filepath}: {e}")
 
@@ -112,6 +126,8 @@ class Library:
 
         # 4. Не забываем обновить карту в памяти, чтобы сразу играть ей
         cls.register(card)
+        # [NEW] Обновляем источник в памяти
+        cls._sources[card.id] = filename
 
     # === УДАЛЕНИЕ ===
     @classmethod
@@ -120,6 +136,10 @@ class Library:
         # 1. Удаляем из памяти
         if card_id in cls._cards:
             del cls._cards[card_id]
+
+        # [NEW] Удаляем из источников
+        if card_id in cls._sources:
+            del cls._sources[card_id]
 
         # 2. Ищем и удаляем из файлов
         path = "data/cards"
@@ -154,6 +174,7 @@ class Library:
                     print(f"Error deleting from {filepath}: {e}")
 
         return False
+
 
 # Инициализация
 Library.load_all("data/cards")

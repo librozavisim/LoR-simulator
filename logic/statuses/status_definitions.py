@@ -40,7 +40,7 @@ STATUS_REGISTRY = {
 
     "enrage_tracker": EnrageTrackerStatus(),
     "invisibility": InvisibilityStatus(),
-    "weakness": WeaknessStatus(),
+    "weakness": WeaknessStatus()   ,
 
     "satiety": SatietyStatus(),
     "mental_protection": MentalProtectionStatus(),
