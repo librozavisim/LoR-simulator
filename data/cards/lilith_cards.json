@@ -11,8 +11,8 @@
       "dice": [
         {
           "type": "slash",
-          "base_min": 3,
-          "base_max": 6,
+          "base_min": 1,
+          "base_max": 3,
           "scripts": {
             "on_hit": [
               {
@@ -30,8 +30,8 @@
         },
         {
           "type": "slash",
-          "base_min": 3,
-          "base_max": 6,
+          "base_min": 1,
+          "base_max": 3,
           "scripts": {
             "on_hit": [
               {
@@ -49,8 +49,8 @@
         },
         {
           "type": "slash",
-          "base_min": 3,
-          "base_max": 6,
+          "base_min": 1,
+          "base_max": 3,
           "scripts": {
             "on_hit": [
               {
@@ -102,14 +102,14 @@
       "dice": [
         {
           "type": "blunt",
-          "base_min": 5,
-          "base_max": 5,
+          "base_min": 3,
+          "base_max": 4,
           "scripts": {}
         },
         {
           "type": "blunt",
-          "base_min": 4,
-          "base_max": 6,
+          "base_min": 3,
+          "base_max": 4,
           "scripts": {}
         }
       ]
@@ -151,8 +151,8 @@
       "dice": [
         {
           "type": "evade",
-          "base_min": 6,
-          "base_max": 7,
+          "base_min": 4,
+          "base_max": 6,
           "scripts": {
             "on_clash_win": [
               {
@@ -170,8 +170,8 @@
         },
         {
           "type": "evade",
-          "base_min": 6,
-          "base_max": 7,
+          "base_min": 4,
+          "base_max": 6,
           "scripts": {
             "on_clash_win": [
               {
@@ -189,8 +189,8 @@
         },
         {
           "type": "slash",
-          "base_min": 3,
-          "base_max": 4,
+          "base_min": 4,
+          "base_max": 6,
           "scripts": {
             "on_hit": [
               {
@@ -239,7 +239,7 @@
         {
           "type": "evade",
           "base_min": 7,
-          "base_max": 10,
+          "base_max": 11,
           "scripts": {}
         }
       ]
@@ -274,8 +274,8 @@
         },
         {
           "type": "slash",
-          "base_min": 6,
-          "base_max": 8,
+          "base_min": 4,
+          "base_max": 7,
           "scripts": {}
         }
       ]
@@ -329,8 +329,8 @@
         },
         {
           "type": "blunt",
-          "base_min": 6,
-          "base_max": 8,
+          "base_min": 2,
+          "base_max": 6,
           "scripts": {
             "on_hit": [
               {
@@ -359,8 +359,8 @@
       "dice": [
         {
           "type": "blunt",
-          "base_min": 5,
-          "base_max": 10,
+          "base_min": 14,
+          "base_max": 20,
           "scripts": {
             "on_hit": [
               {
@@ -411,8 +411,8 @@
         },
         {
           "type": "evade",
-          "base_min": 7,
-          "base_max": 10,
+          "base_min": 5,
+          "base_max": 8,
           "scripts": {
             "on_clash_win": [
               {
