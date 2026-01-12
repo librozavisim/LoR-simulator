@@ -61,8 +61,8 @@
         },
         {
           "type": "slash",
-          "base_min": 13,
-          "base_max": 13,
+          "base_min": 8,
+          "base_max": 11,
           "is_counter": false,
           "scripts": {}
         }
