@@ -121,5 +121,5 @@ class TalentScorchingMastery(BasePassive):
         if count % 3 == 0:
             # Накладываем горение. По умолчанию врагу, так выгоднее.
             if ctx.target:
-                ctx.target.add_status("burn", 4, duration=3)
+                ctx.target.add_status("burn", 4, duration=99)
                 ctx.log.append("🔥 **Обжигающее мастерство**: Враг получил 4 Горения (3-я победа).")

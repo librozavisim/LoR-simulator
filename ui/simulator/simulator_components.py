@@ -32,6 +32,22 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
     ui_stat = slot.get('ui_status', {"text": "...", "icon": "", "color": "gray"})
     selected_card = slot.get('card')
 
+    # Defensive: sometimes session state or external logic can set slot['card'] to
+    # a raw id (str/int). Try to resolve it to a Card object via Library.get_card.
+    if selected_card and not hasattr(selected_card, 'dice_list'):
+        try:
+            resolved = Library.get_card(selected_card)
+            # Library.get_card returns a Card-like object; ensure it has dice_list
+            if hasattr(resolved, 'dice_list'):
+                slot['card'] = resolved
+                selected_card = resolved
+            else:
+                slot['card'] = None
+                selected_card = None
+        except Exception:
+            slot['card'] = None
+            selected_card = None
+
     # Формируем заголовок для экспандера (только текст/эмодзи)
     if selected_card:
         c_type_lower = str(selected_card.card_type).lower()

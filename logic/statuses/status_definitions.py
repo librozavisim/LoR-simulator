@@ -2,7 +2,7 @@
 from logic.statuses.common import (
     StrengthStatus, EnduranceStatus, BleedStatus, ParalysisStatus,
     ProtectionStatus, FragileStatus, VulnerabilityStatus, BarrierStatus, BindStatus, DeepWoundStatus, SlowStatus,
-    HasteStatus
+    HasteStatus, BurnStatus
 )
 from logic.statuses.custom import (
     SelfControlStatus, SmokeStatus, RedLycorisStatus, SinisterAuraStatus,
@@ -27,6 +27,7 @@ STATUS_REGISTRY = {
     "fragile": FragileStatus(),
     "vulnerability": VulnerabilityStatus(),
     "barrier": BarrierStatus(),
+    "burn": BurnStatus(),
 
     # Custom
     "self_control": SelfControlStatus(),
@@ -48,7 +49,7 @@ STATUS_REGISTRY = {
     "bleed_resist": BleedResistStatus(),
     "regen_ganache": RegenGanacheStatus(),
     "revenge_dmg_up": RevengeDmgUpStatus(),
-    "taunt": TauntStatus(),
+    "taunt": TauntStatus() ,
 
     "bind": BindStatus(),
     "deep_wound": DeepWoundStatus(),

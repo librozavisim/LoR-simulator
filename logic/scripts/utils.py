@@ -29,6 +29,10 @@ def _get_unit_stat(unit, stat_name: str) -> int:
     if key in unit.resources: return unit.resources[key]
     if key == "luck": return unit.skills.get("luck", 0)
 
+    # Allow referencing unit.level in scripts (e.g., scale by level)
+    if key in ["level", "lvl"]:
+        return getattr(unit, "level", 0)
+
     # 3. Атрибуты и Навыки (через modifiers)
     val_data = unit.modifiers.get(key)
     if val_data is None:

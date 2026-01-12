@@ -80,7 +80,16 @@
     "passives": [
         "adaptation"
     ],
-    "talents": [],
+    "talents": [
+        "strike_iron_hot",
+        "spark",
+        "cauterization",
+        "body_adaptation",
+        "hearth_of_power",
+        "hellfire",
+        "wildfire",
+        "ifrit"
+    ],
     "augmentations": [],
     "level_rolls": {
         "3": {

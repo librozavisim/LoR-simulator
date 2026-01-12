@@ -644,6 +644,31 @@
       ]
     },
     {
+      "id": "firestorm_mass",
+      "name": "Огненный смерч",
+      "tier": 5,
+      "type": "Mass Summation",
+      "description": "Массовая атака: базовый рол 45, увеличивается на ваш уровень. При попадании накладывает 25 Горения.",
+      "flags": ["offensive"],
+      "scripts": {},
+      "dice": [
+        {
+          "type": "slash",
+          "base_min": 45,
+          "base_max": 45,
+          "is_counter": false,
+          "scripts": {
+            "on_roll": [
+              { "script_id": "modify_roll_power", "params": { "stat": "level", "factor": 1.0, "base": 0 } }
+            ],
+            "on_hit": [
+              { "script_id": "apply_status", "params": { "status": "burn", "base": 25, "duration": 99, "target": "target" } }
+            ]
+          }
+        }
+      ]
+    },
+    {
       "id": "1323123_cf12",
       "name": "1323123",
       "tier": 1,
@@ -756,6 +781,114 @@
           "base_max": 99,
           "is_counter": false,
           "scripts": {}
+        }
+      ]
+    },
+    {
+      "id": "pat_left_shoulder",
+      "name": "Похлопать по левому плечу",
+      "tier": 1,
+      "type": "On Play",
+      "description": "Увеличивает силу атакующих бросков на карте союзника на 6. [НЕВОЗМОЖНО СТОЛКНУТЬСЯ]",
+      "flags": [
+        "friendly",
+        "offensive"
+      ],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "apply_status",
+            "params": {
+              "status": "strength",
+              "base": 6,
+              "duration": 1,
+              "target": "target"
+            }
+          }
+        ]
+      },
+      "dice": []
+    },
+    {
+      "id": "death_dragonfist_a395",
+      "name": "Death Dragonfist",
+      "tier": 4,
+      "type": "Melee",
+      "description": "",
+      "flags": [],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "apply_status",
+            "params": {
+              "status": "burn",
+              "base": 20,
+              "stat": "None",
+              "scale_from_target": false,
+              "factor": 1.0,
+              "duration": 1,
+              "delay": 0,
+              "target": "self"
+            }
+          }
+        ]
+      },
+      "dice": [
+        {
+          "type": "block",
+          "base_min": 40,
+          "base_max": 60,
+          "is_counter": false,
+          "scripts": {
+            "on_clash_win": [
+              {
+                "script_id": "apply_status_by_roll",
+                "params": {
+                  "status": "burn",
+                  "target": "target"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "blunt",
+          "base_min": 60,
+          "base_max": 80,
+          "is_counter": false,
+          "scripts": {
+            "on_hit": [
+              {
+                "script_id": "self_harm_percent",
+                "params": {
+                  "percent": 0.20000000000000004
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+    ,
+    {
+      "id": "spark_attack",
+      "name": "Искра",
+      "tier": 1,
+      "type": "Melee",
+      "description": "Spark attack granted by Spark talent. Small blunt damage; applies Burn.",
+      "flags": ["offensive"],
+      "scripts": {},
+      "dice": [
+        {
+          "type": "blunt",
+          "base_min": 8,
+          "base_max": 12,
+          "is_counter": false,
+          "scripts": {
+            "on_hit": [
+              { "script_id": "apply_status", "params": { "status": "burn", "base": 4, "duration": 99, "target": "target" } }
+            ]
+          }
         }
       ]
     }
