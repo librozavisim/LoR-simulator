@@ -2,6 +2,8 @@
 import streamlit as st
 import pandas as pd
 
+from core.game_templates import CHARACTER_TEMPLATES
+
 
 def render_cheat_sheet_page():
     st.title("📚 Справочник характеристик")
@@ -10,20 +12,28 @@ def render_cheat_sheet_page():
     tab_speed, tab_hp, tab_power, tab_eco, tab_mech, tab_balance = st.tabs([
         "💨 Скорость", "❤️ Здоровье", "⚔️ Сила", "💰 Экономика", "💀 Механики", "⚖️ Конструктор"
     ])
-    base_rolls_data = [
-        (0, "Крысы", 1, 3),
-        (6, "Слухи (Rank 9)", 3, 5),
-        (12, "Миф (Rank 8)", 4, 6),
-        (18, "Легенда (Rank 7)", 5, 7),
-        (24, "Легенда+ (Rank 6)", 7, 10),
-        (30, "Чума (Rank 5)", 9, 13),
-        (36, "Чума+ (Rank 4)", 11, 16),
-        (43, "Кошмар (Rank 3)", 14, 19),
-        (50, "Кошмар+ (Rank 2)", 17, 22),
-        (65, "Звезда (Rank 1)", 21, 27),
-        (80, "Цвет (Color)", 25, 32),
-        (90, "Несовершенство", 30, 40),
-    ]
+    base_rolls_data = []
+
+    # Base roll logic (copied from core/ranks.py logic for display)
+    def get_roll(lvl):
+        if lvl >= 90: return 30, 40
+        if lvl >= 80: return 25, 32
+        if lvl >= 65: return 21, 27
+        if lvl >= 50: return 17, 22
+        if lvl >= 43: return 14, 19
+        if lvl >= 36: return 11, 16
+        if lvl >= 30: return 9, 13
+        if lvl >= 24: return 7, 10
+        if lvl >= 18: return 5, 7
+        if lvl >= 12: return 4, 6
+        if lvl >= 6:  return 3, 5
+        return 1, 3
+
+    for tmpl in CHARACTER_TEMPLATES:
+        rmin, rmax = get_roll(tmpl['level'])
+        base_rolls_data.append((tmpl['level'], tmpl['rank_name'], rmin, rmax))
+
+    base_rolls_data.sort(key=lambda x: x[0])
     # === ТАБ 1: СКОРОСТЬ ===
     with tab_speed:
         st.header("Скорость и Кубики Скорости")
@@ -32,27 +42,27 @@ def render_cheat_sheet_page():
         data_speed = [
             {"Lvl": "90+", "Rank": "Несовершенство (Impurity)", "Dice Slots": "6x [30-40]", "Agility": "40 (+35)",
              "Speed": "40 (+30)"},
-            {"Lvl": 80, "Rank": "Цвет (Звезда Усложнен)", "Dice Slots": "6x [24-27]", "Agility": "30 (+25)",
+            {"Lvl": "80", "Rank": "Цвет (Звезда Усложнен)", "Dice Slots": "6x [24-27]", "Agility": "30 (+25)",
              "Speed": "30 (+20)"},
-            {"Lvl": 65, "Rank": "Rank 1 (Звезда)", "Dice Slots": "5x [21-24], 1x [19-22]", "Agility": "25 (+20)",
+            {"Lvl": "65", "Rank": "Rank 1 (Звезда)", "Dice Slots": "5x [21-24], 1x [19-22]", "Agility": "25 (+20)",
              "Speed": "30 (+16)"},
-            {"Lvl": 50, "Rank": "Rank 2 (Кошмар Усложнен)", "Dice Slots": "4x [19-22], 1x [14-17]",
+            {"Lvl": "50", "Rank": "Rank 2 (Кошмар Усложнен)", "Dice Slots": "4x [19-22], 1x [14-17]",
              "Agility": "20 (+20)", "Speed": "25 (+16)"},
-            {"Lvl": 43, "Rank": "Rank 3 (Кошмар)", "Dice Slots": "3x [16-19], 1x [13-16]", "Agility": "17 (+15)",
+            {"Lvl": "43", "Rank": "Rank 3 (Кошмар)", "Dice Slots": "3x [16-19], 1x [13-16]", "Agility": "17 (+15)",
              "Speed": "22 (+12)"},
-            {"Lvl": 36, "Rank": "Rank 4 (Чума Усложнен)", "Dice Slots": "3x [15-18], 1x [10-13]", "Agility": "14 (+15)",
+            {"Lvl": "36", "Rank": "Rank 4 (Чума Усложнен)", "Dice Slots": "3x [15-18], 1x [10-13]", "Agility": "14 (+15)",
              "Speed": "19 (+12)"},
-            {"Lvl": 30, "Rank": "Rank 5 (Чума)", "Dice Slots": "2x [13-16], 1x [10-13]", "Agility": "12 (+10)",
+            {"Lvl": "30", "Rank": "Rank 5 (Чума)", "Dice Slots": "2x [13-16], 1x [10-13]", "Agility": "12 (+10)",
              "Speed": "16 (+8)"},
-            {"Lvl": 24, "Rank": "Rank 6 (Легенда Усложнен)", "Dice Slots": "2x [12-15], 1x [7-10]",
+            {"Lvl": "24", "Rank": "Rank 6 (Легенда Усложнен)", "Dice Slots": "2x [12-15], 1x [7-10]",
              "Agility": "10 (+10)", "Speed": "13 (+8)"},
-            {"Lvl": 18, "Rank": "Rank 7 (Легенда)", "Dice Slots": "1x [10-13], 1x [7-10]", "Agility": "8 (+5)",
+            {"Lvl": "18", "Rank": "Rank 7 (Легенда)", "Dice Slots": "1x [10-13], 1x [7-10]", "Agility": "8 (+5)",
              "Speed": "10 (+4)"},
-            {"Lvl": 12, "Rank": "Rank 8 (Миф)", "Dice Slots": "1x [9-12], 1x [4-7]", "Agility": "6 (+5)",
+            {"Lvl": "12", "Rank": "Rank 8 (Миф)", "Dice Slots": "1x [9-12], 1x [4-7]", "Agility": "6 (+5)",
              "Speed": "7 (+4)"},
-            {"Lvl": 6, "Rank": "Rank 9 (Слухи Усложнен)", "Dice Slots": "1x [4-7]", "Agility": "4 (+0)",
+            {"Lvl": "6", "Rank": "Rank 9 (Слухи Усложнен)", "Dice Slots": "1x [4-7]", "Agility": "4 (+0)",
              "Speed": "4 (+0)"},
-            {"Lvl": 0, "Rank": "Крысы (Слухи)", "Dice Slots": "1x [1-3]", "Agility": "1 (+0)", "Speed": "1 (+0)"},
+            {"Lvl": "0", "Rank": "Крысы (Слухи)", "Dice Slots": "1x [1-3]", "Agility": "1 (+0)", "Speed": "1 (+0)"},
         ]
         df_speed = pd.DataFrame(data_speed)
         st.table(df_speed)
@@ -62,23 +72,16 @@ def render_cheat_sheet_page():
         st.header("Расчет Здоровья (HP)")
         st.markdown("*(При условии прокачки Стойкости)*")
 
-        data_hp = [
-            {"Lvl": "90+", "Rank": "Несовершенство", "Endurance": 100, "Total HP": "~950-1200"},
-            {"Lvl": 80, "Rank": "Цвет (Звезда+)", "Endurance": 90, "Total HP": 726},
-            {"Lvl": 65, "Rank": "Rank 1 (Звезда)", "Endurance": 80, "Total HP": 525},
-            {"Lvl": 50, "Rank": "Rank 2 (Кошмар+)", "Endurance": 70, "Total HP": 351},
-            {"Lvl": 43, "Rank": "Rank 3 (Кошмар)", "Endurance": 60, "Total HP": 293},
-            {"Lvl": 36, "Rank": "Rank 4 (Чума+)", "Endurance": 50, "Total HP": 239},
-            {"Lvl": 30, "Rank": "Rank 5 (Чума)", "Endurance": 40, "Total HP": 189},
-            {"Lvl": 24, "Rank": "Rank 6 (Легенда+)", "Endurance": 30, "Total HP": 145},
-            {"Lvl": 18, "Rank": "Rank 7 (Легенда)", "Endurance": 20, "Total HP": 104},
-            {"Lvl": 12, "Rank": "Rank 8 (Миф)", "Endurance": 10, "Total HP": 68},
-            {"Lvl": 6, "Rank": "Rank 9 (Слухи+)", "Endurance": 5, "Total HP": 42},
-            {"Lvl": 0, "Rank": "Крысы", "Endurance": 0, "Total HP": 20},
-        ]
-        df_hp = pd.DataFrame(data_hp)
-        st.dataframe(df_hp, use_container_width=True, hide_index=True)
+        hp_rows = []
+        for tmpl in reversed(CHARACTER_TEMPLATES):
+            hp_rows.append({
+                "Lvl": str(tmpl['level']),  # FIX: Explicit string
+                "Rank": tmpl['rank_name'],
+                "Endurance": tmpl['endurance'],
+                "Total HP (Approx)": tmpl['hp_approx']
+            })
 
+        st.dataframe(pd.DataFrame(hp_rows), width='stretch', hide_index=True)
     # === ТАБ 3: РОЛЛЫ ===
     with tab_power:
         st.header("Чистые средние роллы карты")

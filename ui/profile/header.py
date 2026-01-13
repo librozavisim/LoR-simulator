@@ -4,6 +4,7 @@ import os
 from core.ranks import RANK_THRESHOLDS
 from core.unit.unit import Unit
 from core.unit.unit_library import UnitLibrary
+from core.game_templates import CHARACTER_TEMPLATES
 
 def save_avatar_file(uploaded, unit_name):
     os.makedirs("data/avatars", exist_ok=True)
@@ -12,28 +13,75 @@ def save_avatar_file(uploaded, unit_name):
     with open(path, "wb") as f: f.write(uploaded.getbuffer())
     return path
 
+
+def create_character_from_template(template, roster):
+    """Создает персонажа на основе шаблона"""
+    base_name = template["name"]
+    name = f"{base_name} {len(roster) + 1}"
+
+    u = Unit(name)
+    u.level = template["level"]
+    u.rank = 9 - template["tier"]  # В системе рангов: 9=Rank9, 0=Color. Инверсия для UI.
+    if u.rank < -1: u.rank = -1  # Cap for high tiers
+
+    # Атрибуты из шаблона
+    u.attributes["endurance"] = template["endurance"]
+    u.attributes["agility"] = template["agility"]
+    u.skills["speed"] = template["speed_skill"]
+
+    # Для баланса заполняем остальные статы средними значениями,
+    # чтобы персонаж не был "голым" по силе
+    avg_stat = template["endurance"] // 2
+    u.attributes["strength"] = avg_stat
+    u.skills["strike_power"] = avg_stat
+    u.skills["tough_skin"] = template["endurance"] // 2
+
+    # Генерируем "историю" прокачки (Level Rolls),
+    # чтобы HP соответствовало уровню
+    # Каждые 3 уровня персонаж получает бонус.
+    # Эмулируем средний бросок (3 HP, 3 SP)
+    for lvl in range(3, u.level + 1, 3):
+        u.level_rolls[str(lvl)] = {"hp": 3, "sp": 3}
+
+    u.recalculate_stats()
+    return u, name
+
+
 def render_header(roster):
     # --- HEADER / SELECTION ---
     c1, c2 = st.columns([3, 1])
 
-    # Сначала проверяем кнопку создания (чтобы обновить состояние до рендера селектора)
-    if c2.button("➕ Новый"):
-        n = f"Unit_{len(roster) + 1}"
-        u = Unit(n)
-        roster[n] = u
-        UnitLibrary.save_unit(u)
+    # === КНОПКА СОЗДАНИЯ (POPOVER) ===
+    with c2.popover("➕ Создать", use_container_width=True):
+        st.markdown("**Выберите шаблон:**")
 
-        # Обновляем селектор на нового
-        st.session_state["profile_selected_unit"] = n
+        # Опция "Пустой"
+        if st.button("Крыса (Пустой)", use_container_width=True):
+            n = f"Unit_{len(roster) + 1}"
+            u = Unit(n)
+            roster[n] = u
+            UnitLibrary.save_unit(u)
+            st.session_state["profile_selected_unit"] = n
+            if 'save_callback' in st.session_state: st.session_state['save_callback']()
+            st.rerun()
 
-        # Сохраняем состояние сразу
-        if 'save_callback' in st.session_state:
-            st.session_state['save_callback']()
+        st.divider()
 
-        st.rerun()
+        # Шаблоны из файла
+        for tmpl in CHARACTER_TEMPLATES:
+            # Пропускаем крысу, она выше
+            if tmpl["tier"] == 0: continue
+
+            label = f"{tmpl['name']} (Lvl {tmpl['level']})"
+            if st.button(label, key=f"create_{tmpl['tier']}", use_container_width=True):
+                u, n = create_character_from_template(tmpl, roster)
+                roster[n] = u
+                UnitLibrary.save_unit(u)
+                st.session_state["profile_selected_unit"] = n
+                if 'save_callback' in st.session_state: st.session_state['save_callback']()
+                st.rerun()
 
     # Рисуем селектор с привязкой к сохранению
-    # Streamlit сам подставит значение из st.session_state['profile_selected_unit']
     sel = c1.selectbox(
         "Персонаж",
         list(roster.keys()),
@@ -66,29 +114,21 @@ def render_basic_info(unit, u_key):
     unit.name = st.text_input("Имя", unit.name, key=f"name_{u_key}")
 
     c_lvl, c_int = st.columns(2)
-    unit.level = c_lvl.number_input("Уровень", 1, 100, unit.level, key=f"lvl_{u_key}")
+    unit.level = c_lvl.number_input("Уровень", 1, 120, unit.level, key=f"lvl_{u_key}")
 
     # Интеллект
-    # === FIX: Добавлена проверка на изменение ===
     new_int = c_int.number_input("Баз. Инт.", 1, 30, unit.base_intellect, key=f"base_int_{u_key}")
     if new_int != unit.base_intellect:
         unit.base_intellect = new_int
         unit.recalculate_stats()
         st.rerun()
 
-    # === ИСПРАВЛЕНИЕ: Чтение из новой структуры modifiers ===
-    # Раньше было: unit.modifiers.get("total_intellect", ...)
-    # Теперь там словарь {'flat': X, 'pct': Y}.
-
     total_int_data = unit.modifiers.get("total_intellect", {})
     if isinstance(total_int_data, dict):
-        # Если это словарь, берем flat (интеллект обычно flat)
         total_int = total_int_data.get("flat", unit.base_intellect)
     else:
-        # Если вдруг там старое число (совместимость)
         total_int = total_int_data if total_int_data else unit.base_intellect
 
-    # Сравниваем числа
     if total_int > unit.base_intellect:
         st.info(f"🧠 Интеллект: **{total_int}** (+{total_int - unit.base_intellect})")
     else:
@@ -101,29 +141,26 @@ def render_basic_info(unit, u_key):
     r_c1, r_c2 = st.columns(2)
 
     # Выбор ранга
-    unit.rank = r_c1.number_input("Текущий (Tier)", -1, 10, unit.rank, help="Официальный ранг (0-11)",
+    unit.rank = r_c1.number_input("Текущий (Tier)", -5, 10, unit.rank, help="Официальный ранг (0-11)",
                                   key=f"rank_cur_{u_key}")
 
     # === ОТОБРАЖЕНИЕ НАЗВАНИЯ РАНГА ===
     rank_name = "Неизвестный ранг"
     rank_color = "gray"
 
-    # Ищем название в RANK_THRESHOLDS по индексу tier
     for _, name, tier in RANK_THRESHOLDS:
         if (10-tier) == unit.rank:
             rank_name = name
-            # Подсветка для высоких рангов
             if tier >= 10:
-                rank_color = "red"  # Color / Impurity
+                rank_color = "red"
             elif tier >= 9:
-                rank_color = "orange"  # Star
+                rank_color = "orange"
             elif tier >= 7:
-                rank_color = "blue"  # Nightmare
+                rank_color = "blue"
             else:
                 rank_color = "green"
             break
 
-    # Выводим название под полем ввода
     r_c1.markdown(f":{rank_color}[**{rank_name}**]")
 
     # Status Rank (Текстовое поле)

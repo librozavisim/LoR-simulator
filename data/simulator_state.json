@@ -1,13 +1,15 @@
 {
-  "page": "🎲 Checks",
+  "page": "⚔️ Simulator",
   "left": [
-    "Хаски"
+    "Азгик2",
+    "Denis 7-9 7-9",
+    "Зафиэль"
   ],
   "right": [
     "Рейн"
   ],
-  "tree_unit": "Unit_10",
-  "profile_unit": "Азгик2",
+  "tree_unit": "Азгик2",
+  "profile_unit": "Несовершенство 18",
   "leveling_unit": "Denis 7-9 7-9",
   "checks_unit": "Denis 7-9 7-9"
 }
