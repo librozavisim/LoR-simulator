@@ -27,7 +27,6 @@ def process_mass_attack(engine, action, opposing_team, round_label):
         target_dice_list = []
 
         if not target.is_staggered() and target.active_slots:
-            # Берем случайный слот, в котором есть карта
             valid_slots = [s for s in target.active_slots if s.get('card')]
             if valid_slots:
                 target_slot = random.choice(valid_slots)

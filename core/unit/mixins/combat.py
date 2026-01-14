@@ -95,13 +95,16 @@ class UnitCombatMixin:
                     effect.modify_active_slot(self, slot)
 
     def is_staggered(self) -> bool:
-        """Проверяет, оглушен ли юнит, учитывая иммунитеты."""
         if self.current_stagger > 0:
             return False
 
-        # Проверяем иммунитет к оглушению
+            # Проверяем иммунитет к оглушению
         for effect in self._iter_all_mechanics():
-            if getattr(effect, "prevents_stagger", False):
+            # [FIX] Теперь корректно вызываем метод, г8если это метод, или проверяем флаг
+            attr = getattr(effect, "prevents_stagger", None)
+            if callable(attr):
+                if attr(self): return False
+            elif attr:
                 return False
 
         return True
@@ -111,9 +114,13 @@ class UnitCombatMixin:
         if self.current_hp > 0:
             return False
 
-        # Проверяем иммунитет к смерти
+            # Проверяем иммунитет к смерти
         for effect in self._iter_all_mechanics():
-            if getattr(effect, "prevents_death", False):
+            # [FIX] Аналогичное исправление для смерти
+            attr = getattr(effect, "prevents_death", None)
+            if callable(attr):
+                if attr(self): return False
+            elif attr:
                 return False
 
         return True
