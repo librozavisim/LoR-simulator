@@ -25,6 +25,7 @@ class UnitLifecycleMixin:
         """Восстанавливает выдержку (Stagger Resist)."""
         if amount <= 0: return
         self.current_stagger = min(self.max_stagger, self.current_stagger + amount)
+        return amount
 
     def take_stagger_damage(self, amount: int):
         """Наносит урон по выдержке."""

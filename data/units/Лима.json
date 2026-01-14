@@ -29,10 +29,11 @@
         "lima_ram",
         "lima_purge_toxin"
     ],
+    "stored_dice": 0,
     "base_stats": {
         "current_hp": 100,
         "current_sp": 135,
-        "current_stagger": 50
+        "current_stagger": 2
     },
     "defense": {
         "armor_name": "Standard Fixer Suit",
