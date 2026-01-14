@@ -649,7 +649,9 @@
       "tier": 5,
       "type": "Mass Summation",
       "description": "Массовая атака: базовый рол 45, увеличивается на ваш уровень. При попадании накладывает 25 Горения.",
-      "flags": ["offensive"],
+      "flags": [
+        "offensive"
+      ],
       "scripts": {},
       "dice": [
         {
@@ -659,10 +661,25 @@
           "is_counter": false,
           "scripts": {
             "on_roll": [
-              { "script_id": "modify_roll_power", "params": { "stat": "level", "factor": 1.0, "base": 0 } }
+              {
+                "script_id": "modify_roll_power",
+                "params": {
+                  "stat": "level",
+                  "factor": 1.0,
+                  "base": 0
+                }
+              }
             ],
             "on_hit": [
-              { "script_id": "apply_status", "params": { "status": "burn", "base": 25, "duration": 99, "target": "target" } }
+              {
+                "script_id": "apply_status",
+                "params": {
+                  "status": "burn",
+                  "base": 25,
+                  "duration": 99,
+                  "target": "target"
+                }
+              }
             ]
           }
         }
@@ -843,15 +860,16 @@
           }
         }
       ]
-    }
-    ,
+    },
     {
       "id": "spark_attack",
       "name": "Искра",
       "tier": 1,
       "type": "Melee",
       "description": "Spark attack granted by Spark talent. Small blunt damage; applies Burn.",
-      "flags": ["offensive"],
+      "flags": [
+        "offensive"
+      ],
       "scripts": {},
       "dice": [
         {
@@ -861,7 +879,111 @@
           "is_counter": false,
           "scripts": {
             "on_hit": [
-              { "script_id": "apply_status", "params": { "status": "burn", "base": 4, "duration": 99, "target": "target" } }
+              {
+                "script_id": "apply_status",
+                "params": {
+                  "status": "burn",
+                  "base": 4,
+                  "duration": 99,
+                  "target": "target"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "фывфв_9aed",
+      "name": "фывфв",
+      "tier": 1,
+      "type": "Melee",
+      "description": "",
+      "flags": [],
+      "scripts": {},
+      "dice": [
+        {
+          "type": "slash",
+          "base_min": 2,
+          "base_max": 5,
+          "is_counter": false,
+          "scripts": {
+            "on_hit": [
+              {
+                "script_id": "modify_roll_power",
+                "params": {
+                  "base": 0,
+                  "stat": "None",
+                  "scale_from_target": false,
+                  "factor": 1.0,
+                  "diff": false,
+                  "reason": "Bonus"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "фывфв_1de1",
+      "name": "фывфв",
+      "tier": 1,
+      "type": "Melee",
+      "description": "",
+      "flags": [],
+      "scripts": {},
+      "dice": [
+        {
+          "type": "slash",
+          "base_min": 2,
+          "base_max": 5,
+          "is_counter": false,
+          "scripts": {
+            "on_hit": [
+              {
+                "script_id": "modify_roll_power",
+                "params": {
+                  "base": 0,
+                  "stat": "None",
+                  "scale_from_target": false,
+                  "factor": 1.0,
+                  "diff": false,
+                  "reason": "Bonus"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "фывфв_6eaa",
+      "name": "фывфв",
+      "tier": 1,
+      "type": "Melee",
+      "description": "",
+      "flags": [],
+      "scripts": {},
+      "dice": [
+        {
+          "type": "slash",
+          "base_min": 2,
+          "base_max": 5,
+          "is_counter": false,
+          "scripts": {
+            "on_hit": [
+              {
+                "script_id": "modify_roll_power",
+                "params": {
+                  "base": 0,
+                  "stat": "None",
+                  "scale_from_target": false,
+                  "factor": 1.0,
+                  "diff": false,
+                  "reason": "Bonus"
+                }
+              }
             ]
           }
         }

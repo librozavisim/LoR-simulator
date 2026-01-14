@@ -247,11 +247,11 @@ def render_editor_page():
                 scripts=final_global_scripts,
                 flags=st.session_state["ed_flags"]
             )
-            # [NEW] Используем сохраненное имя файла
             target_file = st.session_state.get("ed_source_file", "custom_cards.json")
 
             Library.save_card(new_card, filename=target_file)
             st.toast(f"Карта {name} сохранена в {target_file}!", icon="✅")
+            st.rerun()
 
     if st.session_state.get("ed_loaded_id"):
         if c_del.button("🗑️ Удалить"):
