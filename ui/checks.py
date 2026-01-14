@@ -4,14 +4,17 @@ import random
 from core.unit import unit
 from core.unit.unit import Unit
 
-# === 1. ОПРЕДЕЛЕНИЕ ГРУПП И НАЗВАНИЙ (Оставляем как было) ===
+# === 1. ОПРЕДЕЛЕНИЕ ГРУПП И НАЗВАНИЙ ===
 
+# [CHANGED] Убрали speed и medicine отсюда
 TYPE_10_ATTRS = {
     "strength": "Сила", "agility": "Ловкость", "endurance": "Стойкость",
-    "speed": "Скорость", "psych": "Психический порог", "medicine": "Медицина", "willpower": "Сила воли"
+    "psych": "Психический порог", "willpower": "Сила воли"
 }
 
+# [CHANGED] Добавили speed и medicine сюда
 TYPE_15_SKILLS = {
+    "speed": "Скорость", "medicine": "Медицина",
     "strike_power": "Сила удара", "acrobatics": "Акробатика", "shields": "Щиты",
     "light_weapon": "Легкое оружие", "medium_weapon": "Среднее оружие", "heavy_weapon": "Тяжелое оружие",
     "firearms": "Огнестрельное оружие", "tough_skin": "Крепкая кожа", "eloquence": "Красноречие",
@@ -24,8 +27,9 @@ TYPE_INTELLECT = {"intellect": "Интеллект"}
 
 ALL_LABELS = {**TYPE_10_ATTRS, **TYPE_15_SKILLS, **TYPE_WISDOM, **TYPE_LUCK, **TYPE_INTELLECT}
 
+# === 2. ЛОГИКА РАСЧЕТОВ ===
 
-# === 2. ЛОГИКА РАСЧЕТОВ (Оставляем как было) ===
+
 def get_difficulty_description(value, stat_key=""):
     """Возвращает текстовое описание сложности/уровня."""
     stat_key = stat_key.lower()
@@ -48,6 +52,11 @@ def get_difficulty_description(value, stat_key=""):
 
 
 def get_check_params(key):
+    # [CHANGED] Исключение: Скорость и Медицина считаются как Атрибуты (1/3),
+    # даже если они находятся в списке навыков.
+    if key in ["speed", "medicine"]:
+        return "type10", "d6", "Характеристика (1/3)"
+
     if key in TYPE_10_ATTRS:
         return "type10", "d6", "Характеристика (1/3)"
     elif key in TYPE_15_SKILLS:
@@ -407,6 +416,7 @@ def draw_luck_interface(unit):
                 st.success("Удача обновлена!")
                 st.rerun()
 
+
 # === 3. НОВАЯ ФУНКЦИЯ ОТРИСОВКИ ИНТЕРФЕЙСА ===
 # Мы выносим отрисовку "нижней части" сюда, чтобы вызывать её внутри КАЖДОГО таба отдельно.
 
@@ -493,7 +503,8 @@ def render_checks_page():
     # 1. Характеристики
     with tabs[0]:
         l_dict = {v: k for k, v in TYPE_10_ATTRS.items()}
-        chosen = st.radio("Параметр", list(TYPE_10_ATTRS.values()), horizontal=True, label_visibility="collapsed")
+        # [CHANGED] Заменили Radio на Selectbox
+        chosen = st.selectbox("Параметр", list(TYPE_10_ATTRS.values()), key="sel_attr")
         st.caption("🎲 **1d6 + (Значение / 3)**. Макс стат: 30.")
 
         # Рисуем интерфейс броска
@@ -513,16 +524,23 @@ def render_checks_page():
     # 2. Навыки
     with tabs[1]:
         l_dict = {v: k for k, v in TYPE_15_SKILLS.items()}
-        c1, c2 = st.columns(2)
-        items = list(TYPE_15_SKILLS.values())
-        chosen = st.selectbox("Выберите навык", items, label_visibility="collapsed")
+        # Сортируем список навыков по алфавиту для удобства
+        items = sorted(list(TYPE_15_SKILLS.values()))
+        chosen = st.selectbox("Выберите навык", items, key="sel_skill")
 
-        info_text = "🎲 **1d6 + Значение**. Макс: 15."
-        if l_dict[chosen] == "engineering": info_text += " ⚠️ Сложность x1.3"
+        key = l_dict[chosen]
+
+        info_text = "🎲 **1d6 + Значение**."
+        # [CHANGED] Отображаем спец-формулу для Speed/Medicine, если они тут
+        if key in ["speed", "medicine"]:
+            info_text = "🎲 **1d6 + (Значение / 3)** (Атрибутивный расчет)"
+
+        if key == "engineering": info_text += " ⚠️ Сложность x1.3"
+
         st.caption(info_text)
 
         # Рисуем интерфейс
-        draw_roll_interface(unit, l_dict[chosen], chosen)
+        draw_roll_interface(unit, key, chosen)
 
         # Подсказка по сложности (Навыки)
         with st.expander("ℹ️ Таблица Сложности (Навыки)", expanded=True):

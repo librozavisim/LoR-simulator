@@ -1,3 +1,4 @@
+
 # app.py
 import streamlit as st
 import os
@@ -42,28 +43,95 @@ def save_to_disk(data):
         print(f"Error saving: {e}")
 
 
+# --- ИНИЦИАЛИЗАЦИЯ СОСТОЯНИЯ ---
 if 'persistent_state' not in st.session_state:
-    st.session_state['persistent_state'] = load_from_disk()
+    loaded_state = load_from_disk()
+    st.session_state['persistent_state'] = loaded_state
+
+    # 1. Восстановление навигации
+    if 'nav_page' not in st.session_state:
+        st.session_state['nav_page'] = loaded_state.get("page", "⚔️ Simulator")
+
+    # 2. Восстановление селекторов
+    selector_keys = {
+        "profile_unit": "profile_selected_unit",
+        "leveling_unit": "leveling_selected_unit",
+        "tree_unit": "tree_selected_unit",
+        "checks_unit": "checks_selected_unit"
+    }
+
+    # Загружаем ростер для проверки валидности ключей
+    temp_roster = UnitLibrary.load_all() or {"Roland": Unit("Roland")}
+    roster_keys = list(temp_roster.keys())
+
+    for json_key, session_key in selector_keys.items():
+        val = loaded_state.get(json_key)
+        if val in roster_keys:
+            st.session_state[session_key] = val
+
+    # 3. ВОССТАНОВЛЕНИЕ КОМАНД (ПОЛНЫЕ ОБЪЕКТЫ)
+    # Теперь мы восстанавливаем объекты из сохраненных данных, а не по именам
+
+    # Левая команда
+    left_data = loaded_state.get("team_left_data", [])
+    restored_left = []
+    for u_data in left_data:
+        try:
+            u = Unit.from_dict(u_data)
+            u.recalculate_stats()  # Важно пересчитать статы после загрузки
+            restored_left.append(u)
+        except Exception as e:
+            print(f"Error restoring unit: {e}")
+
+    st.session_state['team_left'] = restored_left
+
+    # Правая команда
+    right_data = loaded_state.get("team_right_data", [])
+    restored_right = []
+    for u_data in right_data:
+        try:
+            u = Unit.from_dict(u_data)
+            u.recalculate_stats()
+            restored_right.append(u)
+        except:
+            pass
+
+    st.session_state['team_right'] = restored_right
 
 
 def update_and_save_state():
-    p_state = st.session_state['persistent_state']
+    """Сохраняет текущее состояние приложения в файл."""
+    p_state = st.session_state.get('persistent_state', {})
 
     # 1. Навигация
     p_state["page"] = st.session_state.get("nav_page", "⚔️ Simulator")
 
-    # Сохраняем селекторы
-    keys_map = {
-        "profile_selected_unit": "profile_unit",
-        "leveling_selected_unit": "leveling_unit",
-        "tree_selected_unit": "tree_unit",
-        "checks_selected_unit": "checks_unit"
-    }
+    # 2. Селекторы (Профиль, Уровни и т.д.)
+    # Сохраняем только если они есть в сессии
+    if "profile_selected_unit" in st.session_state:
+        p_state["profile_unit"] = st.session_state["profile_selected_unit"]
+    if "leveling_selected_unit" in st.session_state:
+        p_state["leveling_unit"] = st.session_state["leveling_selected_unit"]
+    if "tree_selected_unit" in st.session_state:
+        p_state["tree_unit"] = st.session_state["tree_selected_unit"]
+    if "checks_selected_unit" in st.session_state:
+        p_state["checks_unit"] = st.session_state["checks_selected_unit"]
 
-    for session_key, json_key in keys_map.items():
-        if session_key in st.session_state:
-            p_state[json_key] = st.session_state[session_key]
+    # 3. КОМАНДЫ СИМУЛЯТОРА (СЕРИАЛИЗАЦИЯ)
+    # Сохраняем полные данные юнитов, включая их текущие HP/SP
+    # Это позволяет сохранять "шаблонных" персонажей (клонов)
 
+    if "team_left" in st.session_state:
+        p_state["team_left_data"] = [u.to_dict() for u in st.session_state["team_left"]]
+    else:
+        p_state["team_left_data"] = []
+
+    if "team_right" in st.session_state:
+        p_state["team_right_data"] = [u.to_dict() for u in st.session_state["team_right"]]
+    else:
+        p_state["team_right_data"] = []
+
+    st.session_state['persistent_state'] = p_state
     save_to_disk(p_state)
 
 
@@ -76,20 +144,7 @@ if 'roster' not in st.session_state:
 roster_keys = sorted(list(st.session_state['roster'].keys()))
 if not roster_keys: st.stop()
 
-p_state = st.session_state['persistent_state']
-
-
-def restore_widget(session_key, json_key):
-    if session_key not in st.session_state and json_key in p_state:
-        val = p_state[json_key]
-        if val in roster_keys:
-            st.session_state[session_key] = val
-
-
-if 'nav_page' not in st.session_state:
-    st.session_state['nav_page'] = p_state.get("page", "⚔️ Simulator")
-
-# --- ГЛОБАЛЬНЫЕ ОБЪЕКТЫ ---
+# --- ГЛОБАЛЬНЫЕ ОБЪЕКТЫ (Инициализация пустых, если не загрузились) ---
 if 'team_left' not in st.session_state: st.session_state['team_left'] = []
 if 'team_right' not in st.session_state: st.session_state['team_right'] = []
 if 'battle_logs' not in st.session_state: st.session_state['battle_logs'] = []
@@ -97,19 +152,25 @@ if 'script_logs' not in st.session_state: st.session_state['script_logs'] = ""
 
 # --- ОТРИСОВКА ---
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to",
-                        ["⚔️ Simulator", "👤 Profile", "🌳 Skill Tree", "📈 Leveling", "🛠️ Card Editor", "🎲 Checks",
-                         "📚 Cheat Sheet"],
-                        key="nav_page", on_change=update_and_save_state)
+
+# Список страниц (включая новую Cheat Sheet)
+pages = ["⚔️ Simulator", "👤 Profile", "🌳 Skill Tree", "📈 Leveling", "🛠️ Card Editor", "🎲 Checks", "📚 Cheat Sheet"]
+
+page = st.sidebar.radio("Go to", pages, key="nav_page", on_change=update_and_save_state)
 
 # === СТРАНИЦА: SIMULATOR ===
 if "Simulator" in page:
     st.sidebar.divider()
     st.sidebar.subheader("⚔️ Team Builder")
 
+    # Проверка фазы боя
     current_phase = st.session_state.get('phase', 'roll')
     is_team_locked = current_phase != 'roll'
 
+    if is_team_locked:
+        st.sidebar.info("🔒 Идет бой. Изменение команд заблокировано.")
+
+    # 1. Выбор юнита
     unit_to_add_name = st.sidebar.selectbox(
         "Выберите персонажа",
         roster_keys,
@@ -117,14 +178,16 @@ if "Simulator" in page:
         disabled=is_team_locked
     )
 
+    # Чекбокс режима
     as_template = st.sidebar.checkbox(
         "Добавить как копию (Шаблон)",
         value=False,
-        help="Если включено: создает независимую копию (можно много). Если выключено: добавляет самого персонажа (урон сохранится в профиле).",
+        help="Если включено: создает независимую копию. Если выключено: добавляет ссылку на оригинал.",
         disabled=is_team_locked
     )
 
 
+    # Функция добавления
     def add_unit_to_team(target_list_key):
         if not unit_to_add_name: return
 
@@ -158,7 +221,6 @@ if "Simulator" in page:
             unit_to_add = base_unit  # Передаем ссылку!
 
         # === СОХРАНЯЕМ СНИМОК СОСТОЯНИЯ (Для Reset Battle) ===
-        # Сохраняем текущие (добоевые) статы в память юнита
         unit_to_add.memory['start_of_battle_stats'] = {
             'hp': unit_to_add.current_hp,
             'sp': unit_to_add.current_sp,
@@ -168,7 +230,11 @@ if "Simulator" in page:
         st.session_state[target_list_key].append(unit_to_add)
         st.session_state['battle_logs'] = []  # Сброс логов
 
-    # 2. Кнопки добавления
+        # Сохраняем изменения на диск
+        update_and_save_state()
+
+
+    # 2. Кнопки
     c_add_l, c_add_r = st.sidebar.columns(2)
 
     if c_add_l.button("⬅️ Add Left", use_container_width=True, disabled=is_team_locked):
@@ -179,7 +245,16 @@ if "Simulator" in page:
         add_unit_to_team('team_right')
         st.rerun()
 
+    # 3. Списки команд с удалением
     st.sidebar.markdown("---")
+
+
+    # Функция удаления
+    def remove_unit(team_key, idx):
+        st.session_state[team_key].pop(idx)
+        update_and_save_state()
+        st.rerun()
+
 
     # --- LEFT TEAM ---
     st.sidebar.markdown(f"**Left Team ({len(st.session_state['team_left'])})**")
@@ -188,8 +263,7 @@ if "Simulator" in page:
             c_name, c_del = st.sidebar.columns([4, 1])
             c_name.caption(f"{i + 1}. {u.name} (Lvl {u.level})")
             if c_del.button("❌", key=f"del_l_{i}", disabled=is_team_locked):
-                st.session_state['team_left'].pop(i)
-                st.rerun()
+                remove_unit('team_left', i)
     else:
         st.sidebar.caption("Пусто")
 
@@ -200,8 +274,7 @@ if "Simulator" in page:
             c_name, c_del = st.sidebar.columns([4, 1])
             c_name.caption(f"{i + 1}. {u.name} (Lvl {u.level})")
             if c_del.button("❌", key=f"del_r_{i}", disabled=is_team_locked):
-                st.session_state['team_right'].pop(i)
-                st.rerun()
+                remove_unit('team_right', i)
     else:
         st.sidebar.caption("Пусто")
 
@@ -210,25 +283,23 @@ if "Simulator" in page:
         st.session_state['team_left'] = []
         st.session_state['team_right'] = []
         st.session_state['battle_logs'] = []
+        update_and_save_state()
         st.rerun()
 
     render_simulator_page()
 
 # === ОСТАЛЬНЫЕ СТРАНИЦЫ ===
 elif "Profile" in page:
-    restore_widget("profile_selected_unit", "profile_unit")
+    # При смене вкладки тоже можно дернуть сохранение, но on_change уже это делает
     render_profile_page()
 
 elif "Checks" in page:
-    restore_widget("checks_selected_unit", "checks_unit")
     render_checks_page()
 
 elif "Leveling" in page:
-    restore_widget("leveling_selected_unit", "leveling_unit")
     render_leveling_page()
 
 elif "Skill Tree" in page:
-    restore_widget("tree_selected_unit", "tree_unit")
     render_skill_tree_page()
 
 elif "Cheat Sheet" in page:

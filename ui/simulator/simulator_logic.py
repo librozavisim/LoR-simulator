@@ -149,28 +149,28 @@ def roll_phase():
 
     # 2. Авто-таргетинг (Auto-Targeting)
     # По умолчанию левые бьют первых живых правых, и наоборот.
-    def set_default_targets(source_team, target_team):
-        if not target_team: return
-        # Индексы живых врагов
-        alive_targets = [i for i, t in enumerate(target_team) if not t.is_dead()]
-
-        # Ищем провокаторов
-        taunt_targets = [i for i, t in enumerate(target_team) if not t.is_dead() and t.get_status("taunt") > 0]
-
-        # Если есть провокаторы, список целей сужается только до них
-        valid_targets = taunt_targets if taunt_targets else alive_targets
-
-        if not valid_targets: return  # Некого бить
-
-        for u in source_team:
-            if u.is_dead() or u.is_staggered(): continue
-            for slot in u.active_slots:
-                # Простое правило: бьем первого живого врага в первый слот
-                slot['target_unit_idx'] = valid_targets[0]
-                slot['target_slot_idx'] = 0
-
-    set_default_targets(l_team, r_team)
-    set_default_targets(r_team, l_team)
+    # def set_default_targets(source_team, target_team):
+    #     if not target_team: return
+    #     # Индексы живых врагов
+    #     alive_targets = [i for i, t in enumerate(target_team) if not t.is_dead()]
+    #
+    #     # Ищем провокаторов
+    #     taunt_targets = [i for i, t in enumerate(target_team) if not t.is_dead() and t.get_status("taunt") > 0]
+    #
+    #     # Если есть провокаторы, список целей сужается только до них
+    #     valid_targets = taunt_targets if taunt_targets else alive_targets
+    #
+    #     if not valid_targets: return  # Некого бить
+    #
+    #     for u in source_team:
+    #         if u.is_dead() or u.is_staggered(): continue
+    #         for slot in u.active_slots:
+    #             # Простое правило: бьем первого живого врага в первый слот
+    #             slot['target_unit_idx'] = valid_targets[0]
+    #             slot['target_slot_idx'] = 0
+    #
+    # set_default_targets(l_team, r_team)
+    # set_default_targets(r_team, l_team)
 
     st.session_state['phase'] = 'planning'
     st.session_state['turn_message'] = "🎲 Speed Rolled (Targets Auto-Assigned)"
