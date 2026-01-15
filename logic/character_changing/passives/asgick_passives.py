@@ -118,6 +118,18 @@ class PassivePovar(BasePassive):
 
         return {"talent_slots": len(talents_to_learn)}
 
+class PassiveDistortionGroGoroth(BasePassive):
+    id = "distortionGroGoroth"
+    name = "Traces of Gro-goroth"
+    description = "Инкубационный период. +10 скорости. +1 ко всем картам"
+
+    def on_calculate_stats(self, unit) -> dict:
+        stats = {
+            "speed": 10,  # Харизма +20
+        }
+
+        return stats
+
 
 class PassiveFoodLover(BasePassive):
     id = "food_lover"

@@ -142,8 +142,7 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
         if ctx_a: detail_logs.extend(ctx_a.log)
         if ctx_d: detail_logs.extend(ctx_d.log)
 
-        # --- UPDATE FUNCTIONS ---
-
+        # --- HELPERS ---
         def consume_die_a_fn():
             nonlocal active_counter_a, idx_a
             if active_counter_a:
@@ -170,35 +169,62 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                 active_counter_d = (die_d, src_d)
                 if not src_d: idx_d += 1
 
+        def manual_save_die(unit, die):
+            if not hasattr(unit, 'stored_dice') or not isinstance(unit.stored_dice, list):
+                unit.stored_dice = []
+            unit.stored_dice.append(die)
+            detail_logs.append(f"🛡️ {unit.name} Stored Evade (Auto)")
+
         # --- RESOLVE ---
 
         # 1. Broken / Empty
         if not die_a and die_d:
-            # У защитника есть куб, у атакующего нет (сломан/пусто)
-            if is_evade_d or is_block_d:
-                # [FIX] Если куб атакующего был сломан (он есть в очереди, но вернулся None),
-                # мы должны его "сжечь" (увеличить индекс), чтобы он не сохранился.
-                if idx_a < len(queue_a):
-                    idx_a += 1
-                break
+            # У защитника есть куб, у атакующего нет
+            if is_evade_d:
+                # [FIX] Защитник сохраняет Evade и бой продолжается
+                manual_save_die(defender, die_d)
 
-            outcome = f"🚫 {attacker.name} Broken"
-            if is_atk_d: engine._apply_damage(ctx_d, None, "hp")
-            consume_die_a_fn()
-            consume_die_d_fn()
+                # Тратим сломанный слот атакующего
+                if idx_a < len(queue_a): idx_a += 1
+
+                # Тратим (пропускаем) текущий кубик защитника (он ушел в запас)
+                consume_die_d_fn()
+
+                outcome = "🏃 Evade Saved (Opponent Broken)"
+
+            elif is_block_d:
+                # Block просто сгорает
+                consume_die_d_fn()
+                if idx_a < len(queue_a): idx_a += 1
+                outcome = "🛡️ Block Skipped (Opponent Broken)"
+
+            else:
+                outcome = f"🚫 {attacker.name} Broken"
+                if is_atk_d: engine._apply_damage(ctx_d, None, "hp")
+                consume_die_a_fn()
+                consume_die_d_fn()
 
         elif die_a and not die_d:
-            # У атакующего есть куб, у защитника нет (сломан/пусто)
-            if is_evade_a or is_block_a:
-                # [FIX] То же самое: если куб защитника был сломан, сжигаем его индекс.
-                if idx_d < len(queue_d):
-                    idx_d += 1
-                break
+            # У атакующего есть куб, у защитника нет
+            if is_evade_a:
+                # [FIX] Атакующий сохраняет Evade, бой идет дальше
+                manual_save_die(attacker, die_a)
 
-            outcome = f"🚫 {defender.name} Broken"
-            if is_atk_a: engine._apply_damage(ctx_a, None, "hp")
-            consume_die_a_fn()
-            consume_die_d_fn()
+                if idx_d < len(queue_d): idx_d += 1
+                consume_die_a_fn()
+
+                outcome = "🏃 Evade Saved (Opponent Broken)"
+
+            elif is_block_a:
+                consume_die_a_fn()
+                if idx_d < len(queue_d): idx_d += 1
+                outcome = "🛡️ Block Skipped (Opponent Broken)"
+
+            else:
+                outcome = f"🚫 {defender.name} Broken"
+                if is_atk_a: engine._apply_damage(ctx_a, None, "hp")
+                consume_die_a_fn()
+                consume_die_d_fn()
 
         # 2. Defensive vs Defensive
         elif (is_evade_a or is_block_a) and (is_evade_d or is_block_d):
@@ -306,7 +332,7 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
             "outcome": outcome, "details": detail_logs
         })
 
-    # === СОХРАНЕНИЕ ===
+    # === СОХРАНЕНИЕ (Остатки) ===
 
     def store_remaining_dice(unit, queue, idx, active_cnt_tuple, log_list):
         if not hasattr(unit, 'stored_dice') or not isinstance(unit.stored_dice, list):
@@ -315,6 +341,7 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
         if active_cnt_tuple:
             die, is_from_storage = active_cnt_tuple
             if die.dtype == DiceType.EVADE:
+                # Если активный кубик остался и это контр/запас - сохраняем
                 if is_from_storage:
                     unit.stored_dice.append(die)
                     log_list.append({"type": "info", "outcome": f"🛡️ {unit.name} Kept Counter Evade", "details": []})

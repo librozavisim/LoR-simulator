@@ -1,10 +1,10 @@
 {
     "name": "Лима",
-    "level": 24,
+    "level": 28,
     "rank": 6,
     "avatar": "data/avatars/Лима.png",
     "base_intellect": 8,
-    "total_xp": 0,
+    "total_xp": 142606336,
     "pct_mods": {
         "imp_hp": 0,
         "imp_sp": 0,
@@ -53,21 +53,21 @@
     "card_cooldowns": {},
     "attributes": {
         "strength": 2,
-        "endurance": 0,
+        "endurance": 5,
         "agility": 30,
         "wisdom": 15,
         "psych": 9
     },
     "skills": {
         "strike_power": 2,
-        "medicine": 20,
+        "medicine": 24,
         "willpower": 0,
         "luck": 2,
         "acrobatics": 15,
         "shields": 0,
-        "tough_skin": 6,
+        "tough_skin": 8,
         "speed": 30,
-        "light_weapon": 6,
+        "light_weapon": 10,
         "medium_weapon": 0,
         "heavy_weapon": 0,
         "firearms": 15,
@@ -94,7 +94,8 @@
         "speech_master",
         "deal_with_fortune",
         "second_chance",
-        "athletic"
+        "athletic",
+        "pathfinder"
     ],
     "augmentations": [
         "aug_strizh"

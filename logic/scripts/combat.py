@@ -137,7 +137,7 @@ def consume_evade_for_haste(ctx: 'RollContext', params: dict):
         unit.stored_dice = others
 
         # Накладываем статус
-        unit.add_status("haste", count, duration=2)
+        unit.add_status("haste", count, duration=1)
 
         # Логируем (если есть куда)
         if ctx.log:

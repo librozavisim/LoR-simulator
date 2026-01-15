@@ -33,14 +33,14 @@
     "base_stats": {
         "current_hp": 300,
         "current_sp": 102,
-        "current_stagger": 150
+        "current_stagger": 19
     },
     "defense": {
         "armor_name": "Standard Fixer Suit",
         "armor_type": "Medium",
         "hp_resists": {
             "slash": 0.5,
-            "pierce": 1.2,
+            "pierce": 1.5,
             "blunt": 0.7
         },
         "stagger_resists": {
