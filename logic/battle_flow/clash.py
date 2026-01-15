@@ -42,16 +42,13 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
     queue_d = list(dc.dice_list)
 
     # Переменные для хранения "ресайкнутых" кубиков.
-    # Храним кортеж (Die, is_from_storage)
     active_counter_a = None
     active_counter_d = None
 
     def resolve_slot_die(unit, queue, idx, is_broken, active_counter_tuple):
-        # 1. Приоритет: Активный ресайкнутый кубик
         if active_counter_tuple:
             return active_counter_tuple[0], active_counter_tuple[1]
 
-        # 2. Кубик карты
         card_die = None
         if idx < len(queue):
             card_die = queue[idx]
@@ -65,7 +62,6 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                 if not is_saved:
                     card_die = None
 
-        # 3. Запас (Stored/Counter)
         if not card_die:
             if hasattr(unit, 'stored_dice') and isinstance(unit.stored_dice, list) and unit.stored_dice:
                 if unit.is_staggered():
@@ -110,7 +106,6 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
         die_a, src_a = resolve_slot_die(attacker, queue_a, idx_a, is_break_a, active_counter_a)
         die_d, src_d = resolve_slot_die(defender, queue_d, idx_d, is_break_d, active_counter_d)
 
-        # Выход если оба пусты
         if not die_a and not die_d:
             if idx_a < len(queue_a): idx_a += 1
             if idx_d < len(queue_d): idx_d += 1
@@ -179,18 +174,27 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
 
         # 1. Broken / Empty
         if not die_a and die_d:
-            # [FIX] Если у защитника Уклонение/Блок, а врага нет -> Прерываем (сохраняем)
+            # У защитника есть куб, у атакующего нет (сломан/пусто)
             if is_evade_d or is_block_d:
+                # [FIX] Если куб атакующего был сломан (он есть в очереди, но вернулся None),
+                # мы должны его "сжечь" (увеличить индекс), чтобы он не сохранился.
+                if idx_a < len(queue_a):
+                    idx_a += 1
                 break
+
             outcome = f"🚫 {attacker.name} Broken"
             if is_atk_d: engine._apply_damage(ctx_d, None, "hp")
             consume_die_a_fn()
             consume_die_d_fn()
 
         elif die_a and not die_d:
-            # [FIX] Если у атакующего Уклонение/Блок, а врага нет -> Прерываем (сохраняем)
+            # У атакующего есть куб, у защитника нет (сломан/пусто)
             if is_evade_a or is_block_a:
+                # [FIX] То же самое: если куб защитника был сломан, сжигаем его индекс.
+                if idx_d < len(queue_d):
+                    idx_d += 1
                 break
+
             outcome = f"🚫 {defender.name} Broken"
             if is_atk_a: engine._apply_damage(ctx_a, None, "hp")
             consume_die_a_fn()
@@ -308,19 +312,13 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
         if not hasattr(unit, 'stored_dice') or not isinstance(unit.stored_dice, list):
             unit.stored_dice = []
 
-        # 1. Активный ресайкнутый кубик
         if active_cnt_tuple:
             die, is_from_storage = active_cnt_tuple
             if die.dtype == DiceType.EVADE:
-                # [FIX] Сохраняем ТОЛЬКО если он был Stored/Counter (src=True).
-                # Если он был с карты (src=False) и был активирован (попал в active_cnt_tuple),
-                # значит он "потратился" (хоть и выиграл), поэтому в конце сцены сгорает.
                 if is_from_storage:
                     unit.stored_dice.append(die)
                     log_list.append({"type": "info", "outcome": f"🛡️ {unit.name} Kept Counter Evade", "details": []})
 
-        # 2. Оставшиеся (неиспользованные) кубики в очереди
-        # Эти кубики даже не вступали в бой (мы сделали break раньше), поэтому они сохраняются.
         while idx < len(queue):
             die = queue[idx]
             if die.dtype == DiceType.EVADE:
