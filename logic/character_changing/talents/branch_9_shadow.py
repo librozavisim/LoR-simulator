@@ -86,6 +86,12 @@ class TalentSmashingBlade(BasePassive):
         target = ctx.target
         if not target: return
 
+        if target.is_immune_to_surprise_attack():
+            # Если цель имеет иммунитет, логика внезапности не срабатывает
+            # Можно добавить лог, если нужно (опционально)
+            ctx.log.append(f"🛡️ {target.name} immune to Surprise Attack!")
+            return
+
         # === 1. ОПРЕДЕЛЕНИЕ "ВНЕЗАПНОСТИ" ===
         is_sudden = False
         reasons = []
@@ -443,6 +449,10 @@ class TalentKnifeInBack(BasePassive):
         unit = ctx.source
         target = ctx.target
         if not target: return
+
+        if target.is_immune_to_surprise_attack():
+            ctx.log.append(f"🛡️ {target.name} immune to Backstab!")
+            return
 
         # === ЛОГИКА ОПРЕДЕЛЕНИЯ ВНЕЗАПНОСТИ (копия из 9.3) ===
         is_sudden = False

@@ -136,6 +136,16 @@ class UnitCombatMixin:
 
         return True
 
+    def is_immune_to_surprise_attack(self) -> bool:
+        """Проверяет, имеет ли юнит иммунитет к внезапным атакам."""
+        for effect in self._iter_all_mechanics():
+            attr = getattr(effect, "prevents_surprise_attack", None)
+            if callable(attr):
+                if attr(self): return True
+            elif attr:
+                return True
+        return False
+
     def tick_cooldowns(self):
         # Очистка словарей в одну строку (Dict comprehension или list keys)
         # Удаляем истекшие кулдауны

@@ -9,7 +9,7 @@
     "Рейн"
   ],
   "tree_unit": "Азгик2",
-  "profile_unit": "Лима",
+  "profile_unit": "Denis 7-9 7-9",
   "leveling_unit": "Denis 7-9 7-9",
   "checks_unit": "Denis 7-9 7-9",
   "team_left_data": [
@@ -65,7 +65,9 @@
         },
         "weapon_id": "skalalaz_iceaxe"
       },
-      "card_cooldowns": {},
+      "card_cooldowns": {
+        "lima_purge_toxin": 1
+      },
       "attributes": {
         "strength": 2,
         "endurance": 0,
@@ -199,8 +201,8 @@
       "stored_dice": [],
       "base_stats": {
         "current_hp": 200,
-        "current_sp": 192,
-        "current_stagger": 102
+        "current_sp": 202,
+        "current_stagger": 79
       },
       "defense": {
         "armor_name": "Standard Fixer Suit",

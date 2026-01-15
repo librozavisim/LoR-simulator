@@ -45,13 +45,21 @@ class TalentArtOfSelfDefense(BasePassive):
 class PassiveLuckyStreak(BasePassive):
     id = "lucky_streak"
     name = "Полоса удач"
-    description = "Пассивно: +7 к Удаче."
+    description = (
+        "В последнее время с Лимой случались одни неудачи, но это наконец кончилось. "
+        "Астрологи объявили время приключений!\n"
+        "Лима получает иммунитет к внезапным атакам, появлениям зловещих киборгов-убийц, "
+        "сверхсильным социопатам, фатальным травмам черепа, нанесённых ударом дверью и тому подобному.\n"
+        "Она в целом более удачлива, но эта удача не перерастает в нечто явно аномальное."
+    )
     is_active_ability = False
 
     def on_calculate_stats(self, unit) -> dict:
-        # "luck" находится в unit.skills, движок (calculations.py)
-        # автоматически добавит это значение к навыку.
         return {"luck": 7}
+
+    def prevents_surprise_attack(self, unit) -> bool:
+        """Иммунитет к внезапным атакам (например, от талантов 9-й ветки)."""
+        return True
 
 class PassiveFourEyes(BasePassive):
     id = "four_eyes"
