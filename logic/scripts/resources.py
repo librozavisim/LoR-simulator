@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 from logic.scripts.utils import _check_conditions, _resolve_value, _get_targets
+from core.logging import logger, LogLevel
 
 if TYPE_CHECKING:
     from logic.context import RollContext
@@ -17,20 +18,25 @@ def restore_resource(ctx: 'RollContext', params: dict):
             if amount >= 0:
                 healed = u.heal_hp(amount)
                 ctx.log.append(f"💚 **{u.name}**: +{healed} HP")
+                logger.log(f"💚 Healed {u.name} for {healed} HP", LogLevel.VERBOSE, "Scripts")
             else:
                 u.current_hp = max(0, u.current_hp + amount)
                 ctx.log.append(f"💔 **{u.name}**: {amount} HP")
+                logger.log(f"💔 Drained {u.name} for {abs(amount)} HP", LogLevel.VERBOSE, "Scripts")
 
         elif res_type == "sp":
             if amount >= 0:
                 recovered = u.restore_sp(amount)
                 ctx.log.append(f"🧠 **{u.name}**: +{recovered} SP")
+                logger.log(f"🧠 Restored {u.name} for {recovered} SP", LogLevel.VERBOSE, "Scripts")
             else:
                 u.take_sanity_damage(abs(amount))
                 ctx.log.append(f"🤯 **{u.name}**: {amount} SP")
+                logger.log(f"🤯 Drained {u.name} for {abs(amount)} SP", LogLevel.VERBOSE, "Scripts")
 
         elif res_type == "stagger":
             old = u.current_stagger
             u.current_stagger = min(u.max_stagger, u.current_stagger + amount)
             diff = u.current_stagger - old
             ctx.log.append(f"🛡️ **{u.name}**: +{diff} Stagger")
+            logger.log(f"🛡️ Restored {u.name} for {diff} Stagger", LogLevel.VERBOSE, "Scripts")

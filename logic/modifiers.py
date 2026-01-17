@@ -1,16 +1,24 @@
 from logic.context import RollContext
 from logic.statuses.status_manager import STATUS_REGISTRY
+from core.logging import logger, LogLevel
+
 
 class ModifierSystem:
     @staticmethod
     def apply_modifiers(context: RollContext):
         unit = context.source
 
+        # logger.log(f"Applying modifiers for {unit.name}...", LogLevel.VERBOSE, "Modifiers")
+
         # Перебираем все статусы юнита
         # Мы делаем list(items), чтобы можно было безопасно менять словарь, если вдруг понадобится
         for status_id, stack in list(unit.statuses.items()):
             if status_id in STATUS_REGISTRY:
                 handler = STATUS_REGISTRY[status_id]
-                handler.modify_roll(context, stack)
+
+                # [FIX] Используем стандартный метод on_roll вместо modify_roll
+                if hasattr(handler, "on_roll"):
+                    # logger.log(f"Applying status {status_id} (stack {stack})", LogLevel.VERBOSE, "Modifiers")
+                    handler.on_roll(context, stack=stack)
 
         return context

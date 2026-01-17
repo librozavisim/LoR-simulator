@@ -2,6 +2,8 @@ from logic.battle_flow.clash_flow import ClashFlowMixin
 from logic.battle_flow.targeting import calculate_redirections
 from logic.battle_flow.lifecycle import prepare_turn, finalize_turn
 from logic.battle_flow.executor import execute_single_action
+from core.logging import logger, LogLevel
+
 
 class ClashSystem(ClashFlowMixin):
     """
@@ -14,6 +16,8 @@ class ClashSystem(ClashFlowMixin):
 
     def log(self, message):
         self.logs.append(message)
+        # Можно дублировать в системный лог, если нужно
+        # logger.log(message, LogLevel.VERBOSE, "Engine")
 
     # Статический метод для доступа из UI (precalculate_interactions)
     @staticmethod
@@ -33,6 +37,8 @@ class ClashSystem(ClashFlowMixin):
         """
         ГЛАВНЫЙ МЕТОД (Pipeline).
         """
+        logger.log(">>> RESOLVE TURN START <<<", LogLevel.NORMAL, "System")
+
         full_report = []
 
         # 1. Подготовка
@@ -50,5 +56,7 @@ class ClashSystem(ClashFlowMixin):
         # 3. Финализация
         end_logs = self.finalize_turn(team_left + team_right)
         full_report.extend(end_logs)
+
+        logger.log(">>> RESOLVE TURN END <<<", LogLevel.NORMAL, "System")
 
         return full_report

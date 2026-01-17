@@ -1,9 +1,11 @@
 import random
 from typing import TYPE_CHECKING
 from logic.scripts.utils import _check_conditions, _resolve_value, _get_targets
+from core.logging import logger, LogLevel
 
 if TYPE_CHECKING:
     from logic.context import RollContext
+
 
 def apply_status(ctx: 'RollContext', params: dict):
     if not _check_conditions(ctx.source, params): return
@@ -14,9 +16,12 @@ def apply_status(ctx: 'RollContext', params: dict):
     duration = int(params.get("duration", 1))
     delay = int(params.get("delay", 0))
     min_roll = int(params.get("min_roll", 0))
+
     if min_roll > 0:
-        # Check against base_value (natural roll), not final_value
+        # Проверка по базовому броску (натуральному)
         if ctx.base_value < min_roll:
+            logger.log(f"Apply Status {status_name} failed: Roll {ctx.base_value} < {min_roll}", LogLevel.VERBOSE,
+                       "Scripts")
             return
 
     # Подготовка параметров для расчета
@@ -39,7 +44,6 @@ def apply_status(ctx: 'RollContext', params: dict):
                 continue
 
         # ВАЖНО: Считаем стаки для КОНКРЕТНОГО юнита u
-        # Если scale_from_target=True, то стат возьмется у u
         stack = _resolve_value(ctx.source, u, calc_params)
 
         if stack <= 0: continue
@@ -49,10 +53,13 @@ def apply_status(ctx: 'RollContext', params: dict):
         if success:
             if msg == "Delayed":
                 ctx.log.append(f"⏰ **{u.name}**: {status_name.capitalize()} (Delayed {delay} turns)")
+                logger.log(f"⏰ Status Delayed: {status_name} on {u.name} for {delay}t", LogLevel.VERBOSE, "Scripts")
             else:
                 ctx.log.append(f"🧪 **{u.name}**: +{stack} {status_name.capitalize()}")
+                logger.log(f"🧪 Applied {stack} {status_name} to {u.name}", LogLevel.VERBOSE, "Scripts")
         elif msg:
             ctx.log.append(f"🛡️ {msg}")
+            logger.log(f"🛡️ Status Blocked: {msg}", LogLevel.VERBOSE, "Scripts")
 
 
 def steal_status(ctx: 'RollContext', params: dict):
@@ -65,7 +72,9 @@ def steal_status(ctx: 'RollContext', params: dict):
         victim.remove_status(status_name, current)
         duration = 99 if status_name == "smoke" else 1
         thief.add_status(status_name, current, duration=duration)
+
         ctx.log.append(f"✋ **{thief.name}** stole {current} {status_name}")
+        logger.log(f"✋ {thief.name} stole {current} {status_name} from {victim.name}", LogLevel.VERBOSE, "Scripts")
 
 
 def multiply_status(ctx: 'RollContext', params: dict):
@@ -79,7 +88,9 @@ def multiply_status(ctx: 'RollContext', params: dict):
             add = int(current * (multiplier - 1))
             duration = 99 if status_name == "smoke" else 1
             u.add_status(status_name, add, duration=duration)
+
             ctx.log.append(f"✖️ **{u.name}**: {status_name} x{multiplier} (+{add})")
+            logger.log(f"✖️ Multiplied {status_name} on {u.name} by {multiplier}", LogLevel.VERBOSE, "Scripts")
 
 
 def remove_status_script(ctx: 'RollContext', params: dict):
@@ -99,7 +110,9 @@ def remove_status_script(ctx: 'RollContext', params: dict):
         if current > 0:
             to_remove = min(current, amount)
             u.remove_status(status_name, to_remove)
+
             ctx.log.append(f"🧹 **{u.name}**: Снято {to_remove} {status_name}")
+            logger.log(f"🧹 Removed {to_remove} {status_name} from {u.name}", LogLevel.VERBOSE, "Scripts")
 
 
 def remove_all_positive(context: 'RollContext', params: dict):
@@ -124,6 +137,7 @@ def remove_all_positive(context: 'RollContext', params: dict):
 
         if removed_list:
             context.log.append(f"🧹 **Вафли**: Снято {', '.join(removed_list)}")
+            logger.log(f"🧹 Removed positive buffs from {u.name}: {removed_list}", LogLevel.NORMAL, "Scripts")
 
 
 def apply_status_by_roll(ctx: 'RollContext', params: dict):
@@ -137,6 +151,7 @@ def apply_status_by_roll(ctx: 'RollContext', params: dict):
     for u in targets:
         u.add_status(status, amount)
         ctx.log.append(f"🎲 **Roll Status**: +{amount} {status}")
+        logger.log(f"🎲 Applied {amount} {status} (Roll-based) to {u.name}", LogLevel.VERBOSE, "Scripts")
 
 
 def remove_random_status(ctx: 'RollContext', params: dict):
@@ -171,6 +186,7 @@ def remove_random_status(ctx: 'RollContext', params: dict):
 
     if ctx.log is not None:
         ctx.log.append(f"🧪 **Purge**: Снято {amount} {chosen_status} с {target.name}")
+        logger.log(f"🧪 Random Purge: Removed {amount} {chosen_status} from {target.name}", LogLevel.VERBOSE, "Scripts")
 
 
 def apply_slot_debuff(ctx: 'RollContext', params: dict):
@@ -184,3 +200,4 @@ def apply_slot_debuff(ctx: 'RollContext', params: dict):
 
     if ctx.log:
         ctx.log.append(f"🔒 **Purge**: {target.name} will lose 1 Slot next turn")
+        logger.log(f"🔒 Slot Lock applied to {target.name} for {duration} turns", LogLevel.NORMAL, "Scripts")

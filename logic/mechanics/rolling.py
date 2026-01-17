@@ -5,6 +5,7 @@ from logic.mechanics.scripts import process_card_scripts
 # Импортируем функцию для чтения модов
 from logic.calculations.formulas import get_modded_value
 from logic.weapon_definitions import WEAPON_REGISTRY
+from core.logging import logger, LogLevel
 
 
 def safe_randint(min_val: int, max_val: int) -> int:
@@ -43,6 +44,7 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
         base_val = roll
         log_prefix = "⚖️ **Advantage + Disadvantage** -> Normal"
         source.remove_status("advantage", 1)
+        logger.log(f"⚖️ {source.name}: Adv cancels Disadv. Rolled {roll}", LogLevel.VERBOSE, "Roll")
 
     elif is_disadvantage:
         # Помеха (Худший из 2)
@@ -52,6 +54,7 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
         base_val = roll
         log_prefix = f"📉 **Помеха!** ({r1}, {r2})"
         final_is_disadvantage = True
+        logger.log(f"📉 {source.name}: Disadvantage ({r1}, {r2}) -> {roll}", LogLevel.VERBOSE, "Roll")
 
     elif has_advantage:
         # Преимущество (Лучший из 2)
@@ -61,11 +64,13 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
         base_val = roll
         log_prefix = f"🍀 **Преимущество!** ({r1}, {r2})"
         source.remove_status("advantage", 1)
+        logger.log(f"🍀 {source.name}: Advantage ({r1}, {r2}) -> {roll}", LogLevel.VERBOSE, "Roll")
 
     else:
         # Обычный
         roll = safe_randint(base_min, base_max)
         base_val = roll
+        logger.log(f"🎲 {source.name}: Rolled {roll} [{base_min}-{base_max}]", LogLevel.VERBOSE, "Roll")
 
     # Создаем контекст с base_value
     ctx = RollContext(
@@ -83,6 +88,8 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
     # === 3. НЕИЗМЕНЯЕМОСТЬ ===
     if source.current_card and "unchangeable" in source.current_card.flags:
         ctx.log.append("🔒 Unchangeable (Mods ignored)")
+        logger.log("🔒 Roll is Unchangeable", LogLevel.VERBOSE, "Roll")
+
         process_card_scripts("on_roll", ctx)
         process_card_scripts("on_play", ctx)
         if hasattr(ctx, 'get_formatted_roll_log'):
@@ -96,7 +103,9 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
     if die.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
         # Общая сила (от стата Strength)
         p_atk = get_modded_value(0, "power_attack", mods)
-        if p_atk: ctx.modify_power(p_atk, "Сила")
+        if p_atk:
+            ctx.modify_power(p_atk, "Сила")
+            logger.log(f"💪 Power Atk Bonus: {p_atk:+}", LogLevel.VERBOSE, "Roll")
 
         # === БОНУС ОРУЖИЯ ===
         # Определяем тип текущего оружия
@@ -126,21 +135,28 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
             }
             reason = ru_names.get(weapon_type, "Оружие")
             ctx.modify_power(w_bonus, reason)
+            logger.log(f"⚔️ Weapon Bonus ({weapon_type}): {w_bonus:+}", LogLevel.VERBOSE, "Roll")
 
         # Бонус конкретного типа атаки (Slash/Pierce/Blunt)
         type_key = f"power_{die.dtype.value.lower()}"
         type_bonus = get_modded_value(0, type_key, mods)
-        if type_bonus: ctx.modify_power(type_bonus, f"Bonus {die.dtype.name}")
+        if type_bonus:
+            ctx.modify_power(type_bonus, f"Bonus {die.dtype.name}")
+            logger.log(f"⚔️ Type Bonus ({die.dtype.name}): {type_bonus:+}", LogLevel.VERBOSE, "Roll")
 
     # Блок
     elif die.dtype == DiceType.BLOCK:
         p_blk = get_modded_value(0, "power_block", mods)
-        if p_blk: ctx.modify_power(p_blk, "Стойкость")
+        if p_blk:
+            ctx.modify_power(p_blk, "Стойкость")
+            logger.log(f"🛡️ Block Bonus: {p_blk:+}", LogLevel.VERBOSE, "Roll")
 
     # Уворот
     elif die.dtype == DiceType.EVADE:
         p_evd = get_modded_value(0, "power_evade", mods)
-        if p_evd: ctx.modify_power(p_evd, "Ловкость")
+        if p_evd:
+            ctx.modify_power(p_evd, "Ловкость")
+            logger.log(f"💨 Evade Bonus: {p_evd:+}", LogLevel.VERBOSE, "Roll")
 
     # === [ОПТИМИЗАЦИЯ] 5. СОБЫТИЯ ON_ROLL ===
     # Заменяем ручной перебор на trigger_mechanics
@@ -153,5 +169,6 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
     # === 6. ФИНАЛИЗАЦИЯ ЛОГА ===
     if hasattr(ctx, 'get_formatted_roll_log'):
         ctx.log.insert(0, ctx.get_formatted_roll_log())
+        logger.log(f"🎲 Final: {ctx.final_value} ({ctx.formula})", LogLevel.VERBOSE, "Roll")
 
     return ctx

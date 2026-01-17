@@ -1,9 +1,11 @@
 import random
 import streamlit as st
 from typing import TYPE_CHECKING
+from core.logging import logger, LogLevel
 
 if TYPE_CHECKING:
     from logic.context import RollContext
+
 
 # ==========================================
 # 🧮 УНИВЕРСАЛЬНЫЙ КАЛЬКУЛЯТОР (CORE)
@@ -86,6 +88,10 @@ def _resolve_value(source, target, params: dict) -> int:
     factor = float(params.get("factor", 1.0))
 
     total = base + (final_stat_val * factor)
+
+    # Опционально: лог расчета
+    # logger.log(f"Calc: {base} + {final_stat_val}*{factor} = {total}", LogLevel.VERBOSE, "Scripts")
+
     return int(total)
 
 
@@ -119,6 +125,7 @@ def _check_conditions(unit, params) -> bool:
     # 1. Вероятность (0.01 = 1%)
     prob = float(params.get("probability", 1.0))
     if prob < 1.0 and random.random() > prob:
+        logger.log(f"🎲 Script chance failed ({prob})", LogLevel.VERBOSE, "Scripts")
         return False
 
     # 2. Требование стата (например, Agility > 10 для Сакуры)
@@ -127,6 +134,7 @@ def _check_conditions(unit, params) -> bool:
         req_val = int(params.get("req_val", 0))
         unit_val = _get_unit_stat(unit, req_stat)
         if unit_val < req_val:
+            logger.log(f"🚫 Script requirement failed: {req_stat} {unit_val} < {req_val}", LogLevel.VERBOSE, "Scripts")
             return False
 
     return True

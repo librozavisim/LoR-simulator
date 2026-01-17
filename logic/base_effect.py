@@ -1,5 +1,5 @@
-# logic/base_effect.py
 from logic.context import RollContext
+from core.logging import logger, LogLevel
 
 
 class BaseEffect:
@@ -13,16 +13,17 @@ class BaseEffect:
 
     # === БАЗОВЫЕ СОБЫТИЯ (Lifecycle) ===
     # Combat: 1 раз за весь бой
-    def on_combat_start(self, unit, log_func, **kwargs): pass
+    # *args добавлен для совместимости со старыми вызовами, передающими log_func
+    def on_combat_start(self, unit, *args, **kwargs): pass
 
-    def on_combat_end(self, unit, log_func, **kwargs): pass
+    def on_combat_end(self, unit, *args, **kwargs): pass
 
     # Round: 1 раз за каждый раунд (ход)
-    def on_round_start(self, unit, log_func, **kwargs): pass
+    def on_round_start(self, unit, *args, **kwargs): pass
 
-    def on_speed_rolled(self, unit, log_func, **kwargs): pass
+    def on_speed_rolled(self, unit, *args, **kwargs): pass
 
-    def on_round_end(self, unit, log_func, **kwargs): pass
+    def on_round_end(self, unit, *args, **kwargs): pass
 
     # === БОЕВЫЕ ТРИГГЕРЫ ===
     def on_roll(self, ctx: RollContext, **kwargs): pass
@@ -38,10 +39,10 @@ class BaseEffect:
     def on_take_damage(self, unit, amount, source, **kwargs): pass
 
     # === АКТИВНЫЕ СПОСОБНОСТИ ===
-    def activate(self, unit, log_func, **kwargs): return False
+    def activate(self, unit, *args, **kwargs): return False
 
     # === МОДИФИКАТОРЫ И ХУКИ ===
-    def modify_stats(self, unit, stats: dict, logs: list): pass
+    def modify_stats(self, unit, stats: dict, *args): pass
 
     def modify_clash_interaction(self, ctx, interaction, loser_ctx): pass
 
@@ -87,3 +88,5 @@ class BaseEffect:
     def prevents_death(self, unit, stack=0) -> bool: return False
 
     def prevents_stagger(self, unit, stack=0) -> bool: return False
+
+    def prevents_surprise_attack(self, unit) -> bool: return False

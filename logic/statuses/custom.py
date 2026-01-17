@@ -2,6 +2,7 @@ import random
 from core.enums import DiceType
 from logic.context import RollContext
 from logic.statuses.common import StatusEffect
+from core.logging import logger, LogLevel
 
 class SelfControlStatus(StatusEffect):
     id = "self_control"
@@ -13,6 +14,7 @@ class SelfControlStatus(StatusEffect):
             ctx.damage_multiplier *= 2.0
             ctx.is_critical = True
             ctx.log.append(f"💨 CRIT! ({chance}%) x2 DMG")
+            logger.log(f"💨 SelfControl Crit: {ctx.source.name} (Chance {chance}%) -> x2 Dmg", LogLevel.VERBOSE, "Status")
             ctx.source.remove_status("self_control", 20)
 
     def on_round_end(self, unit, log_func, **kwargs):
@@ -48,6 +50,7 @@ class SmokeStatus(StatusEffect):
             loss = current - limit
             unit.remove_status("smoke", loss)
             msgs.append(f"💨 Smoke cap ({limit}) exceeded. Removed {loss}.")
+            logger.log(f"💨 Smoke cap exceeded for {unit.name}: -{loss}", LogLevel.VERBOSE, "Status")
         return msgs
 
 
@@ -81,6 +84,7 @@ class SinisterAuraStatus(StatusEffect):
                 if dmg_val > 0:
                     ctx.source.take_sanity_damage(dmg_val)
                     ctx.log.append(f"🌑 Аура: -{dmg_val} SP (от величия {target.name})")
+                    logger.log(f"🌑 Sinister Aura: {ctx.source.name} took {dmg_val} SP dmg", LogLevel.VERBOSE, "Status")
 
 
 class AdaptationStatus(StatusEffect):
@@ -111,12 +115,14 @@ class BulletTimeStatus(StatusEffect):
         if ctx.dice.dtype == DiceType.EVADE:
             ctx.final_value = ctx.dice.max_val
             ctx.log.append(f"🕰️ **BULLET TIME**: Идеальное уклонение ({ctx.dice.max_val})")
+            logger.log(f"🕰️ Bullet Time: {ctx.source.name} Evade Max ({ctx.dice.max_val})", LogLevel.VERBOSE, "Status")
 
         # 2. Отмена атак
         elif ctx.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
             ctx.final_value = 0
             ctx.damage_multiplier = 0.0
             ctx.log.append("🕰️ **BULLET TIME**: Атака отменена (0)")
+            logger.log(f"🕰️ Bullet Time: {ctx.source.name} Attack Nullified", LogLevel.VERBOSE, "Status")
 
 class ClarityStatus(StatusEffect):
     id = "clarity"
@@ -136,6 +142,7 @@ class EnrageTrackerStatus(StatusEffect):
                             duration=2)  # На этот и следующий ход (или duration=1 если только на следующий)
             if log_func:
                 log_func(f"😡 **Разозлить**: Получено {amount} урона -> +{amount} Силы!")
+            logger.log(f"😡 Enrage: {unit.name} gain +{amount} Strength from damage", LogLevel.VERBOSE, "Status")
 
     def on_round_end(self, unit, log_func, **kwargs):
         return []  # Исчезает сам по duration
@@ -148,11 +155,13 @@ class InvisibilityStatus(StatusEffect):
         if ctx.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
             ctx.source.remove_status("invisibility", 999)
             ctx.log.append("👻 **Невидимость**: Раскрыт после удара!")
+            logger.log(f"👻 Invisibility broken (Attack) for {ctx.source.name}", LogLevel.NORMAL, "Status")
 
     def on_clash_lose(self, ctx: RollContext, **kwargs):
         if ctx.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
             ctx.source.remove_status("invisibility", 999)
             ctx.log.append("👻 **Невидимость**: Раскрыт (перехвачен)!")
+            logger.log(f"👻 Invisibility broken (Clash Lose) for {ctx.source.name}", LogLevel.NORMAL, "Status")
 
     def on_round_end(self, unit, log_func, **kwargs):
         return ["👻 Невидимость рассеялась."]
@@ -182,7 +191,7 @@ class SatietyStatus(StatusEffect):
         if stack >= 15:
             penalties = {
                 "initiative": -3,
-                "power_all": -3  # Убедитесь, что power_all поддерживается в collectors/modifiers
+                # "power_all": -3  # power_all needs support in collectors/modifiers
             }
 
         # === [ОПТИМИЗАЦИЯ] Прогоняем через фильтр ===
@@ -210,6 +219,7 @@ class SatietyStatus(StatusEffect):
             damage = excess * 10
             unit.current_hp = max(0, unit.current_hp - damage)
             msgs.append(f"**Переедание**: {excess} лишних стаков -> -{damage} HP!")
+            logger.log(f"🍗 Satiety Overload: {unit.name} took {damage} HP damage", LogLevel.NORMAL, "Status")
 
         unit.remove_status("satiety", 1)
         msgs.append("🍗 Сытость немного спала (-1)")
@@ -245,6 +255,7 @@ class RegenGanacheStatus(StatusEffect):
         if heal > 0:
             unit.heal_hp(heal)
             if log_func: log_func(f"🍫 **Ганаш**: Регенерация +{heal} HP")
+            logger.log(f"🍫 Ganache Regen: {unit.name} +{heal} HP", LogLevel.VERBOSE, "Status")
 
     def on_round_end(self, unit, log_func, **kwargs):
         return []
@@ -257,6 +268,7 @@ class RevengeDmgUpStatus(StatusEffect):
         # Логика Мести: x1.5 урон и снятие
         ctx.damage_multiplier *= 1.5
         ctx.log.append(f"🩸 **Месть**: Урон x1.5!")
+        logger.log(f"🩸 Revenge Triggered: {ctx.source.name} Damage x1.5", LogLevel.VERBOSE, "Status")
 
         # Снимаем статус полностью после использования
         ctx.source.remove_status("revenge_dmg_up", 999)

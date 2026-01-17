@@ -2,9 +2,9 @@ from logic.character_changing.augmentations.augmentations import AUGMENTATION_RE
 from logic.character_changing.passives import PASSIVE_REGISTRY
 from logic.character_changing.talents import TALENT_REGISTRY
 from logic.statuses.status_manager import STATUS_REGISTRY
-# Импорт для чтения модов
 from logic.calculations.formulas import get_modded_value
 from logic.weapon_definitions import WEAPON_REGISTRY
+from core.logging import logger, LogLevel
 
 
 def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_event_func):
@@ -48,7 +48,7 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
 
         # Логируем
         if defense_sum != 0:
-            sign = "+" if defense_sum > 0 else ""  # Если минус, он сам добавится
+            sign = "+" if defense_sum > 0 else ""
             log_formula.append(f"{sign}{defense_sum} (Def)")
 
         # 2. ПОРОГ ИГНОРИРОВАНИЯ (Threshold)
@@ -71,12 +71,10 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
             stagger_mult = 2.0
 
             if hasattr(target, "apply_mechanics_filter"):
-                # Передаем текущий множитель (2.0) и просим всех изменить его при желании
                 stagger_mult = target.apply_mechanics_filter("modify_stagger_damage_multiplier", stagger_mult)
 
             res *= stagger_mult
             is_stag_hit = True
-        # =====================================
 
         # Адаптация защитника
         active_adapt_type = target.memory.get("adaptation_active_type")
@@ -90,6 +88,7 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
         # 4. ПРОВЕРКА ПОРОГА
         if final_dmg < threshold:
             source_ctx.log.append(f"🛡️ Ignored (<{threshold})")
+            logger.log(f"🛡️ {target.name}: Damage ignored (Threshold {threshold})", LogLevel.VERBOSE, "Damage")
             final_dmg = 0
         else:
             # Барьер
@@ -107,6 +106,9 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
             if is_stag_hit: hit_msg += " (Staggered)"
             source_ctx.log.append(hit_msg)
 
+            logger.log(f"💥 {target.name} took {final_dmg} HP Damage. Formula: {formula_str}", LogLevel.VERBOSE,
+                       "Damage")
+
     elif dmg_type == "stagger":
         res = getattr(target.stagger_resists, dtype_name, 1.0)
         stg_take_pct = target.modifiers["stagger_take"]["pct"]
@@ -119,6 +121,7 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
         target.current_stagger = max(0, target.current_stagger - final_dmg)
 
         source_ctx.log.append(f"😵 **{target.name}**: Stagger -{final_dmg}")
+        logger.log(f"😵 {target.name} took {final_dmg} Stagger Damage", LogLevel.VERBOSE, "Damage")
 
     # Триггер событий
     if amount > 0:
@@ -147,12 +150,12 @@ def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
 
     if defender.get_status("red_lycoris") > 0:
         attacker_ctx.log.append(f"🚫 {defender.name} Immune (Lycoris)")
+        logger.log(f"🚫 {defender.name} Immune to Damage (Red Lycoris)", LogLevel.VERBOSE, "Damage")
         return
 
-    # === [ОПТИМИЗАЦИЯ] Trigger On Hit effects ===
+    # Trigger On Hit effects
     if hasattr(attacker, "trigger_mechanics"):
         attacker.trigger_mechanics("on_hit", attacker_ctx)
-    # ============================================
 
     if script_runner_func: script_runner_func("on_hit", attacker_ctx)
 
@@ -183,6 +186,7 @@ def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
 
             defender.take_sanity_damage(final_amt)
             attacker_ctx.log.append(f"🧠 **White Dmg**: {final_amt} SP")
+            logger.log(f"🧠 {defender.name} took {final_amt} SP Damage (White)", LogLevel.VERBOSE, "Damage")
         else:
             deal_direct_damage(attacker_ctx, defender, final_amt, "hp", trigger_event_func)
 
@@ -197,22 +201,15 @@ def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
                 dtype = attacker_ctx.dice.dtype.value.lower()
             res_stg = getattr(defender.stagger_resists, dtype, 1.0)
 
-            # === [FIX START] Получаем защиту для Stagger ===
-            # Считаем защиту так же, как для HP (Protection, Tough Skin и т.д.)
-            # Или берем только damage_take, если Protection не должен работать на Stagger
-
-            # Вариант 1: Полная защита (как у HP)
+            # Получаем защиту для Stagger
             status_def = defender.get_status("protection") - defender.get_status("fragile") - defender.get_status(
                 "vulnerability")
-            skin_def = get_modded_value(0, "damage_take", defender.modifiers)  # Крепкая кожа
+            skin_def = get_modded_value(0, "damage_take", defender.modifiers)
 
             total_def = status_def + skin_def
-
-            # Применяем защиту к базе (не может быть меньше 0)
             base_stg_dmg = max(0, final_amt - total_def)
-            # === [FIX END] ===
 
-            stg_dmg = int(base_stg_dmg * res_stg)  # Используем base_stg_dmg вместо final_amt
+            stg_dmg = int(base_stg_dmg * res_stg)
 
             stg_take_pct = defender.modifiers["stagger_take"]["pct"]
             if stg_take_pct != 0:
@@ -220,3 +217,4 @@ def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
                 stg_dmg = int(stg_dmg * mod_mult)
 
             defender.current_stagger = max(0, defender.current_stagger - stg_dmg)
+            logger.log(f"😵 {defender.name} took {stg_dmg} Stagger Side-Damage", LogLevel.VERBOSE, "Damage")

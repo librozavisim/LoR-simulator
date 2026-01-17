@@ -3,6 +3,8 @@ from core.enums import DiceType
 from logic.character_changing.talents import TALENT_REGISTRY
 from logic.context import RollContext
 from logic.statuses.base_status import StatusEffect
+from core.logging import logger, LogLevel
+
 
 # === STANDARD STATUSES ===
 
@@ -12,10 +14,13 @@ class StrengthStatus(StatusEffect):
     def on_roll(self, ctx: RollContext, stack: int):
         if ctx.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
             ctx.modify_power(stack, "Strength")
+            # logger.log(f"💪 Strength: +{stack} for {ctx.source.name}", LogLevel.VERBOSE, "Status")
+
 
 class BindStatus(StatusEffect):
     id = "bind"
     pass
+
 
 class EnduranceStatus(StatusEffect):
     id = "endurance"
@@ -23,6 +28,7 @@ class EnduranceStatus(StatusEffect):
     def on_roll(self, ctx: RollContext, stack: int):
         if ctx.dice.dtype == DiceType.BLOCK or ctx.dice.dtype == DiceType.EVADE:
             ctx.modify_power(stack, "Endurance")
+            # logger.log(f"🛡️ Endurance: +{stack} for {ctx.source.name}", LogLevel.VERBOSE, "Status")
 
 
 class BleedStatus(StatusEffect):
@@ -35,20 +41,22 @@ class BleedStatus(StatusEffect):
             if ctx.source.get_status("bleed_resist") > 0:
                 # Снижаем на 33%
                 dmg = int(dmg * 0.67)
-                # Лог можно добавить при желании
 
+            # Учет талантов (например, Survivor)
             if hasattr(ctx.source, "talents"):
                 for talent_id in ctx.source.talents:
                     talent = TALENT_REGISTRY.get(talent_id)
-                    # Если у таланта есть метод modify_incoming_damage, вызываем его
                     if talent and hasattr(talent, "modify_incoming_damage"):
-                        # Передаем тип урона как строку "bleed"
                         dmg = talent.modify_incoming_damage(ctx.source, dmg, "bleed")
 
-            ctx.source.current_hp -= dmg
+            ctx.source.current_hp = max(0, ctx.source.current_hp - dmg)
+
             remove_amt = stack // 2
             ctx.source.remove_status("bleed", remove_amt)
+
             ctx.log.append(f"🩸 Bleed: {ctx.source.name} takes {dmg} dmg")
+            logger.log(f"🩸 Bleed: {ctx.source.name} took {dmg} damage (Stack: {stack}->{stack - remove_amt})",
+                       LogLevel.VERBOSE, "Status")
 
 
 class ParalysisStatus(StatusEffect):
@@ -57,12 +65,12 @@ class ParalysisStatus(StatusEffect):
     def on_roll(self, ctx: RollContext, stack: int):
         if ctx.dice:
             # Рассчитываем разницу между базовым броском и минимальным возможным
-            # Например: выпало 7 на кубе 4-8. Мин = 4. Разница = 4 - 7 = -3.
             diff = ctx.dice.min_val - ctx.base_value
 
             # Применяем штраф, только если он отрицательный (не даем бонусов)
             if diff < 0:
                 ctx.modify_power(diff, "Paralysis (Min)")
+                logger.log(f"⚡ Paralysis: {ctx.source.name} roll reduced by {abs(diff)}", LogLevel.VERBOSE, "Status")
 
             # Снимаем 1 стак
             ctx.source.remove_status("paralysis", 1)
@@ -70,25 +78,25 @@ class ParalysisStatus(StatusEffect):
 
 class ProtectionStatus(StatusEffect):
     id = "protection"
-    # Логика: Снижает получаемый урон на X (реализовано в damage.py)
+    # Логика в damage.py
     pass
 
 
 class FragileStatus(StatusEffect):
     id = "fragile"
-    # Логика: Увеличивает получаемый урон на X (реализовано в damage.py)
+    # Логика в damage.py
     pass
 
 
 class VulnerabilityStatus(StatusEffect):
     id = "vulnerability"
-    # Логика: То же самое, что и Fragile
+    # Логика в damage.py
     pass
 
 
 class BarrierStatus(StatusEffect):
     id = "barrier"
-    # Логика: Поглощает урон вместо HP (для карты Зиккурат)
+    # Логика в damage.py
     pass
 
 
@@ -103,21 +111,20 @@ class DeepWoundStatus(StatusEffect):
     def on_roll(self, ctx: RollContext, stack: int):
         # Проверяем, является ли кубик защитным
         if ctx.dice and ctx.dice.dtype in [DiceType.BLOCK, DiceType.EVADE]:
-            # === FIX: Прямое изменение HP вместо take_damage ===
             dmg = stack
 
-            # Allow mechanics (talents/passives/etc.) to modify incoming burn damage
+            # Allow mechanics to modify incoming burn damage (using 'burn' type as placeholder or create new)
             if hasattr(ctx.source, "apply_mechanics_filter"):
-                dmg = ctx.source.apply_mechanics_filter("modify_incoming_damage", dmg, "burn", stack=stack)
+                dmg = ctx.source.apply_mechanics_filter("modify_incoming_damage", dmg, "deep_wound", stack=stack)
 
             # Apply damage to HP
             ctx.source.current_hp = max(0, ctx.source.current_hp - dmg)
-            # ==================================================
 
             # Накладываем Кровотечение
-            ctx.source.add_status("bleed", stack, duration = 3)
+            ctx.source.add_status("bleed", stack, duration=3)
 
             ctx.log.append(f"💔 **Глубокая рана**: Защита вскрыла раны! -{dmg} HP и +{stack} Bleed.")
+            logger.log(f"💔 Deep Wound triggered on {ctx.source.name}: -{dmg} HP", LogLevel.NORMAL, "Status")
 
     def apply_heal_reduction(self, unit, amount: int) -> int:
         """
@@ -130,14 +137,15 @@ class DeepWoundStatus(StatusEffect):
         # Тратим 1 заряд
         unit.remove_status("deep_wound", 1)
 
+        logger.log(f"💔 Deep Wound reduced healing on {unit.name}: {amount} -> {new_amount}", LogLevel.VERBOSE, "Status")
         return new_amount
+
 
 class HasteStatus(StatusEffect):
     id = "haste"
     name = "Спешка"
-    # Логика скорости обычно вшита в core/unit/mixins/combat.py,
-    # поэтому здесь методов может не быть, но класс обязан существовать.
     pass
+
 
 class SlowStatus(StatusEffect):
     id = "slow"
@@ -153,27 +161,30 @@ class BurnStatus(StatusEffect):
             return []
 
         msgs = []
-
         dmg = stack
 
-        # Allow mechanics (talents/passives/etc.) to modify incoming burn damage
+        # Allow mechanics to modify incoming burn damage
         if hasattr(unit, "apply_mechanics_filter"):
             dmg = unit.apply_mechanics_filter("modify_incoming_damage", dmg, "burn", stack=stack)
 
         # Apply damage to HP
         unit.current_hp = max(0, unit.current_hp - dmg)
+
         if log_func:
             log_func(f"🔥 Burn: {unit.name} takes {dmg} dmg")
+
+        logger.log(f"🔥 Burn: {unit.name} took {dmg} damage", LogLevel.VERBOSE, "Status")
+
         msgs.append(f"🔥 Burn: -{dmg} HP")
 
-        # Trigger on_take_damage hooks so talents can respond to the damage
+        # Trigger on_take_damage hooks
         try:
             if hasattr(unit, "trigger_mechanics"):
                 unit.trigger_mechanics("on_take_damage", unit, dmg, None, log_func=log_func)
         except Exception:
             pass
 
-        # Halve the remaining stack (integer division)
+        # Halve the remaining stack
         new_stack = stack // 2
         remove_amt = stack - new_stack
         if remove_amt > 0:

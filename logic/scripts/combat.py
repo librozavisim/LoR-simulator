@@ -1,11 +1,12 @@
 import copy
 from typing import TYPE_CHECKING
-
 from core.enums import DiceType
 from logic.scripts.utils import _check_conditions, _resolve_value, _get_targets
+from core.logging import logger, LogLevel
 
 if TYPE_CHECKING:
     from logic.context import RollContext
+
 
 def modify_roll_power(ctx: 'RollContext', params: dict):
     if not _check_conditions(ctx.source, params): return
@@ -17,6 +18,7 @@ def modify_roll_power(ctx: 'RollContext', params: dict):
         reason = f"{params['stat'].title()} scale"
 
     ctx.modify_power(amount, reason)
+    logger.log(f"Modify Power: {amount} ({reason}) for {ctx.source.name}", LogLevel.VERBOSE, "Scripts")
 
 
 def deal_effect_damage(ctx: 'RollContext', params: dict):
@@ -42,9 +44,11 @@ def deal_effect_damage(ctx: 'RollContext', params: dict):
         if dmg_type == "hp":
             u.current_hp = max(0, u.current_hp - amount)
             ctx.log.append(f"💔 **{u.name}**: -{amount} HP (Effect)")
+            logger.log(f"💔 Effect Dmg: {u.name} takes {amount} HP", LogLevel.VERBOSE, "Scripts")
         elif dmg_type == "stagger":
             u.current_stagger = max(0, u.current_stagger - amount)
             ctx.log.append(f"😵 **{u.name}**: -{amount} Stagger")
+            logger.log(f"😵 Effect Stagger: {u.name} takes {amount}", LogLevel.VERBOSE, "Scripts")
         elif dmg_type == "sp":
             # Логика Эдама (Mental Protection)
             ment_prot = u.get_status("mental_protection")
@@ -56,11 +60,15 @@ def deal_effect_damage(ctx: 'RollContext', params: dict):
 
             u.take_sanity_damage(amount)
             ctx.log.append(f"🤯 **{u.name}**: -{amount} SP")
+            logger.log(f"🤯 Effect SP: {u.name} takes {amount}", LogLevel.VERBOSE, "Scripts")
+
 
 def nullify_hp_damage(ctx: 'RollContext', params: dict):
     """Обнуляет множитель урона, предотвращая нанесение стандартного HP урона."""
     ctx.damage_multiplier = 0.0
-    # ctx.log.append("🚫 HP Damage Negated") # Можно раскомментить для дебага
+    logger.log(f"🚫 HP Damage Nullified for {ctx.source.name}", LogLevel.VERBOSE, "Scripts")
+    # ctx.log.append("🚫 HP Damage Negated")
+
 
 def self_harm_percent(ctx: 'RollContext', params: dict):
     """Наносит урон самому себе в % от Макс ХП."""
@@ -71,6 +79,7 @@ def self_harm_percent(ctx: 'RollContext', params: dict):
     if damage > 0:
         ctx.source.current_hp = max(0, ctx.source.current_hp - damage)
         ctx.log.append(f"🩸 **Self Harm**: -{damage} HP ({percent * 100}%)")
+        logger.log(f"🩸 Self Harm: {ctx.source.name} takes {damage} HP", LogLevel.VERBOSE, "Scripts")
 
 
 def add_hp_damage(ctx: 'RollContext', params: dict):
@@ -85,34 +94,27 @@ def add_hp_damage(ctx: 'RollContext', params: dict):
     if damage > 0:
         target.current_hp = max(0, target.current_hp - damage)
         ctx.log.append(f"💔 **Decay**: -{damage} HP ({percent * 100}%)")
+        logger.log(f"💔 Decay: {target.name} takes {damage} HP", LogLevel.VERBOSE, "Scripts")
 
 
 def convert_status_to_power(ctx: 'RollContext', params: dict):
     """
-    params: {
-        "status": "haste",   # Какой статус поглощать
-        "factor": 1.0,       # Сколько силы за 1 стак
-        "max_stacks": 999    # (Опц) Лимит поглощения
-    }
+    Поглощает статус -> дает силу.
     """
     status_id = params.get("status")
     factor = params.get("factor", 1.0)
 
-    # 1. Получаем текущее количество стаков у того, кто бьет (source)
-    # get_status возвращает int
     stack_count = ctx.source.get_status(status_id)
 
     if stack_count <= 0:
         return
 
-    # 2. Считаем бонус
     bonus = int(stack_count * factor)
 
-    # 3. Применяем бонус к текущему броску
     ctx.modify_power(bonus, f"Consumed {status_id.capitalize()}")
-
-    # 4. Удаляем статус (полностью или сколько поглотили)
     ctx.source.remove_status(status_id, stack_count)
+
+    logger.log(f"🔋 Converted {stack_count} {status_id} -> +{bonus} Power", LogLevel.VERBOSE, "Scripts")
 
 
 # === NEW FUNCTIONS ===
@@ -122,35 +124,26 @@ def consume_evade_for_haste(ctx: 'RollContext', params: dict):
     Конвертирует все запасенные кубики уклонения (Stored Evade) в статус Спешка (Haste).
     """
     unit = ctx.source
-    # Проверяем, есть ли stored_dice и является ли он списком
     if not hasattr(unit, "stored_dice") or not isinstance(unit.stored_dice, list) or not unit.stored_dice:
         return
 
-    # Фильтруем кубики
     evades = [d for d in unit.stored_dice if d.dtype == DiceType.EVADE]
     others = [d for d in unit.stored_dice if d.dtype != DiceType.EVADE]
 
     count = len(evades)
 
     if count > 0:
-        # Обновляем список, удаляя уклонения
         unit.stored_dice = others
-
-        # Накладываем статус
         unit.add_status("haste", count, duration=1)
 
-        # Логируем (если есть куда)
         if ctx.log:
             ctx.log.append(f"⚡ **{unit.name}** consumed {count} Evades -> +{count} Haste")
+        logger.log(f"⚡ Consumed {count} Evades -> Haste", LogLevel.VERBOSE, "Scripts")
 
 
 def repeat_dice_by_status(ctx: 'RollContext', params: dict):
     """
     Копирует кубик карты N раз, где N = значение статуса (но не более max).
-    Params:
-      - status: название статуса (default: haste)
-      - max: лимит повторений (default: 4)
-      - die_index: индекс кубика для копирования (default: 0)
     """
     unit = ctx.source
     card = unit.current_card
@@ -164,20 +157,19 @@ def repeat_dice_by_status(ctx: 'RollContext', params: dict):
     val = unit.get_status(status_name)
     count = min(val, limit)
 
-    # Проверяем, что есть что копировать
     if count > 0 and card.dice_list and len(card.dice_list) > die_idx:
         base_die = card.dice_list[die_idx]
 
         new_dice = []
         for _ in range(count):
-            # Важно делать глубокую копию, чтобы скрипты на кубике были независимы
             new_dice.append(copy.deepcopy(base_die))
 
-        # Добавляем кубики в конец карты
         card.dice_list.extend(new_dice)
 
         if ctx.log:
             ctx.log.append(f"♻️ **{unit.name}** repeats dice {count} times (Status: {status_name})")
+        logger.log(f"♻️ Dice Repeated {count} times due to {status_name}", LogLevel.VERBOSE, "Scripts")
+
 
 def lima_ram_logic(ctx: 'RollContext', params: dict):
     """
@@ -201,17 +193,14 @@ def lima_ram_logic(ctx: 'RollContext', params: dict):
         base_bonus = 1
 
     # Множитель уровня
-    # Используем integer деление, чтобы избежать float
     lvl_mult = int(unit.level / 3)
-
     final_bonus = base_bonus * lvl_mult
 
     if final_bonus > 0:
         ctx.modify_power(final_bonus, f"Ram (Haste {haste} * Lvl {unit.level}/3)")
 
-    # Снимаем всю спешку
     if haste > 0:
         unit.remove_status("haste", 999)
         if ctx.log:
             ctx.log.append(f"📉 **{unit.name}** consumed all Haste")
-
+        logger.log(f"📉 Ram Logic: {final_bonus} Power, Haste Consumed", LogLevel.VERBOSE, "Scripts")

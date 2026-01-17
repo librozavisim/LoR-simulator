@@ -1,7 +1,9 @@
-# logic/statuses/status_manager.py
-from typing import List
-from core.unit.unit import Unit
+from typing import List, TYPE_CHECKING
 from logic.statuses.status_definitions import STATUS_REGISTRY
+from core.logging import logger, LogLevel
+
+if TYPE_CHECKING:
+    from core.unit.unit import Unit
 
 
 class StatusManager:
@@ -36,15 +38,19 @@ class StatusManager:
                 unit._status_effects[status_id] = next_instances
             else:
                 del unit._status_effects[status_id]
+                logger.log(f"📉 Status Expired: {status_id} on {unit.name}", LogLevel.VERBOSE, "Status")
 
-        # Обработка Delayed (без изменений)
+        # Обработка Delayed
         if unit.delayed_queue:
             remaining = []
             for item in unit.delayed_queue:
                 item["delay"] -= 1
                 if item["delay"] <= 0:
+                    # add_status сам залогирует наложение (NORMAL)
                     unit.add_status(item["name"], item["amount"], duration=item["duration"])
+
                     logs.append(f"⏰ {item['name'].capitalize()} activated!")
+                    logger.log(f"⏰ Delayed Status Activated: {item['name']} on {unit.name}", LogLevel.VERBOSE, "Status")
                 else:
                     remaining.append(item)
             unit.delayed_queue = remaining
