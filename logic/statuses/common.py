@@ -28,7 +28,7 @@ class EnduranceStatus(StatusEffect):
 class BleedStatus(StatusEffect):
     id = "bleed"
 
-    def on_roll(self, ctx: RollContext, stack: int):
+    def on_hit(self, ctx: RollContext, stack: int):
         if ctx.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
             dmg = stack
 

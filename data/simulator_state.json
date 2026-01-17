@@ -9,7 +9,7 @@
     "Рейн"
   ],
   "tree_unit": "Азгик2",
-  "profile_unit": "Лилит",
+  "profile_unit": "Denis 7-9 7-9",
   "leveling_unit": "Denis 7-9 7-9",
   "checks_unit": "Denis 7-9 7-9",
   "team_left_data": [
@@ -65,11 +65,11 @@
         "candy_fudge",
         "candy_waffles"
       ],
-      "stored_dice": 0,
+      "stored_dice": [],
       "base_stats": {
-        "current_hp": 100,
+        "current_hp": -18,
         "current_sp": 91,
-        "current_stagger": 43
+        "current_stagger": 7
       },
       "defense": {
         "armor_name": "Standard Fixer Suit",
@@ -86,11 +86,7 @@
         },
         "weapon_id": "dual_blades"
       },
-      "card_cooldowns": {
-        "azgick_rule_1": 1,
-        "azgick_rule_2": 1,
-        "azgick_rule_3": 1
-      },
+      "card_cooldowns": {},
       "attributes": {
         "strength": 6,
         "endurance": 7,
@@ -247,9 +243,9 @@
       ],
       "stored_dice": [],
       "base_stats": {
-        "current_hp": 300,
-        "current_sp": 102,
-        "current_stagger": 150
+        "current_hp": 240,
+        "current_sp": 76,
+        "current_stagger": 62
       },
       "defense": {
         "armor_name": "Standard Fixer Suit",
