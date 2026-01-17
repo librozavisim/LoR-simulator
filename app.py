@@ -1,18 +1,19 @@
 # app.py
-import streamlit as st
-import os
-import json
 import copy
+import json
+import os
+
+import streamlit as st
 
 from core.unit.unit import Unit
 from core.unit.unit_library import UnitLibrary
 from ui.cheat_sheet import render_cheat_sheet_page
 from ui.checks import render_checks_page
+from ui.editor.editor import render_editor_page
 from ui.leveling import render_leveling_page
 from ui.profile.main import render_profile_page
-from ui.styles import apply_styles
 from ui.simulator.simulator import render_simulator_page
-from ui.editor.editor import render_editor_page
+from ui.styles import apply_styles
 from ui.tree_view import render_skill_tree_page
 
 apply_styles()
@@ -215,11 +216,11 @@ if "Simulator" in page:
 
     c_add_l, c_add_r = st.sidebar.columns(2)
 
-    if c_add_l.button("⬅️ Add Left", use_container_width=True, disabled=is_team_locked):
+    if c_add_l.button("⬅️ Add Left", width='stretch', disabled=is_team_locked):
         add_unit_to_team('team_left')
         st.rerun()
 
-    if c_add_r.button("Add Right ➡️", use_container_width=True, disabled=is_team_locked):
+    if c_add_r.button("Add Right ➡️", width='stretch', disabled=is_team_locked):
         add_unit_to_team('team_right')
         st.rerun()
 
@@ -252,7 +253,7 @@ if "Simulator" in page:
     else:
         st.sidebar.caption("Пусто")
 
-    if st.sidebar.button("🗑️ Очистить все команды", use_container_width=True, disabled=is_team_locked):
+    if st.sidebar.button("🗑️ Очистить все команды", width='stretch', disabled=is_team_locked):
         st.session_state['team_left'] = []
         st.session_state['team_right'] = []
         st.session_state['battle_logs'] = []

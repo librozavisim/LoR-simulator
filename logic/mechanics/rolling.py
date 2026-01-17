@@ -1,11 +1,12 @@
 import random
+
 from core.enums import DiceType
-from logic.context import RollContext
-from logic.mechanics.scripts import process_card_scripts
+from core.logging import logger, LogLevel
 # Импортируем функцию для чтения модов
 from logic.calculations.formulas import get_modded_value
+from logic.context import RollContext
+from logic.mechanics.scripts import process_card_scripts
 from logic.weapon_definitions import WEAPON_REGISTRY
-from core.logging import logger, LogLevel
 
 
 def safe_randint(min_val: int, max_val: int) -> int:
@@ -168,7 +169,9 @@ def create_roll_context(source, target, die, is_disadvantage=False) -> RollConte
 
     # === 6. ФИНАЛИЗАЦИЯ ЛОГА ===
     if hasattr(ctx, 'get_formatted_roll_log'):
-        ctx.log.insert(0, ctx.get_formatted_roll_log())
-        logger.log(f"🎲 Final: {ctx.final_value} ({ctx.formula})", LogLevel.VERBOSE, "Roll")
+        # [FIXED] Сохраняем строку в переменную и используем её
+        formula_text = ctx.get_formatted_roll_log()
+        ctx.log.insert(0, formula_text)
+        logger.log(f"🎲 Final: {ctx.final_value} ({formula_text})", LogLevel.VERBOSE, "Roll")
 
     return ctx

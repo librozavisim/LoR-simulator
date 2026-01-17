@@ -1,6 +1,7 @@
-# logic/passives/equipment_passives.py
+# logic/character_changing/passives/equipment_passives.py
 from logic.character_changing.passives.base_passive import BasePassive
 from core.enums import DiceType
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # === АННИГИЛЯТОРНАЯ ПУШКА ===
@@ -28,8 +29,10 @@ class PassiveAnnihilator(BasePassive):
             ctx.modify_power(100, "Annihilator")
             ctx.source.memory["annihilator_ammo"] = 0
             ctx.log.append("💥 **BOOM**: Патрон истрачен!")
+            logger.log(f"💥 Annihilator used by {ctx.source.name} (+100 Pwr)", LogLevel.NORMAL, "Passive")
         else:
             ctx.log.append("🔇 **Click**: Пусто...")
+            # logger.log(f"🔇 Annihilator click (empty) for {ctx.source.name}", LogLevel.VERBOSE, "Passive")
 
 
 # === БАНГАНРАНГ ===
@@ -44,6 +47,7 @@ class PassiveBanganrang(BasePassive):
         # Логика обработки будет в damage.py
         ctx.convert_hp_to_sp = True
         ctx.log.append("🎵 **Банганранг**: Тип урона изменен на Белый (SP).")
+        logger.log(f"🎵 Banganrang: Converted HP dmg to SP dmg for {ctx.source.name}", LogLevel.VERBOSE, "Passive")
 
 
 # === ОБНОВЛЕННЫЙ ГАНИТАР ===
@@ -76,16 +80,20 @@ class PassiveGanitar(BasePassive):
             return False
 
         count = 0
+        names = []
         for enemy in enemies:
             if not enemy.is_dead():
                 # Накладываем статус блокировки
                 enemy.add_status("passive_lock", 1, duration=99)
                 count += 1
+                names.append(enemy.name)
 
         unit.cooldowns[self.id] = self.cooldown
 
         if log_func:
             log_func(f"📿 **Ганитар**: Активирован! Пассивки отключены у {count} врагов.")
+
+        logger.log(f"📿 Ganitar activated by {unit.name}. Targets: {', '.join(names)}", LogLevel.NORMAL, "Passive")
         return True
 
 
@@ -103,4 +111,4 @@ class PassiveLimagun(BasePassive):
         if "лима" in name or "lima" in name:
             ctx.damage_multiplier += 6.66
             ctx.log.append("🚪 **ЛИМАГАН**: x6.66 Урона по Лиме!")
-
+            logger.log(f"🚪 Limagun triggered: {ctx.source.name} vs {ctx.target.name}", LogLevel.NORMAL, "Passive")

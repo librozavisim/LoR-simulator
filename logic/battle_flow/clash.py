@@ -249,13 +249,13 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                 if is_atk_a and is_atk_d:
                     outcome = f"🏆 {attacker.name} Win (Hit)"
                     engine._resolve_clash_interaction(ctx_a, ctx_d, val_a - val_d)
-                    consume_die_a_fn();
+                    consume_die_a_fn()
                     consume_die_d_fn()
 
                 elif is_atk_a and is_evade_d:
                     outcome = f"💥 Evade Failed"
                     engine._resolve_clash_interaction(ctx_a, ctx_d, val_a)
-                    consume_die_a_fn();
+                    consume_die_a_fn()
                     consume_die_d_fn()
 
                 elif is_evade_a and is_atk_d:
@@ -268,13 +268,13 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                 elif is_atk_a and is_block_d:
                     outcome = f"🔨 Block Broken"
                     defender.take_stagger_damage(val_a - val_d)
-                    consume_die_a_fn();
+                    consume_die_a_fn()
                     consume_die_d_fn()
 
                 elif is_block_a and is_atk_d:
                     outcome = f"🛡️ Blocked"
                     attacker.restore_stagger(val_a - val_d)
-                    consume_die_a_fn();
+                    consume_die_a_fn()
                     consume_die_d_fn()
 
             elif val_d > val_a:
@@ -285,13 +285,13 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                 if is_atk_d and is_atk_a:
                     outcome = f"🏆 {defender.name} Win (Hit)"
                     engine._resolve_clash_interaction(ctx_d, ctx_a, val_d - val_a)
-                    consume_die_a_fn();
+                    consume_die_a_fn()
                     consume_die_d_fn()
 
                 elif is_atk_d and is_evade_a:
                     outcome = f"💥 Evade Failed"
                     engine._resolve_clash_interaction(ctx_d, ctx_a, val_d)
-                    consume_die_a_fn();
+                    consume_die_a_fn()
                     consume_die_d_fn()
 
                 elif is_evade_d and is_atk_a:
@@ -304,13 +304,13 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                 elif is_atk_d and is_block_a:
                     outcome = f"🔨 Block Broken"
                     attacker.take_stagger_damage(val_d - val_a)
-                    consume_die_a_fn();
+                    consume_die_a_fn()
                     consume_die_d_fn()
 
                 elif is_block_d and is_atk_a:
                     outcome = f"🛡️ Blocked"
                     defender.restore_stagger(val_d - val_a)
-                    consume_die_a_fn();
+                    consume_die_a_fn()
                     consume_die_d_fn()
 
             else:
@@ -318,7 +318,7 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                 logger.log(f"Clash Draw ({val_a})", LogLevel.NORMAL, "Clash")
                 engine._handle_clash_draw(ctx_a)
                 engine._handle_clash_draw(ctx_d)
-                consume_die_a_fn();
+                consume_die_a_fn()
                 consume_die_d_fn()
 
         l_lbl = die_a.dtype.name if die_a else "Broken"

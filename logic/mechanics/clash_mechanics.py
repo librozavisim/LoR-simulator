@@ -1,5 +1,6 @@
-from logic.mechanics import scripts, rolling, damage
 from core.logging import logger, LogLevel
+from logic.mechanics import scripts, rolling, damage
+
 
 class ClashMechanicsMixin:
     """
@@ -11,9 +12,10 @@ class ClashMechanicsMixin:
         # Делегируем выполнение скриптов
         return scripts.process_card_scripts(trigger, ctx)
 
-    def _process_card_self_scripts(self, trigger: str, source, target, custom_log_list=None):
+    def _process_card_self_scripts(self, trigger: str, source, target, custom_log_list=None, card_override=None):
         # Делегируем выполнение скриптов "на себя"
-        return scripts.process_card_self_scripts(trigger, source, target, self.logs, custom_log_list)
+        # card_override добавлен для поддержки предметов
+        return scripts.process_card_self_scripts(trigger, source, target, custom_log_list, card_override)
 
     def _create_roll_context(self, source, target, die, is_disadvantage=False):
         # Создаем контекст броска
@@ -27,6 +29,10 @@ class ClashMechanicsMixin:
         logger.log(f"🏳️ Clash Lose Hook: {ctx.source.name}", LogLevel.VERBOSE, "Mechanics")
         return scripts.handle_clash_outcome("on_clash_lose", ctx)
 
+    def _handle_clash_draw(self, ctx):
+        logger.log(f"🤝 Clash Draw Hook: {ctx.source.name}", LogLevel.VERBOSE, "Mechanics")
+        return scripts.handle_clash_outcome("on_clash_draw", ctx)
+
     def _trigger_unit_event(self, event_name, unit, *args, **kwargs):
         # Триггер событий юнита (on_hit, on_take_damage и т.д.)
         return scripts.trigger_unit_event(event_name, unit, *args, **kwargs)
@@ -35,17 +41,20 @@ class ClashMechanicsMixin:
         logger.log(f"Direct Damage Call: {amount} {dmg_type} -> {target.name}", LogLevel.VERBOSE, "Mechanics")
         return damage.deal_direct_damage(source_ctx, target, amount, dmg_type, self._trigger_unit_event)
 
-    # === NEW METHOD ===
-    def _handle_clash_draw(self, ctx):
-        logger.log(f"🤝 Clash Draw Hook: {ctx.source.name}", LogLevel.VERBOSE, "Mechanics")
-        return scripts.handle_clash_outcome("on_clash_draw", ctx)
-
     def _apply_damage(self, attacker_ctx, defender_ctx, dmg_type="hp"):
-        logger.log(f"Apply Damage Flow: {attacker_ctx.source.name} -> {defender_ctx.source.name}", LogLevel.VERBOSE, "Mechanics")
+        # [FIX] Безопасное получение имени защитника
+        def_name = "Unknown"
+        if defender_ctx:
+            def_name = defender_ctx.source.name
+        elif attacker_ctx.target:
+            def_name = attacker_ctx.target.name
+
+        logger.log(f"Apply Damage Flow: {attacker_ctx.source.name} -> {def_name}", LogLevel.VERBOSE, "Mechanics")
+
         return damage.apply_damage(
-            attacker_ctx, 
-            defender_ctx, 
-            dmg_type, 
+            attacker_ctx,
+            defender_ctx,
+            dmg_type,
             trigger_event_func=self._trigger_unit_event,
             script_runner_func=self._process_card_scripts
         )

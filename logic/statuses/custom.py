@@ -1,8 +1,10 @@
 import random
+
 from core.enums import DiceType
+from core.logging import logger, LogLevel
 from logic.context import RollContext
 from logic.statuses.common import StatusEffect
-from core.logging import logger, LogLevel
+
 
 class SelfControlStatus(StatusEffect):
     id = "self_control"
@@ -14,7 +16,8 @@ class SelfControlStatus(StatusEffect):
             ctx.damage_multiplier *= 2.0
             ctx.is_critical = True
             ctx.log.append(f"💨 CRIT! ({chance}%) x2 DMG")
-            logger.log(f"💨 SelfControl Crit: {ctx.source.name} (Chance {chance}%) -> x2 Dmg", LogLevel.VERBOSE, "Status")
+            logger.log(f"💨 SelfControl Crit: {ctx.source.name} (Chance {chance}%) -> x2 Dmg", LogLevel.VERBOSE,
+                       "Status")
             ctx.source.remove_status("self_control", 20)
 
     def on_round_end(self, unit, log_func, **kwargs):
@@ -36,9 +39,9 @@ class SmokeStatus(StatusEffect):
     def get_damage_modifier(self, unit, stack) -> float:
         eff_stack = min(10, stack)
         if unit.memory.get("smoke_is_defensive"):
-            return -(eff_stack * 0.03)  # Снижение урона (-30% макс)
+            return -(eff_stack * 0.03)
         else:
-            return eff_stack * 0.05  # Увеличение урона (+50% макс)
+            return eff_stack * 0.05
 
     def on_round_end(self, unit, log_func, **kwargs):
         msgs = []
@@ -56,11 +59,9 @@ class SmokeStatus(StatusEffect):
 
 class RedLycorisStatus(StatusEffect):
     id = "red_lycoris"
-
     prevents_stagger = True
     prevents_death = True
 
-    # 3. Замена логики в roll_speed_dice
     def modify_active_slot(self, unit, slot):
         slot['prevent_redirection'] = True
         if not slot.get('source_effect'):
@@ -84,51 +85,36 @@ class SinisterAuraStatus(StatusEffect):
                 if dmg_val > 0:
                     ctx.source.take_sanity_damage(dmg_val)
                     ctx.log.append(f"🌑 Аура: -{dmg_val} SP (от величия {target.name})")
-                    logger.log(f"🌑 Sinister Aura: {ctx.source.name} took {dmg_val} SP dmg", LogLevel.VERBOSE, "Status")
+                    # [CHANGE] VERBOSE -> MINIMAL
+                    logger.log(f"🌑 Sinister Aura: {ctx.source.name} took {dmg_val} SP dmg", LogLevel.MINIMAL, "Status")
 
 
 class AdaptationStatus(StatusEffect):
     id = "adaptation"
     name = "Адаптация"
-    description = ("Адаптация - накапливаемое до четырёх уровней состояние. "
-                   "Зафиэль начинает бой с 1 уровнем особенности и повышает его каждый ход. "
-                   "Понижает сопротивление к урону цели против атак Зафиэля до минимального "
-                   "[0.25], [0.5], [0.75], [1] за уровень.")
+    description = ("Адаптация - накапливаемое до четырёх уровней состояние...")
 
-    # def on_calculate_stats(self, unit, stack=0) -> dict:
-        # 1. Игнорирование урона: 11, 21, 31, 41, 51
-        # Передаем это как "damage_threshold_flat", чтобы коллектор сам добавил это в mods
-        # threshold = -1 + (stack * 8)
-
-        # 2. Снижение урона по выдержке вдвое (-50%)
-        # Возвращаем словарь с обоими параметрами
-        # return {
-        #     "stagger_take_pct": -30,
-        #     "damage_threshold_flat": threshold
-        # }
 
 class BulletTimeStatus(StatusEffect):
     id = "bullet_time"
 
     def on_roll(self, ctx: RollContext, stack: int):
-        # 1. Максимальное уклонение
         if ctx.dice.dtype == DiceType.EVADE:
             ctx.final_value = ctx.dice.max_val
             ctx.log.append(f"🕰️ **BULLET TIME**: Идеальное уклонение ({ctx.dice.max_val})")
             logger.log(f"🕰️ Bullet Time: {ctx.source.name} Evade Max ({ctx.dice.max_val})", LogLevel.VERBOSE, "Status")
-
-        # 2. Отмена атак
         elif ctx.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
             ctx.final_value = 0
             ctx.damage_multiplier = 0.0
             ctx.log.append("🕰️ **BULLET TIME**: Атака отменена (0)")
             logger.log(f"🕰️ Bullet Time: {ctx.source.name} Attack Nullified", LogLevel.VERBOSE, "Status")
 
+
 class ClarityStatus(StatusEffect):
     id = "clarity"
-    # Просто отображение, логика в таланте
+
     def on_round_end(self, unit, log_func, **kwargs):
-        return [] # Не исчезает сам по себе (duration 99)
+        return []
 
 
 class EnrageTrackerStatus(StatusEffect):
@@ -137,15 +123,13 @@ class EnrageTrackerStatus(StatusEffect):
     def on_take_damage(self, unit, amount, source, **kwargs):
         log_func = kwargs.get("log_func")
         if amount > 0:
-            # 1 урона = 1 силы
-            unit.add_status("strength", amount,
-                            duration=2)  # На этот и следующий ход (или duration=1 если только на следующий)
+            unit.add_status("strength", amount, duration=2)
             if log_func:
                 log_func(f"😡 **Разозлить**: Получено {amount} урона -> +{amount} Силы!")
             logger.log(f"😡 Enrage: {unit.name} gain +{amount} Strength from damage", LogLevel.VERBOSE, "Status")
 
     def on_round_end(self, unit, log_func, **kwargs):
-        return []  # Исчезает сам по duration
+        return []
 
 
 class InvisibilityStatus(StatusEffect):
@@ -171,9 +155,9 @@ class WeaknessStatus(StatusEffect):
     id = "weakness"
 
     def on_round_end(self, unit, log_func, **kwargs):
-        # Уменьшаем стаки на 1 в конце хода (или снимаем все, как решите)
         unit.remove_status("weakness", 1)
         return ["🔻 Слабость уменьшилась (-1)"]
+
 
 class MentalProtectionStatus(StatusEffect):
     id = "mental_protection"
@@ -184,42 +168,27 @@ class SatietyStatus(StatusEffect):
     id = "satiety"
 
     def on_calculate_stats(self, unit, stack=0) -> dict:
-        if unit.get_status("ignore_satiety") > 0:
-            return {}
-
+        if unit.get_status("ignore_satiety") > 0: return {}
         penalties = {}
         if stack >= 15:
-            penalties = {
-                "initiative": -3,
-                # "power_all": -3  # power_all needs support in collectors/modifiers
-            }
-
-        # === [ОПТИМИЗАЦИЯ] Прогоняем через фильтр ===
-        # Если есть "Любитель поесть", он вернет {} и штрафы исчезнут
+            penalties = {"initiative": -3}
         if hasattr(unit, "apply_mechanics_filter"):
             penalties = unit.apply_mechanics_filter("modify_satiety_penalties", penalties)
-        # ============================================
-
         return penalties
 
     def on_round_end(self, unit, log_func, **kwargs):
         stack = kwargs.get("stack")
         msgs = []
-
-        # Базовый порог
         threshold = 20
-
-        # === [ОПТИМИЗАЦИЯ] Можно добавить хук и для порога, если нужно ===
-        if "food_lover" in unit.passives:  # Пока оставим так, или можно добавить modify_satiety_threshold
-            threshold = 27
-        # ================================================================
+        if "food_lover" in unit.passives: threshold = 27
 
         if stack > threshold:
             excess = stack - threshold
             damage = excess * 10
             unit.current_hp = max(0, unit.current_hp - damage)
             msgs.append(f"**Переедание**: {excess} лишних стаков -> -{damage} HP!")
-            logger.log(f"🍗 Satiety Overload: {unit.name} took {damage} HP damage", LogLevel.NORMAL, "Status")
+            # [CHANGE] NORMAL -> MINIMAL
+            logger.log(f"🍗 Satiety Overload: {unit.name} took {damage} HP damage", LogLevel.MINIMAL, "Status")
 
         unit.remove_status("satiety", 1)
         msgs.append("🍗 Сытость немного спала (-1)")
@@ -227,22 +196,18 @@ class SatietyStatus(StatusEffect):
 
 
 # === СТАТУСЫ КОНФЕТ ===
-
 class IgnoreSatietyStatus(StatusEffect):
     id = "ignore_satiety"
-    # Логика внутри SatietyStatus
     pass
 
 
 class StaggerResistStatus(StatusEffect):
     id = "stagger_resist"
-    # Логика в damage.py
     pass
 
 
 class BleedResistStatus(StatusEffect):
     id = "bleed_resist"
-    # Логика в common.py (BleedStatus)
     pass
 
 
@@ -250,7 +215,6 @@ class RegenGanacheStatus(StatusEffect):
     id = "regen_ganache"
 
     def on_round_start(self, unit, log_func, **kwargs):
-        # 5% от макс хп
         heal = int(unit.max_hp * 0.05)
         if heal > 0:
             unit.heal_hp(heal)
@@ -265,17 +229,12 @@ class RevengeDmgUpStatus(StatusEffect):
     id = "revenge_dmg_up"
 
     def on_hit(self, ctx: RollContext, stack: int):
-        # Логика Мести: x1.5 урон и снятие
         ctx.damage_multiplier *= 1.5
         ctx.log.append(f"🩸 **Месть**: Урон x1.5!")
         logger.log(f"🩸 Revenge Triggered: {ctx.source.name} Damage x1.5", LogLevel.VERBOSE, "Status")
-
-        # Снимаем статус полностью после использования
         ctx.source.remove_status("revenge_dmg_up", 999)
 
     def on_round_end(self, unit, log_func, **kwargs):
-        # Статус сам исчезнет по длительности (duration=2),
-        # но на всякий случай можно вернуть пустой список
         return []
 
 

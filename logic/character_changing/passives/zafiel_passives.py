@@ -1,4 +1,5 @@
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 class PassiveSevereTraining(BasePassive):
@@ -25,6 +26,9 @@ class PassiveAdaptation(BasePassive):
         current = unit.get_status("adaptation")
         if current < 4:
             unit.add_status("adaptation", 1, duration=99)
-            if log_func: log_func(f"🧬 Адаптация: Рост -> Уровень {current + 1}")
+            if log_func:
+                log_func(f"🧬 Адаптация: Рост -> Уровень {current + 1}")
+
+            logger.log(f"🧬 Adaptation: {unit.name} stack increased to {current + 1}", LogLevel.VERBOSE, "Passive")
         else:
             unit.add_status("adaptation", 0, duration=99)

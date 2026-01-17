@@ -1,16 +1,12 @@
-# ==========================================
-# Махнуть хвостиком (Wag Tail)
-# ==========================================
+# logic/character_changing/passives/lilith_passives.py
 from core.dice import Dice
 from core.enums import DiceType
 from core.ranks import get_base_roll_by_level
 from logic.context import RollContext
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
-# ==========================================
-# Махнуть хвостиком (Wag Tail)
-# ==========================================
 # ==========================================
 # Махнуть хвостиком (Wag Tail)
 # ==========================================
@@ -22,7 +18,6 @@ class PassiveWagTail(BasePassive):
 
     def on_speed_rolled(self, unit, log_func, **kwargs):
         # 1. Определяем силу кубика на основе уровня персонажа
-        # (Используем ту же таблицу, что и для всех карт/талантов)
         base_min, base_max = get_base_roll_by_level(unit.level)
 
         # 2. Создаем кубик уклонения
@@ -36,6 +31,10 @@ class PassiveWagTail(BasePassive):
 
         if log_func:
             log_func(f"🐈 **{self.name}**: +1 Counter Evade ({base_min}-{base_max}) added to pool.")
+
+        # [LOG]
+        logger.log(f"🐈 Wag Tail: Added Counter Evade ({base_min}-{base_max}) to {unit.name}", LogLevel.VERBOSE,
+                   "Passive")
 
 
 # ==========================================
@@ -62,10 +61,12 @@ class PassiveBackstreetDemon(BasePassive):
         if counter_dmg <= 0: return
 
         # 4. Наносим урон врагу (HP)
-        # Так как это прямой урон от эффекта, используем current_hp
         loser.source.current_hp = max(0, loser.source.current_hp - counter_dmg)
 
         ctx.log.append(f"😈 **{self.name}**: Уворот! Враг получает {counter_dmg} урона (50% от {loser.final_value})")
+        # [LOG]
+        logger.log(f"😈 Backstreet Demon: Evade dealt {counter_dmg} dmg to {loser.source.name}", LogLevel.NORMAL,
+                   "Passive")
 
     # --- СЛАБАЯ СТОРОНА (Проигрыш против Блока) ---
     def on_clash_lose(self, ctx, **kwargs):
@@ -86,6 +87,9 @@ class PassiveBackstreetDemon(BasePassive):
             ctx.source.current_hp = max(0, ctx.source.current_hp - recoil_dmg)
 
             ctx.log.append(f"💔 **{self.name}**: Разбились о блок! Получено {recoil_dmg} урона.")
+            # [LOG]
+            logger.log(f"💔 Backstreet Demon: Block recoil took {recoil_dmg} HP from {ctx.source.name}", LogLevel.NORMAL,
+                       "Passive")
 
 
 # ==========================================
@@ -104,6 +108,9 @@ class PassiveDaughterOfBackstreets(BasePassive):
 
         if log_func:
             log_func(f"🏙️ **{self.name}**: Реген (+1 HP, +1 SP, +1 Stagger)")
+
+        # [LOG]
+        logger.log(f"🏙️ Daughter of Backstreets: Regen +1 HP/SP/Stg for {unit.name}", LogLevel.VERBOSE, "Passive")
 
 
 # ==========================================
@@ -140,8 +147,14 @@ class PassiveLiveFastDieYoung(BasePassive):
             if log_func:
                 log_func(f"⚡ **{self.name}**: +{slots_count} Силы и Стойкости (за {slots_count} слота)")
 
+            # [LOG]
+            logger.log(f"⚡ Live Fast Die Young: +{slots_count} Str/End for {unit.name}", LogLevel.VERBOSE, "Passive")
+
     def on_clash_win(self, ctx: RollContext):
         # Если выиграли атакующим кубиком -> +1 Дым
         if ctx.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
             ctx.source.add_status("smoke", 1, duration=99)
             ctx.log.append(f"⚡ **{self.name}**: +1 Дым за победу")
+            # [LOG]
+            logger.log(f"⚡ Live Fast Die Young: +1 Smoke on Clash Win for {ctx.source.name}", LogLevel.VERBOSE,
+                       "Passive")

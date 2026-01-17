@@ -1,7 +1,7 @@
-import streamlit as st
 import random
 
-from core.unit import unit
+import streamlit as st
+
 from core.unit.unit import Unit
 
 # === 1. ОПРЕДЕЛЕНИЕ ГРУПП И НАЗВАНИЙ ===
@@ -448,7 +448,7 @@ def draw_roll_interface(unit, selected_key, selected_label):
     st.markdown(f"Шанс: :{color}[**{chance:.1f}%**] | Ожидание: **{ev:.1f}** | DC: **{final_dc}**")
 
     # 4. Кнопка
-    if st.button("🎲 Бросить", type="primary", use_container_width=True, key=f"btn_{selected_key}"):
+    if st.button("🎲 Бросить", type="primary", width='stretch', key=f"btn_{selected_key}"):
         res = perform_check_logic(unit, selected_key, val, difficulty, bonus)
 
         res_color = "green" if res["is_success"] else "red"

@@ -1,7 +1,9 @@
 import streamlit as st
+
 from logic.character_changing.passives import PASSIVE_REGISTRY
 from logic.character_changing.talents import TALENT_REGISTRY
 from logic.weapon_definitions import WEAPON_REGISTRY
+
 
 def render_active_abilities(unit, unit_key):
     abilities = []
@@ -39,7 +41,7 @@ def render_active_abilities(unit, unit_key):
                     disabled = True
 
                 if st.button(f"✨ {btn_label}", key=f"act_{unit_key}_{pid}", disabled=disabled,
-                             use_container_width=True):
+                             width='stretch'):
                     def log_f(msg):
                         st.session_state.get('battle_logs', []).append(
                             {"round": "Skill", "rolls": "Activate", "details": msg})

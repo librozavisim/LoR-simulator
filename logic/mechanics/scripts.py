@@ -25,15 +25,8 @@ def process_card_self_scripts(trigger: str, source, target, custom_log_list=None
     (например, для отображения в отчете о столкновении).
     """
     card = card_override if card_override else source.current_card
-
     if not card or not card.scripts or trigger not in card.scripts: return
-
-    # Если передан кастомный список, используем его, иначе создаем временный,
-    # так как RollContext требует список (для совместимости старых скриптов).
-    # Новые скрипты должны писать в logger, но старые могут писать в ctx.log.
     target_log = custom_log_list if custom_log_list is not None else []
-
-    # Создаем фиктивный контекст для скрипта карты
     ctx = RollContext(source=source, target=target, dice=None, final_value=0, log=target_log)
 
     for script_data in card.scripts[trigger]:

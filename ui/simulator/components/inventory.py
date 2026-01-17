@@ -1,6 +1,9 @@
-import streamlit as st
 from collections import Counter
+
+import streamlit as st
+
 from core.library import Library
+
 
 def render_inventory(unit, unit_key):
     inventory_cards = []
@@ -36,7 +39,7 @@ def render_inventory(unit, unit_key):
                 max_cd = max(cooldowns_list) if cooldowns_list else 0
                 st.button(
                     f"⏳ {card.name} ({max_cd})",
-                    key=btn_key, disabled=True, use_container_width=True,
+                    key=btn_key, disabled=True, width='stretch',
                     help=f"{desc}\n\n(Все копии на перезарядке)"
                 )
             else:
@@ -44,7 +47,7 @@ def render_inventory(unit, unit_key):
                 if total_copies > 1:
                     label += f" ({available_copies}/{total_copies})"
 
-                if st.button(label, key=btn_key, help=desc, use_container_width=True):
+                if st.button(label, key=btn_key, help=desc, width='stretch'):
                     # Отложенный импорт для избежания циклических ссылок, если логика использует компоненты
                     from ui.simulator.logic.simulator_logic import use_item_action
                     use_item_action(unit, card)

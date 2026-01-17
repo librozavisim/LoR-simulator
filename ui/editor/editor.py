@@ -1,20 +1,20 @@
-import streamlit as st
 import uuid
+
+import streamlit as st
 
 from core.card import Card
 from core.dice import Dice
 from core.enums import DiceType
 from core.library import Library
-from ui.editor.editor_loader import load_card_to_state
 from ui.components import _format_script_text
-
-# Импорты из новых модулей
-from ui.editor.config import SCRIPT_SCHEMAS
-from ui.editor.forms import render_dynamic_form
 from ui.editor.callbacks import (
     edit_global_script, delete_global_script,
     edit_dice_script, delete_dice_script
 )
+# Импорты из новых модулей
+from ui.editor.config import SCRIPT_SCHEMAS
+from ui.editor.editor_loader import load_card_to_state
+from ui.editor.forms import render_dynamic_form
 
 
 def render_editor_page():
@@ -72,7 +72,7 @@ def render_editor_page():
         # Отступ для выравнивания с селектами
         st.write("")
         st.write("")
-        if st.button("📥 Загрузить", use_container_width=True):
+        if st.button("📥 Загрузить", width='stretch'):
             load_card_to_state(card_options[selected_option])
             st.rerun()
 

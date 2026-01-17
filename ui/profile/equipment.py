@@ -1,4 +1,5 @@
 import streamlit as st
+
 from core.unit.unit_library import UnitLibrary
 from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
 from logic.weapon_definitions import WEAPON_REGISTRY
@@ -88,7 +89,7 @@ def render_equipment(unit, u_key):
             reason = st.text_input("Описание", placeholder="Награда...", key=f"money_reason_{u_key}")
         with c_mon3:
             st.write("")
-            if st.button("Добавить", key=f"money_add_{u_key}", use_container_width=True):
+            if st.button("Добавить", key=f"money_add_{u_key}", width='stretch'):
                 if amount != 0:
                     if not hasattr(unit, 'money_log'): unit.money_log = []
                     unit.money_log.append({"amount": amount, "reason": reason})

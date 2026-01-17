@@ -127,7 +127,6 @@ def execute_single_action(engine, act, executed_slots):
         _apply_card_cooldown(target, target.current_card)
 
         logger.log(f"⚔️ Clash: {source.name} vs {target.name}", LogLevel.NORMAL, "Combat")
-        # engine.log уже заменен на logger.log внутри _resolve_card_clash, но для UI лога оставим, если нужно
 
         logs = engine._resolve_card_clash(
             source, target, "Clash", act['is_left'],
@@ -147,7 +146,16 @@ def execute_single_action(engine, act, executed_slots):
         is_target_busy = (tgt_id in executed_slots) or is_redirected
 
         spd_def_val = 0
-        if target_slot: spd_def_val = target_slot['speed']
+        if target_slot:
+            spd_def_val = target_slot['speed']
+            # [FIX] Явно устанавливаем карту цели для пассивной защиты
+            # Если слот не занят, берем карту из слота. Если занят - None.
+            if not is_target_busy and not target.is_staggered():
+                target.current_card = target_slot.get('card')
+            else:
+                target.current_card = None
+        else:
+            target.current_card = None
 
         logger.log(f"🏹 One-Sided: {source.name} -> {target.name} ({'Redirected' if is_redirected else 'Direct'})",
                    LogLevel.NORMAL, "Combat")

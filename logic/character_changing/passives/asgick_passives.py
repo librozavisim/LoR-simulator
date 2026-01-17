@@ -1,5 +1,6 @@
 from logic.context import RollContext
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Импорт логгера
 
 
 class PassiveWitnessOfGroGoroth(BasePassive):
@@ -31,13 +32,12 @@ class PassiveWitnessOfGroGoroth(BasePassive):
             "hp_flat": -50,  # Здоровье -50
             "sp_flat": -50,  # Рассудок -50
             "stagger_pct": -50,  # Выдержка -50%
-            "talent_slots": 2,  # <--- ДОБАВЛЕНО: +2 слота талантов
+            "talent_slots": 2,  # +2 слота талантов
             "threat_level": -1,
             "damage_take_pct": 20,
             "disable_block": 1,
             "disable_evade": 1
         }
-
         return stats
 
     def on_combat_start(self, unit, log_func, **kwargs):
@@ -55,39 +55,19 @@ class PassiveWitnessOfGroGoroth(BasePassive):
             ctx.damage_multiplier += 6.66
             ctx.log.append(f"🩸 **НЕНАВИСТЬ**: Урон по Лиме увеличен (+666%)!")
 
-        # === НОВЫЙ ХУК: РАСПРОСТРАНЕНИЕ БАФФОВ ===
     def on_status_applied(self, unit, status_id, amount, duration=100, **kwargs):
         # Список распространяемых баффов
         POSITIVE_BUFFS = [
             # Базовые характеристики
-            "strength",  # Сила
-            "endurance",  # Стойкость
-            "haste",  # Спешка (Скорость)
-            "protection",  # Защита (Снижение урона)
-            "barrier",  # Барьер (HP Shield)
-
+            "strength", "endurance", "haste", "protection", "barrier",
             # Боевые модификаторы
-            "dmg_up",  # Повышение урона
-            "power_up",  # Повышение мощи
-            "clash_power_up",  # Мощь в столкновении
-            "revenge_dmg_up",  # Месть (Усиление следующей атаки)
-
+            "dmg_up", "power_up", "clash_power_up", "revenge_dmg_up",
             # Уникальные механики
-            "self_control",  # Самообладание (Криты/Урон)
-            "invisibility",  # Невидимость
-            "bullet_time",  # Bullet Time (Уворот)
-            "adaptation",  # Адаптация (Резисты/Игнор)
-            "clarity",  # Ясность (Блок дебаффа)
-
+            "self_control", "invisibility", "bullet_time", "adaptation", "clarity",
             # Защитные и Регенерация
-            "mental_protection",  # Защита Рассудка
-            "stagger_resist",  # Сопротивление урону по Выдержке
-            "bleed_resist",  # Сопротивление Кровотечению
-            "regen_ganache",  # Регенерация (Ганаш)
-            "ignore_satiety",  # Игнорирование сытости
-
+            "mental_protection", "stagger_resist", "bleed_resist", "regen_ganache", "ignore_satiety",
             # Особые состояния
-            "red_lycoris"  # Красный Ликорис (Иммунитет/Реген)
+            "red_lycoris"
         ]
 
         if status_id in POSITIVE_BUFFS:
@@ -97,11 +77,17 @@ class PassiveWitnessOfGroGoroth(BasePassive):
             if not allies:
                 return
 
+            shared_names = []
             for ally in allies:
                 if not ally.is_dead():
-                    # ВАЖНО: trigger_events=False предотвращает бесконечный цикл,
-                    # если у союзника тоже есть такая пассивка или триггеры
+                    # ВАЖНО: trigger_events=False предотвращает бесконечный цикл
                     ally.add_status(status_id, amount, duration=duration, trigger_events=False)
+                    shared_names.append(ally.name)
+
+            # [LOG] Логируем факт распространения (Verbose)
+            if shared_names:
+                logger.log(f"👁️ Witness: Shared {amount} {status_id} with {', '.join(shared_names)}", LogLevel.VERBOSE,
+                           "Passive")
 
 
 class PassivePovar(BasePassive):
@@ -111,12 +97,13 @@ class PassivePovar(BasePassive):
 
     def on_calculate_stats(self, unit) -> dict:
         talents_to_learn = ["cheese", "confete"]
-
+        # Добавляем таланты, если их нет (без логов, т.к. это происходит часто)
         for tid in talents_to_learn:
             if tid not in unit.talents:
                 unit.talents.append(tid)
 
         return {"talent_slots": len(talents_to_learn)}
+
 
 class PassiveDistortionGroGoroth(BasePassive):
     id = "distortionGroGoroth"
@@ -125,9 +112,8 @@ class PassiveDistortionGroGoroth(BasePassive):
 
     def on_calculate_stats(self, unit) -> dict:
         stats = {
-            "speed": 10,  # Харизма +20
+            "speed": 10,
         }
-
         return stats
 
 
@@ -148,6 +134,8 @@ class PassiveFoodLover(BasePassive):
         # Штраф к проверкам за голод
         if ctx.source.get_status("satiety") <= 0:
             ctx.modify_power(-5, "Hunger")
+            # [LOG] Добавляем визуальный лог
+            ctx.log.append("🍗 **Hunger**: -5 Power penalty")
 
     def modify_satiety_penalties(self, unit, penalties: dict) -> dict:
         return {}

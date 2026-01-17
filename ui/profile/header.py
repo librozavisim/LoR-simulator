@@ -1,10 +1,12 @@
-import streamlit as st
 import os
 
+import streamlit as st
+
+from core.game_templates import CHARACTER_TEMPLATES
 from core.ranks import RANK_THRESHOLDS
 from core.unit.unit import Unit
 from core.unit.unit_library import UnitLibrary
-from core.game_templates import CHARACTER_TEMPLATES
+
 
 def save_avatar_file(uploaded, unit_name):
     os.makedirs("data/avatars", exist_ok=True)
@@ -62,10 +64,10 @@ def render_header(roster):
     c1, c2 = st.columns([3, 1])
 
     # === КНОПКА СОЗДАНИЯ (POPOVER) ===
-    with c2.popover("➕ Создать", use_container_width=True):
+    with c2.popover("➕ Создать", width='stretch'):
         st.markdown("**Выберите шаблон:**")
 
-        if st.button("Крыса (Пустой)", use_container_width=True):
+        if st.button("Крыса (Пустой)", width='stretch'):
             n = f"Unit_{len(roster) + 1}"
             u = Unit(n)
             roster[n] = u
@@ -79,7 +81,7 @@ def render_header(roster):
         for tmpl in CHARACTER_TEMPLATES:
             if tmpl["tier"] == 0: continue
             label = f"{tmpl['name']} (Lvl {tmpl['level']})"
-            if st.button(label, key=f"create_{tmpl['tier']}", use_container_width=True):
+            if st.button(label, key=f"create_{tmpl['tier']}", width='stretch'):
                 u, n = create_character_from_template(tmpl, roster)
                 roster[n] = u
                 UnitLibrary.save_unit(u)
@@ -114,12 +116,12 @@ def render_header(roster):
     c_save, c_del = st.columns([4, 1])
 
     with c_save:
-        if st.button("💾 СОХРАНИТЬ ПРОФИЛЬ", type="primary", use_container_width=True, key=f"save_btn_{u_key}"):
+        if st.button("💾 СОХРАНИТЬ ПРОФИЛЬ", type="primary", width='stretch', key=f"save_btn_{u_key}"):
             UnitLibrary.save_unit(unit)
             st.toast("Данные персонажа сохранены!", icon="✅")
 
     with c_del:
-        with st.popover("🗑️", use_container_width=True):
+        with st.popover("🗑️", width='stretch'):
             st.warning(f"Удалить {unit.name}?")
             st.button(
                 "Да, удалить",

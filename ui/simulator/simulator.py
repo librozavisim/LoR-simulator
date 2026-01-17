@@ -1,14 +1,13 @@
 import streamlit as st
-from ui.components import render_unit_stats
-# Импортируем обновленные функции логики
-from ui.simulator.logic.simulator_logic import (
-    roll_phase, execute_combat_auto, reset_game,
-    sync_state_from_widgets, precalculate_interactions
-)
-from ui.simulator.components.simulator_components import render_slot_strip, render_active_abilities, render_inventory
 
 # [NEW] Импорт логгера
-from core.logging import logger
+from core.logging import logger, LogLevel
+from ui.components import render_unit_stats
+# Импортируем логику симулятора
+from ui.simulator.components.simulator_components import render_slot_strip, render_active_abilities, render_inventory
+from ui.simulator.logic.precalculate_speed_rolls import precalculate_interactions
+from ui.simulator.logic.simulator_logic import sync_state_from_widgets
+from ui.simulator.logic.step_func import reset_game, roll_phase, execute_combat_auto
 
 
 def render_simulator_page():
@@ -16,119 +15,193 @@ def render_simulator_page():
     if 'phase' not in st.session_state: st.session_state['phase'] = 'roll'
     if 'round_number' not in st.session_state: st.session_state['round_number'] = 1
 
-    # === ОБНОВЛЕННЫЕ СТИЛИ (CSS) ===
+    # === CSS СТИЛИ ДЛЯ ЛОГОВ И СЧЕТЧИКА ===
     st.markdown(f"""
         <style>
-            /* Контейнер для счетчика */
+            /* Контейнер счетчика раундов */
             .turn-counter-static {{
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                margin: 0 auto 20px auto; 
-                padding: 10px 40px;
+                margin: 0 auto 10px auto; 
+                padding: 5px 20px;
                 width: fit-content;
-                min-width: 150px;
+                min-width: 120px;
                 background: linear-gradient(135deg, rgba(35, 37, 46, 1) 0%, rgba(20, 20, 25, 1) 100%);
                 border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 12px;
+                border-radius: 8px;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             }}
-
             .counter-label {{
-                font-family: sans-serif; font-size: 11px; letter-spacing: 2px;
-                text-transform: uppercase; color: #8d99ae; margin-bottom: 4px;
+                font-family: sans-serif; font-size: 10px; letter-spacing: 2px;
+                text-transform: uppercase; color: #8d99ae; margin-bottom: 2px;
             }}
-
             .counter-value {{
-                font-family: 'Courier New', monospace; font-size: 32px;
+                font-family: 'Courier New', monospace; font-size: 24px;
                 font-weight: 700; color: #edf2f4; text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
                 line-height: 1;
             }}
 
-            /* [NEW] Стиль для системного лога */
-            .log-entry {{
-                font-family: 'Consolas', monospace;
+            /* Стили логов */
+            .log-container {{
+                background-color: #0e1117;
+                border: 1px solid #30333d;
+                border-radius: 5px;
+                padding: 10px;
+                max-height: 500px;
+                overflow-y: auto;
+                font-family: 'Consolas', 'Courier New', monospace;
                 font-size: 13px;
-                padding: 4px 8px;
-                border-bottom: 1px solid #333;
-                display: flex;
             }}
-            .log-time {{ color: #6c757d; margin-right: 10px; min-width: 80px; }}
-            .log-cat {{ color: #ffd166; margin-right: 10px; font-weight: bold; min-width: 80px; }}
-            .log-msg {{ color: #e9ecef; word-break: break-word; }}
-            .log-verbose {{ color: #adb5bd; }}
-        </style>
+            .log-entry {{
+                padding: 3px 0;
+                border-bottom: 1px solid #1c1f26;
+                display: flex;
+                align-items: baseline;
+            }}
+            .log-time {{ color: #6c757d; margin-right: 10px; min-width: 70px; font-size: 0.9em; }}
 
+            /* Категории */
+            .cat-Combat {{ color: #ff6b6b; font-weight: bold; }} /* Красный */
+            .cat-Status {{ color: #4ecdc4; }} /* Бирюзовый */
+            .cat-Effect {{ color: #feca57; }} /* Желтый */
+            .cat-Stats {{ color: #54a0ff; }} /* Синий */
+            .cat-System {{ color: #8395a7; }} /* Серый */
+            .cat-Clash {{ color: #ff9ff3; font-weight: bold; }} /* Розовый */
+            .cat-Damage {{ color: #ff4757; font-weight: bold; text-decoration: underline; }} /* Кровавый */
+
+            .log-cat {{ margin-right: 10px; min-width: 80px; text-transform: uppercase; font-size: 0.85em; }}
+
+            /* Уровни важности */
+            .lvl-NORMAL {{ color: #e9ecef; }}
+            .lvl-MINIMAL {{ color: #ffffff; font-weight: bold; border-left: 2px solid #fff; padding-left: 5px; }}
+            .lvl-VERBOSE {{ color: #636e72; font-style: italic; }}
+        </style>
+        """, unsafe_allow_html=True)
+
+    # === САЙДБАР ===
+    with st.sidebar:
+        st.divider()
+        st.subheader("⚙️ Управление боем")
+
+        # Кнопка сброса
+        if st.button("🔄 Сброс Боя (Reset)", type="secondary", width='stretch'):
+            reset_game()
+            logger.clear()  # Очищаем системный лог
+            st.rerun()
+
+        st.divider()
+
+        # --- ВЫБОР РЕЖИМА ЛОГИРОВАНИЯ ---
+        st.markdown("**📜 Уровень Логирования**")
+        log_mode = st.radio(
+            "Детализация:",
+            ["Минимальный", "Обычный", "Подробный"],
+            index=1,  # Обычный по умолчанию
+            key="sim_log_mode",
+            help="Влияет на то, сколько информации будет показано в консоли событий."
+        )
+
+        # Маппинг для конвертации
+        log_level_map = {
+            "Минимальный": LogLevel.MINIMAL,
+            "Обычный": LogLevel.NORMAL,
+            "Подробный": LogLevel.VERBOSE
+        }
+        current_log_level = log_level_map[log_mode]
+
+    # === ВЕРХНЯЯ ЧАСТЬ: СЧЕТЧИК И ФАЗЫ ===
+    col_counter, col_ctrl = st.columns([1, 4])
+
+    with col_counter:
+        st.markdown(f"""
         <div class="turn-counter-static">
             <div class="counter-label">SCENE</div>
             <div class="counter-value">{st.session_state['round_number']}</div>
         </div>
         """, unsafe_allow_html=True)
 
-    # Сайдбар с кнопкой сброса
-    with st.sidebar:
-        st.divider()
-        # [UPD] Добавляем очистку логгера при сбросе
-        if st.button("🔄 Reset Battle", type="secondary", use_container_width=True):
-            reset_game()
-            logger.clear()  # Очищаем системный лог
-            st.rerun()
+    with col_ctrl:
+        # Получаем команды
+        team_left = st.session_state.get('team_left', [])
+        team_right = st.session_state.get('team_right', [])
 
-    # Получаем команды
-    team_left = st.session_state.get('team_left', [])
-    team_right = st.session_state.get('team_right', [])
+        if not team_left or not team_right:
+            st.warning("⚠️ Команды пусты. Добавьте персонажей в боковом меню.")
+            return
 
-    if not team_left or not team_right:
-        st.warning("Teams are empty. Please configure teams in the sidebar.")
-        return
+        # 1. Пересчет статов (чтобы UI был свежим)
+        for u in team_left + team_right:
+            u.recalculate_stats()
 
-    # 1. Пересчет статов
-    for u in team_left + team_right:
-        u.recalculate_stats()
+        # 2. Логика фаз и Кнопка действия
+        btn_col1, btn_col2 = st.columns([3, 1])
 
-    # 2. Синхронизация и прекалькуляция (только в фазе планирования)
-    if st.session_state['phase'] == 'planning':
-        sync_state_from_widgets(team_left, team_right)
-        precalculate_interactions(team_left, team_right)
+        with btn_col1:
+            if st.session_state['phase'] == 'roll':
+                st.info("🎲 Фаза: **Бросок Инициативы**. Определите скорость персонажей.")
+                if st.button("🎲 БРОСИТЬ КУБИКИ СКОРОСТИ", type="primary", width='stretch'):
+                    roll_phase()
+                    st.rerun()
+            else:
+                # Фаза планирования/боя
+                st.success("⚔️ Фаза: **Столкновение**. Настройте карты и начните бой.")
 
-    # === ОСНОВНАЯ РАЗМЕТКА ===
+                # Синхронизация виджетов с данными (чтобы при нажатии Fight данные не потерялись)
+                sync_state_from_widgets(team_left, team_right)
+                precalculate_interactions(team_left, team_right)
+
+                if st.button("⚔️ НАЧАТЬ РАУНД (FIGHT)", type="primary", width='stretch'):
+                    execute_combat_auto()
+                    st.rerun()
+
+    st.divider()
+
+    # === ОСНОВНАЯ ЗОНА: КОМАНДЫ ===
     col_left_main, col_right_main = st.columns(2, gap="large")
 
-    # --- LEFT TEAM ---
+    # --- ЛЕВАЯ КОМАНДА ---
     with col_left_main:
-        st.subheader(f"Left Team ({len(team_left)})")
+        st.markdown(f"### 🟦 Left Team ({len(team_left)})")
         for i, unit in enumerate(team_left):
             with st.container(border=True):
+                # Шапка юнита
                 c_stats, c_img = st.columns([2, 1.2])
                 with c_stats:
                     render_unit_stats(unit)
                 with c_img:
-                    img = unit.avatar if unit.avatar else "https://placehold.co/150?text=U"
-                    st.image(img, use_column_width=True)
+                    # Аватар
+                    img = unit.avatar if unit.avatar else "https://placehold.co/150?text=Unit"
+                    st.image(img, width='stretch')
 
+                # Активные способности и инвентарь
                 render_active_abilities(unit, f"l_abil_{i}")
                 render_inventory(unit, f"l_inv_{i}")
 
+                # Слоты (только если не стадия ролла)
                 if st.session_state['phase'] == 'planning':
                     st.divider()
                     if unit.active_slots:
                         for s_i in range(len(unit.active_slots)):
                             render_slot_strip(unit, team_right, team_left, s_i, f"l_{i}")
                     else:
-                        st.caption("No active slots")
+                        if unit.is_staggered():
+                            st.error("😵 STAGGERED")
+                        else:
+                            st.caption("No active slots")
 
-    # --- RIGHT TEAM ---
+    # --- ПРАВАЯ КОМАНДА ---
     with col_right_main:
-        st.subheader(f"Right Team ({len(team_right)})")
+        st.markdown(f"### 🟥 Right Team ({len(team_right)})")
         for i, unit in enumerate(team_right):
             with st.container(border=True):
                 c_stats, c_img = st.columns([2, 1.2])
                 with c_stats:
                     render_unit_stats(unit)
                 with c_img:
-                    img = unit.avatar if unit.avatar else "https://placehold.co/150?text=E"
-                    st.image(img, use_column_width=True)
+                    img = unit.avatar if unit.avatar else "https://placehold.co/150?text=Enemy"
+                    st.image(img, width='stretch')
 
                 render_active_abilities(unit, f"r_abil_{i}")
                 render_inventory(unit, f"r_inv_{i}")
@@ -139,96 +212,104 @@ def render_simulator_page():
                         for s_i in range(len(unit.active_slots)):
                             render_slot_strip(unit, team_left, team_right, s_i, f"r_{i}")
                     else:
-                        st.caption("No active slots")
+                        if unit.is_staggered():
+                            st.error("😵 STAGGERED")
+                        else:
+                            st.caption("No active slots")
 
     st.divider()
 
-    # === ЦЕНТРАЛЬНЫЕ КНОПКИ УПРАВЛЕНИЯ ===
-    _, c_center, _ = st.columns([1, 2, 1])
-    with c_center:
-        if st.session_state['phase'] == 'roll':
-            st.button("🎲 ROLL INITIATIVE (ALL)", type="primary", on_click=roll_phase, use_container_width=True)
+    # === ЗОНА ЛОГОВ (2 ЧАСТИ) ===
+
+    tab_visual, tab_system = st.tabs(["📜 Visual Report (Cards)", f"🛠️ System Log ({log_mode})"])
+
+    # 1. VISUAL REPORT (Карточки столкновений)
+    # Показывает красивые плашки Clash/OneSided из logic/battle_flow
+    with tab_visual:
+        visual_logs = st.session_state.get('battle_logs', [])
+
+        if not visual_logs:
+            st.caption("Нет данных о столкновениях в этом раунде.")
         else:
-            st.button("⚔️ FIGHT! (Execute Turn)", type="primary", on_click=execute_combat_auto,
-                      use_container_width=True)
-
-    # === ВИЗУАЛЬНЫЙ ОТЧЕТ (Карточки) ===
-    st.subheader("📜 Battle Report")
-
-    if st.session_state.get('turn_message'):
-        st.info(st.session_state['turn_message'])
-
-    visual_logs = st.session_state.get('battle_logs', [])
-
-    if visual_logs:
-        # Прячем визуальные логи в экспандер, чтобы не занимать место, если нужен дебаг
-        with st.expander("Show Visual Clash Report", expanded=True):
             for log in visual_logs:
+                # Если это полноценный отчет о столкновении (словарь с left/right)
                 if "left" in log and "right" in log:
                     with st.container(border=True):
                         l = log['left']
                         r = log['right']
+
+                        # Определяем цвет рамки по исходу (победа/поражение)
+                        outcome = log.get('outcome', '-')
+
                         c_vis_l, c_vis_c, c_vis_r = st.columns([5, 1, 5])
 
+                        # ЛЕВО
                         with c_vis_l:
                             st.markdown(
-                                f"<div style='text-align:right'><b>{l['unit']}</b> <span style='color:gray'>({l['card']})</span><br>{l['dice']} <span style='font-size:1.2em; font-weight:bold'>{l['val']}</span> <span style='font-size:0.8em'>[{l['range']}]</span></div>",
+                                f"<div style='text-align:right'><b>{l['unit']}</b> <span style='color:gray; font-size:0.8em'>({l['card']})</span><br>"
+                                f"{l['dice']} <span style='font-size:1.4em; font-weight:bold; color:#4ecdc4'>{l['val']}</span> <span style='font-size:0.8em; color:gray'>[{l['range']}]</span></div>",
                                 unsafe_allow_html=True)
+
+                        # VS
                         with c_vis_c:
-                            st.markdown("<div style='text-align:center; padding-top:10px; color:gray'>VS</div>",
-                                        unsafe_allow_html=True)
+                            st.markdown(
+                                "<div style='text-align:center; font-weight:bold; padding-top:10px; color:#555'>VS</div>",
+                                unsafe_allow_html=True)
+
+                        # ПРАВО
                         with c_vis_r:
                             st.markdown(
-                                f"<b>{r['unit']}</b> <span style='color:gray'>({r['card']})</span><br><span style='font-size:0.8em'>[{r['range']}]</span> <span style='font-size:1.2em; font-weight:bold'>{r['val']}</span> {r['dice']}",
+                                f"<b>{r['unit']}</b> <span style='color:gray; font-size:0.8em'>({r['card']})</span><br>"
+                                f"<span style='font-size:1.4em; font-weight:bold; color:#ff6b6b'>{r['val']}</span> {r['dice']} <span style='font-size:0.8em; color:gray'>[{r['range']}]</span>",
                                 unsafe_allow_html=True)
 
-                        st.divider()
-                        st.caption(f"Result: {log.get('outcome', '-')}")
-                        if 'details' in log:
-                            for d in log['details']:
-                                st.markdown(f"• {d}")
+                        # Итог и Детали
+                        st.caption(f"🏁 {outcome}")
+                        if 'details' in log and log['details']:
+                            with st.expander("Подробности"):
+                                for d in log['details']:
+                                    st.markdown(f"- {d}")
 
+                # Если это просто текстовое событие (например, начало раунда)
                 else:
-                    st.caption(f"ℹ️ {log.get('round', '')}: {log.get('details', '')}")
+                    # Фильтруем простые события, если выбран Minimal, чтобы не засорять визуал
+                    if current_log_level > LogLevel.MINIMAL:
+                        st.caption(f"ℹ️ {log.get('round', '')}: {log.get('details', '')}")
 
-    # === [NEW] СИСТЕМНЫЙ ЛОГ (ТЕКСТОВЫЙ) ===
-    st.divider()
-    with st.expander("🛠️ System Logs (Debug Console)", expanded=False):
-        c_filter_lvl, c_filter_cat = st.columns(2)
+        # 2. SYSTEM LOG (Текстовая консоль)
+        with tab_system:
+            # Получаем отфильтрованные логи
+            system_logs = logger.get_logs_for_ui(current_log_level)
 
-        # 1. Фильтр уровня
-        # Маппинг UI имен на значения Enum
-        lvl_map = {"Minimal": 1, "Normal": 2, "Verbose": 3}
-        selected_lvl_name = c_filter_lvl.selectbox("Log Level", ["Normal", "Verbose", "Minimal"], index=0)
-        selected_lvl_val = lvl_map[selected_lvl_name]
+            # Доп. фильтр по категориям
+            if system_logs:
+                all_cats = sorted(list(set(l['category'] for l in system_logs)))
+                selected_cats = st.multiselect("Фильтр категорий", all_cats, default=all_cats, key="log_cat_filter")
+            else:
+                selected_cats = []
 
-        # 2. Получаем отфильтрованные по уровню логи
-        # (logger импортирован из core.logging)
-        system_logs = logger.get_logs_for_ui(selected_lvl_val)
+            # Начинаем контейнер
+            log_html = '<div class="log-container">'
 
-        # 3. Фильтр категорий
-        if system_logs:
-            all_cats = sorted(list(set(l['category'] for l in system_logs)))
-            selected_cats = c_filter_cat.multiselect("Category", all_cats, default=all_cats)
-        else:
-            selected_cats = []
+            if not system_logs:
+                log_html += '<div class="log-entry">Нет логов для отображения.</div>'
 
-        # 4. Рендер логов
-        log_html = ""
-        for entry in system_logs:
-            if entry['category'] in selected_cats:
-                # Серый цвет для Verbose, белый для остальных
-                css_class = "log-verbose" if entry['level'] == 3 else "log-msg"
+            for entry in system_logs:
+                if entry['category'] in selected_cats:
+                    # CSS классы
+                    lvl_class = f"lvl-{entry['level'].name}"
+                    cat_class = f"cat-{entry['category']}"
 
-                log_html += f"""
-                <div class="log-entry">
-                    <span class="log-time">[{entry['time']}]</span>
-                    <span class="log-cat">{entry['category']}</span>
-                    <span class="{css_class}">{entry['message']}</span>
-                </div>
-                """
+                    # [FIX] Собираем строку без лишних отступов, чтобы Markdown не превратил это в Code Block
+                    # Используем конкатенацию или экранирование переносов строки (\)
+                    row = (
+                        f'<div class="log-entry {lvl_class}">'
+                        f'<span class="log-time">[{entry["time"]}]</span>'
+                        f'<span class="log-cat {cat_class}">[{entry["category"]}]</span>'
+                        f'<span class="log-msg">{entry["message"]}</span>'
+                        f'</div>'
+                    )
+                    log_html += row
 
-        if log_html:
+            log_html += '</div>'
             st.markdown(log_html, unsafe_allow_html=True)
-        else:
-            st.caption("No logs found. Try changing filters or running a battle.")

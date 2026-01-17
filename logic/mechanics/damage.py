@@ -1,10 +1,5 @@
-from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
-from logic.character_changing.passives import PASSIVE_REGISTRY
-from logic.character_changing.talents import TALENT_REGISTRY
-from logic.statuses.status_manager import STATUS_REGISTRY
-from logic.calculations.formulas import get_modded_value
-from logic.weapon_definitions import WEAPON_REGISTRY
 from core.logging import logger, LogLevel
+from logic.calculations.formulas import get_modded_value
 
 
 def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_event_func):
@@ -106,8 +101,8 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
             if is_stag_hit: hit_msg += " (Staggered)"
             source_ctx.log.append(hit_msg)
 
-            logger.log(f"💥 {target.name} took {final_dmg} HP Damage. Formula: {formula_str}", LogLevel.VERBOSE,
-                       "Damage")
+            # [CHANGE] VERBOSE -> MINIMAL
+            logger.log(f"💥 {target.name} took {final_dmg} HP Damage", LogLevel.MINIMAL, "Damage")
 
     elif dmg_type == "stagger":
         res = getattr(target.stagger_resists, dtype_name, 1.0)
@@ -121,7 +116,8 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
         target.current_stagger = max(0, target.current_stagger - final_dmg)
 
         source_ctx.log.append(f"😵 **{target.name}**: Stagger -{final_dmg}")
-        logger.log(f"😵 {target.name} took {final_dmg} Stagger Damage", LogLevel.VERBOSE, "Damage")
+        # [CHANGE] VERBOSE -> MINIMAL
+        logger.log(f"😵 {target.name} took {final_dmg} Stagger Damage", LogLevel.MINIMAL, "Damage")
 
     # Триггер событий
     if amount > 0:
@@ -144,13 +140,22 @@ def deal_direct_damage(source_ctx, target, amount: int, dmg_type: str, trigger_e
 def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
                  trigger_event_func=None, script_runner_func=None):
     attacker = attacker_ctx.source
-    defender = attacker_ctx.target
+    # [FIX] Безопасное получение имени защитника (скопировано из прошлого чата)
+    def_name = "Unknown"
+    defender = attacker_ctx.target  # Берем defender из контекста атакующего
+
+    # Если передан defender_ctx, он может быть полезен, но основной таргет в attacker_ctx
+    if defender_ctx:
+        defender = defender_ctx.source  # В контексте защиты source - это тот кто защищается
+        def_name = defender.name
+    elif defender:
+        def_name = defender.name
 
     if not defender: return
 
     if defender.get_status("red_lycoris") > 0:
         attacker_ctx.log.append(f"🚫 {defender.name} Immune (Lycoris)")
-        logger.log(f"🚫 {defender.name} Immune to Damage (Red Lycoris)", LogLevel.VERBOSE, "Damage")
+        logger.log(f"🚫 {defender.name} Immune to Damage (Red Lycoris)", LogLevel.MINIMAL, "Damage")
         return
 
     # Trigger On Hit effects
@@ -186,7 +191,8 @@ def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
 
             defender.take_sanity_damage(final_amt)
             attacker_ctx.log.append(f"🧠 **White Dmg**: {final_amt} SP")
-            logger.log(f"🧠 {defender.name} took {final_amt} SP Damage (White)", LogLevel.VERBOSE, "Damage")
+            # [CHANGE] VERBOSE -> MINIMAL
+            logger.log(f"🧠 {defender.name} took {final_amt} SP Damage (White)", LogLevel.MINIMAL, "Damage")
         else:
             deal_direct_damage(attacker_ctx, defender, final_amt, "hp", trigger_event_func)
 
@@ -217,4 +223,5 @@ def apply_damage(attacker_ctx, defender_ctx, dmg_type="hp",
                 stg_dmg = int(stg_dmg * mod_mult)
 
             defender.current_stagger = max(0, defender.current_stagger - stg_dmg)
-            logger.log(f"😵 {defender.name} took {stg_dmg} Stagger Side-Damage", LogLevel.VERBOSE, "Damage")
+            # [CHANGE] VERBOSE -> MINIMAL
+            logger.log(f"😵 {defender.name} took {stg_dmg} Stagger Side-Damage", LogLevel.MINIMAL, "Damage")

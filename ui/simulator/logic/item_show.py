@@ -1,5 +1,7 @@
-from core.library import Library
 import streamlit as st
+
+from core.library import Library
+
 
 def use_item_action(unit, card):
     # Проверка наличия доступных копий (дублирует UI, но для надежности)
@@ -57,7 +59,7 @@ def render_inventory(unit, unit_key):
             desc = card.description if card.description else "No description"
 
             # Кнопка использования
-            if st.button(f"💊 {card.name}", key=btn_key, help=desc, use_container_width=True):
+            if st.button(f"💊 {card.name}", key=btn_key, help=desc, width='stretch'):
                 from ui.simulator.logic.simulator_logic import use_item_action
                 use_item_action(unit, card)
                 st.rerun()

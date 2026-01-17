@@ -1,6 +1,8 @@
 from core.enums import DiceType
 from logic.context import RollContext
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
+
 
 class PassiveAcceleratedLearning(BasePassive):
     id = "accelerated_learning"
@@ -27,7 +29,7 @@ class TalentArtOfSelfDefense(BasePassive):
     is_active_ability = True
     cooldown = 3  # Перезарядка 3 хода
 
-    def activate(self, unit, log_func):
+    def activate(self, unit, log_func, **kwargs):
         # Проверка кулдауна
         if unit.cooldowns.get(self.id, 0) > 0:
             return False
@@ -40,7 +42,10 @@ class TalentArtOfSelfDefense(BasePassive):
 
         if log_func:
             log_func(f"🕰️ **{self.name}**: Активирован BULLET TIME! (Уклонение MAX, Атака 0)")
+
+        logger.log(f"🕰️ Art of Self Defense activated by {unit.name}", LogLevel.NORMAL, "Passive")
         return True
+
 
 class PassiveLuckyStreak(BasePassive):
     id = "lucky_streak"
@@ -61,6 +66,7 @@ class PassiveLuckyStreak(BasePassive):
         """Иммунитет к внезапным атакам (например, от талантов 9-й ветки)."""
         return True
 
+
 class PassiveFourEyes(BasePassive):
     id = "four_eyes"
     name = "Четыре глаза"
@@ -70,14 +76,16 @@ class PassiveFourEyes(BasePassive):
     )
     is_active_ability = True
 
-    def activate(self, unit, log_func):
+    def activate(self, unit, log_func, **kwargs):
         # Механика переключателя (Toggle)
         if unit.get_status("no_glasses") > 0:
             unit.remove_status("no_glasses", 999)
             if log_func: log_func(f"👓 **{self.name}**: Лима нашла свои очки! Зрение восстановлено.")
+            logger.log(f"👓 Four Eyes: Glasses put ON by {unit.name}", LogLevel.NORMAL, "Passive")
         else:
             unit.add_status("no_glasses", 1, duration=99)
             if log_func: log_func(f"👓 **{self.name}**: Очки потеряны/разбиты! Лима ничего не видит.")
+            logger.log(f"👓 Four Eyes: Glasses taken OFF by {unit.name}", LogLevel.NORMAL, "Passive")
         return True
 
     def on_roll(self, ctx: RollContext):
@@ -101,6 +109,8 @@ class PassiveFourEyes(BasePassive):
 
         # 5. Применяем штраф (с минусом)
         ctx.modify_power(-penalty, "Blind 👓")
+        logger.log(f"👓 Four Eyes Penalty: -{penalty} power for {ctx.source.name}", LogLevel.VERBOSE, "Passive")
+
 
 # ==========================================
 # Охотничьи веды
@@ -125,12 +135,21 @@ class PassiveMindSuppression(BasePassive):
     def on_combat_start(self, unit, log_func, **kwargs):
         opponent = kwargs.get("opponent")
         if not opponent:
-            return
+            # Fallback if opponent passed differently or not found
+            # Try getting from enemies list if provided
+            enemies = kwargs.get("enemies")
+            if enemies and len(enemies) > 0:
+                opponent = enemies[0]
+            else:
+                return
 
         # Получаем итоговый интеллект (с учетом всех бонусов)
         # Если total_intellect еще не рассчитан, берем базу
-        my_int = unit.modifiers.get("total_intellect", unit.base_intellect)['flat']
-        op_int = opponent.modifiers.get("total_intellect", opponent.base_intellect)['flat']
+        my_int = unit.modifiers.get("total_intellect", unit.base_intellect)
+        if isinstance(my_int, dict): my_int = my_int.get('flat', unit.base_intellect)
+
+        op_int = opponent.modifiers.get("total_intellect", opponent.base_intellect)
+        if isinstance(op_int, dict): op_int = op_int.get('flat', opponent.base_intellect)
 
         # Считаем разницу (только если мы умнее)
         diff = max(0, my_int - op_int)
@@ -140,11 +159,13 @@ class PassiveMindSuppression(BasePassive):
 
         if log_func and diff > 0:
             log_func(f"🧠 **{self.name}**: Интеллект {my_int} vs {op_int}. Бонус +{diff} к Красноречию.")
+            logger.log(f"🧠 Mind Suppression: +{diff} Eloquence for {unit.name} (Int Diff)", LogLevel.VERBOSE, "Passive")
 
     def on_calculate_stats(self, unit) -> dict:
         # Считываем сохраненный бонус
         bonus = unit.memory.get("mind_suppression_bonus", 0)
         return {"eloquence": bonus}
+
 
 # ==========================================
 # Проблема корабля Тесея (Ship of Theseus Problem)
@@ -158,6 +179,7 @@ class PassiveShipOfTheseus(BasePassive):
         "Кибернетические модификации не оказывают никакого полезного действия и вызывают желание избавиться от них."
     )
     is_active_ability = False
+
 
 # ==========================================
 # Wild Cityscape

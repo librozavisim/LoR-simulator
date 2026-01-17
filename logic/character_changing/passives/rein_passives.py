@@ -1,7 +1,7 @@
 import math
 
+from core.logging import logger, LogLevel  # [NEW] Import
 from logic.character_changing.passives.base_passive import BasePassive
-from logic.statuses.status_definitions import NEGATIVE_STATUSES
 
 
 class PassiveSCells(BasePassive):
@@ -19,6 +19,8 @@ class PassiveSCells(BasePassive):
 
             if log_func:
                 log_func(f"🧬 {self.name}: {dice_count} слотов x 10 = Восстановлено {actual_heal} HP")
+
+            logger.log(f"🧬 S-Cells: Healed {actual_heal} HP for {unit.name}", LogLevel.VERBOSE, "Passive")
 
 
 class PassiveNewDiscovery(BasePassive):
@@ -51,7 +53,9 @@ class TalentRedLycoris(BasePassive):
     cooldown = 7
     duration = 1
 
-    def activate(self, unit, log_func):
+    def activate(self, unit, log_func, **kwargs):
+        from logic.statuses.status_definitions import NEGATIVE_STATUSES
+
         if unit.cooldowns.get(self.id, 0) > 0:
             return False
 
@@ -89,6 +93,8 @@ class TalentRedLycoris(BasePassive):
 
         if log_func:
             log_func(f"🩸 {self.name}: Активирован! Иммунитет к негативу и синхронизация.")
+
+        logger.log(f"🩸 Red Lycoris activated by {unit.name}. Cleared: {removed_list}", LogLevel.NORMAL, "Passive")
         return True
 
     def on_speed_rolled(self, unit, log_func, **kwargs):
@@ -115,15 +121,22 @@ class TalentRedLycoris(BasePassive):
                 log_func(
                     f"🩸 Ликорис ({dice_count} д.): Восстановлено {int(pct * 100)}% ({h_amt} HP, {s_amt} SP, {stg_amt} Stg)")
 
+            logger.log(f"🩸 Red Lycoris regen for {unit.name}: {h_amt} HP, {s_amt} SP, {stg_amt} Stg", LogLevel.VERBOSE,
+                       "Passive")
+
     # === [НОВОЕ] Перехват наложения статусов ===
     def on_before_status_add(self, unit, status_id, amount):
+        from logic.statuses.status_definitions import NEGATIVE_STATUSES
+
         # Если Ликорис активен -> Блокируем только негативные статусы
         if unit.get_status("red_lycoris") > 0:
             if status_id in NEGATIVE_STATUSES:
+                logger.log(f"🩸 Red Lycoris blocked status {status_id} for {unit.name}", LogLevel.VERBOSE, "Passive")
                 return False, f"🩸 Lycoris blocked {status_id}"
 
         # Положительные статусы пропускаем
         return True, None
+
 
 class TalentShadowOfMajesty(BasePassive):
     id = "shadow_majesty"
@@ -138,6 +151,12 @@ class TalentShadowOfMajesty(BasePassive):
         # ТЕПЕРЬ МЫ БЕРЕМ ОППОНЕНТА ИЗ АРГУМЕНТОВ
         opponent = kwargs.get("opponent")
 
+        # Fallback to enemies list if opponent is not directly provided
+        if not opponent:
+            enemies = kwargs.get("enemies")
+            if enemies and len(enemies) > 0:
+                opponent = enemies[0]
+
         if opponent:
             threshold = unit.level // 2
 
@@ -145,6 +164,8 @@ class TalentShadowOfMajesty(BasePassive):
                 opponent.add_status("sinister_aura", 1, duration=99)
                 if log_func:
                     log_func(f"🌑 {self.name}: {opponent.name} (Lvl {opponent.level}) подавлен Величием")
+                logger.log(f"🌑 Shadow of Majesty: Applied Sinister Aura to {opponent.name}", LogLevel.NORMAL, "Passive")
             else:
                 if log_func:
                     log_func(f"🛡️ {self.name}: {opponent.name} (Lvl {opponent.level}) сопротивляется Ауре")
+                logger.log(f"🛡️ Shadow of Majesty: {opponent.name} resisted aura", LogLevel.VERBOSE, "Passive")

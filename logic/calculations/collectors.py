@@ -75,7 +75,6 @@ def _apply_smart_bonuses(source_name, bonus_dict, mods, bonuses, icon):
             mode = "flat"
 
         # 2. Определяем куда писать: в bonuses (базовые статы) или mods (боевые/производные)
-        # Базовые атрибуты обычно идут в bonuses, чтобы потом участвовать в формулах
         is_attribute = stat_name in ["strength", "endurance", "agility", "wisdom", "psych",
                                      "strike_power", "medicine", "willpower", "luck", "acrobatics", "shields",
                                      "tough_skin", "speed", "light_weapon", "medium_weapon", "heavy_weapon",
@@ -86,12 +85,12 @@ def _apply_smart_bonuses(source_name, bonus_dict, mods, bonuses, icon):
             if icon:
                 logger.log(f"{icon} {source_name}: {stat_name} {val:+}", LogLevel.VERBOSE, "Stats")
         else:
-            if stat_name in mods:
-                mods[stat_name][mode] += val
+            # [FIX] Убрали проверку "if stat_name in mods", так как mods это defaultdict
+            mods[stat_name][mode] += val
 
-                # Красивый лог
-                if icon:
-                    sign = "+" if val >= 0 else ""
-                    suffix = "%" if mode == "pct" else ""
-                    logger.log(f"{icon} {source_name}: {stat_name.upper()} {sign}{val}{suffix}", LogLevel.VERBOSE,
-                               "Stats")
+            # Красивый лог
+            if icon:
+                sign = "+" if val >= 0 else ""
+                suffix = "%" if mode == "pct" else ""
+                logger.log(f"{icon} {source_name}: {stat_name.upper()} {sign}{val}{suffix}", LogLevel.VERBOSE,
+                           "Stats")
