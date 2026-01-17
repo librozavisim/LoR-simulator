@@ -1,6 +1,7 @@
 import random
 from logic.battle_flow.targeting import calculate_redirections
 from logic.battle_flow.priorities import get_action_priority
+from core.logging import logger, LogLevel
 
 
 def prepare_turn(engine, team_left: list, team_right: list):
@@ -11,9 +12,13 @@ def prepare_turn(engine, team_left: list, team_right: list):
     report = []
     all_units = team_left + team_right
 
+    logger.log("🔄 Preparing Turn: Collecting Actions...", LogLevel.NORMAL, "Phase")
+
     # Рассчитываем перехваты для обеих команд
     calculate_redirections(team_left, team_right)
     calculate_redirections(team_right, team_left)
+
+    logger.log("Redirections calculated.", LogLevel.VERBOSE, "Flow")
 
     actions = []
 
@@ -25,6 +30,8 @@ def prepare_turn(engine, team_left: list, team_right: list):
 
                 # Пропускаем, если карты нет или слот оглушен
                 if not card or slot.get('stunned'):
+                    if slot.get('stunned'):
+                        logger.log(f"🚫 {unit.name} slot {s_idx} is stunned, action skipped.", LogLevel.VERBOSE, "Flow")
                     continue
 
                 base_prio = get_action_priority(card)
@@ -57,6 +64,8 @@ def prepare_turn(engine, team_left: list, team_right: list):
                         # Обновляем данные слота, чтобы executor понимал контекст
                         slot['target_unit_idx'] = u_idx
                         slot['is_ally_target'] = True
+                        logger.log(f"🤖 Auto-Target (Self): {unit.name} uses {card.name} on Self", LogLevel.VERBOSE,
+                                   "Targeting")
 
                     # Сценарий Б: Атака или Гибрид -> применяем на ВРАГА
                     else:
@@ -67,9 +76,13 @@ def prepare_turn(engine, team_left: list, team_right: list):
 
                             if taunted:
                                 target_unit = taunted[0]
+                                logger.log(f"🤖 Auto-Target (Taunt): {unit.name} -> {target_unit.name}", LogLevel.NORMAL,
+                                           "Targeting")
                             else:
                                 # Приоритет 2: Просто первый живой
                                 target_unit = alive_enemies[0]
+                                logger.log(f"🤖 Auto-Target (Default): {unit.name} -> {target_unit.name}",
+                                           LogLevel.VERBOSE, "Targeting")
 
                             # Если слот атаки не выбран, бьем в первый (0)
                             if slot.get('target_slot_idx', -1) == -1:
@@ -88,11 +101,16 @@ def prepare_turn(engine, team_left: list, team_right: list):
                         'card_type': str(card.card_type).lower(),
                         'opposing_team': target_team
                     })
+                    logger.log(
+                        f"➕ Action Queued: {unit.name} -> {target_unit.name} ({card.name}, Spd: {slot['speed']}, Score: {int(score)})",
+                        LogLevel.VERBOSE, "Flow")
 
     collect_actions(team_left, team_right, True)
     collect_actions(team_right, team_left, False)
 
     actions.sort(key=lambda x: x['score'], reverse=True)
+
+    logger.log(f"✅ Turn Prepared. Total Actions: {len(actions)}", LogLevel.NORMAL, "Phase")
 
     return report, actions
 
@@ -101,6 +119,7 @@ def finalize_turn(engine, all_units: list):
     """
     Фаза 3: Завершение хода (Events On Combat End).
     """
+    logger.log("🏁 Finalizing Turn...", LogLevel.VERBOSE, "Phase")
     engine.logs = []
     report = []
 

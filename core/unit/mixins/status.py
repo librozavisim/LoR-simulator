@@ -1,4 +1,5 @@
 from typing import Dict, TYPE_CHECKING
+from core.logging import logger, LogLevel
 
 if TYPE_CHECKING:
     pass
@@ -35,6 +36,8 @@ class UnitStatusMixin:
                         allowed, msg = res, None
 
                     if not allowed:
+                        # Логируем блокировку (VERBOSE)
+                        logger.log(f"🚫 {self.name}: Status {name} blocked ({msg})", LogLevel.VERBOSE, "Status")
                         return False, msg
         # =========================================================================
 
@@ -42,6 +45,7 @@ class UnitStatusMixin:
             self.delayed_queue.append({
                 "name": name, "amount": amount, "duration": duration, "delay": delay
             })
+            logger.log(f"⏰ {self.name}: {name} delayed for {delay} turns", LogLevel.NORMAL, "Status")
             return True, "Delayed"
 
         if name not in self._status_effects:
@@ -57,6 +61,9 @@ class UnitStatusMixin:
         else:
             # Обычное поведение: добавляем новый отдельный стак
             self._status_effects[name].append({"amount": amount, "duration": duration})
+
+        # Логируем наложение (NORMAL)
+        logger.log(f"🧪 {self.name}: +{amount} {name} ({duration}t)", LogLevel.NORMAL, "Status")
 
         # === [ОПТИМИЗАЦИЯ] 2. ХУК: on_status_applied ===
         if trigger_events and hasattr(self, "trigger_mechanics"):
@@ -75,8 +82,11 @@ class UnitStatusMixin:
         self._ensure_status_storage()
         if name not in self._status_effects: return
 
+        current_val = self.get_status(name)
+
         if amount is None:
             del self._status_effects[name]
+            logger.log(f"🧹 {self.name}: Cleared all {name} ({current_val})", LogLevel.NORMAL, "Status")
             return
 
         items = sorted(self._status_effects[name], key=lambda x: x["duration"])
@@ -98,3 +108,8 @@ class UnitStatusMixin:
             del self._status_effects[name]
         else:
             self._status_effects[name] = new_items
+
+        # Логируем фактическое снятие
+        removed = current_val - self.get_status(name)
+        if removed > 0:
+            logger.log(f"🧹 {self.name}: Removed {removed} {name}", LogLevel.NORMAL, "Status")

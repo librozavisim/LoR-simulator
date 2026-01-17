@@ -1,6 +1,8 @@
 import random
 from typing import Dict, Any
 from core.unit.unit import Unit
+from core.logging import logger, LogLevel  # [LOG] Импорт логгера
+
 
 class CheckSystem:
     # Таблицы сложности (порог, описание)
@@ -27,15 +29,17 @@ class CheckSystem:
     @staticmethod
     def get_difficulty_desc(value: int, is_wisdom: bool = False) -> str:
         table = CheckSystem.DIFFICULTY_WIS if is_wisdom else CheckSystem.DIFFICULTY_STD
-        # Ищем первое значение, которое меньше или равно value (так как список от большего к меньшему не подходит для range поиска снизу вверх, вернем старую логику но короче)
-        # Для корректной работы с interval check лучше оставить порядок 1->21 и искать с конца или использовать next
-        for threshold, desc in reversed(table):  # reversed, если таблица 0->45
+        # Ищем первое значение, которое меньше или равно value
+        for threshold, desc in table:
             if value >= threshold: return desc
         return "Неизвестно"
 
     @staticmethod
     def perform_check(unit: Unit, stat_key: str, difficulty: int = 0) -> Dict[str, Any]:
         key = stat_key.lower()
+
+        # [LOG] Старт проверки
+        logger.log(f"🎲 Checking {key} for {unit.name} (DC: {difficulty})...", LogLevel.VERBOSE, "Check")
 
         # 1. Получаем базовое значение
         # Ищем в modifiers -> attributes -> skills -> 0
@@ -60,6 +64,10 @@ class CheckSystem:
         total = roll + stat_bonus + status_bonus
         final_dc = int(difficulty * dc_mult) if difficulty > 0 else 0
 
+        # [LOG] Детали расчета
+        logger.log(f"Calc: [{roll}] (Die) + {stat_bonus} (Stat) + {status_bonus} (Buffs) = {total}", LogLevel.VERBOSE,
+                   "Check")
+
         # 4. Формирование результата
         is_success = total >= final_dc if final_dc > 0 else None
 
@@ -72,6 +80,13 @@ class CheckSystem:
                     outcome = "🌟 КРИТИЧЕСКИЙ УСПЕХ"
                 elif roll == 1:
                     outcome = "💀 КРИТИЧЕСКИЙ ПРОВАЛ"
+
+            # [LOG] Итог с DC
+            logger.log(f"🎲 Check {key}: {outcome} ({total} vs {final_dc})", LogLevel.NORMAL, "Check")
+        else:
+            # [LOG] Итог без DC
+            desc = CheckSystem.get_difficulty_desc(total, is_wis)
+            logger.log(f"🎲 Check {key} Result: {total} ({desc})", LogLevel.NORMAL, "Check")
 
         formula = f"[{roll}] + {stat_bonus}"
         if status_bonus: formula += f" + {status_bonus} (Buffs)"

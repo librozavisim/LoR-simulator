@@ -6,6 +6,8 @@ from core.unit.mixins.combat import UnitCombatMixin
 from core.unit.mixins.lifecycle import UnitLifecycleMixin
 # 1. ИМПОРТ МИКСИНА
 from core.unit.mixins.mechanics import UnitMechanicsMixin
+# 2. ИМПОРТ ЛОГГЕРА
+from core.logging import logger, LogLevel
 
 
 @dataclass
@@ -19,6 +21,9 @@ class Unit(UnitData, UnitStatusMixin, UnitCombatMixin, UnitLifecycleMixin, UnitM
         """Пересчитывает характеристики на основе атрибутов, навыков и пассивок."""
         # Импорт здесь, чтобы избежать циклических ссылок
         from core.calculations import recalculate_unit_stats
+
+        logger.log(f"Recalculating stats for {self.name}", LogLevel.VERBOSE, "Stats")
+
         return recalculate_unit_stats(self)
 
     def get_total_money(self) -> int:
@@ -28,5 +33,9 @@ class Unit(UnitData, UnitStatusMixin, UnitCombatMixin, UnitLifecycleMixin, UnitM
     @classmethod
     def from_dict(cls, data: dict):
         unit = super().from_dict(data)
+
+        # Логируем загрузку юнита
+        logger.log(f"Unit loaded/created: {unit.name} (Lvl {unit.level})", LogLevel.VERBOSE, "System")
+
         unit.recalculate_stats()
         return unit

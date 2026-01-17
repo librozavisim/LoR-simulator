@@ -1,4 +1,5 @@
 from logic.battle_flow.mass_attack import process_mass_attack
+from core.logging import logger, LogLevel
 
 
 def _apply_card_cooldown(unit, card):
@@ -24,6 +25,8 @@ def _apply_card_cooldown(unit, card):
         # Добавляем новый экземпляр таймера в список
         unit.card_cooldowns[card.id].append(cd_val)
 
+        logger.log(f"⏳ {unit.name}: Cooldown applied to '{card.name}' ({cd_val} turns)", LogLevel.NORMAL, "Cooldown")
+
 
 def execute_single_action(engine, act, executed_slots):
     """
@@ -37,20 +40,25 @@ def execute_single_action(engine, act, executed_slots):
     src_id = (source.name, s_idx)
 
     # Если этот слот уже сыграл, пропускаем
-    if src_id in executed_slots: return []
+    if src_id in executed_slots:
+        return []
 
     # Проверка состояния бойца
-    if source.is_dead() or source.is_staggered(): return []
+    if source.is_dead() or source.is_staggered():
+        logger.log(f"🚫 {source.name} action skipped (Dead or Staggered)", LogLevel.VERBOSE, "Executor")
+        return []
 
     # Загружаем карту
     source.current_card = act['slot_data'].get('card')
-    if not source.current_card: return []
+    if not source.current_card:
+        return []
 
     intent_src = act['slot_data'].get('destroy_on_speed', True)
     target = act['target_unit']
 
     # === 1. MASS ATTACK ===
     if "mass" in act['card_type']:
+        logger.log(f"💥 {source.name} initiates Mass Attack: {source.current_card.name}", LogLevel.NORMAL, "Combat")
         executed_slots.add(src_id)
         p_label = "Mass Atk" if act['is_left'] else "Enemy Mass"
 
@@ -61,6 +69,7 @@ def execute_single_action(engine, act, executed_slots):
 
     # === 2. ON PLAY / INSTANT ===
     if "on_play" in act['card_type'] or "on play" in act['card_type']:
+        logger.log(f"⚡ {source.name} activates On Play: {source.current_card.name}", LogLevel.NORMAL, "Combat")
         executed_slots.add(src_id)
         engine._process_card_self_scripts("on_use", source, target)
         tgt_name = f" on {target.name}" if target else ""
@@ -79,6 +88,7 @@ def execute_single_action(engine, act, executed_slots):
     t_s_idx = act['target_slot_idx']
 
     if not target or target.is_dead():
+        logger.log(f"⚠️ {source.name}: Target missing or dead, action skipped.", LogLevel.VERBOSE, "Executor")
         return []
 
     # Проверяем Clash или One-Sided
@@ -116,7 +126,8 @@ def execute_single_action(engine, act, executed_slots):
         # Кулдаун Защитника (он тоже тратит карту)
         _apply_card_cooldown(target, target.current_card)
 
-        engine.log(f"⚔️ Clash: {source.name} vs {target.name}")
+        logger.log(f"⚔️ Clash: {source.name} vs {target.name}", LogLevel.NORMAL, "Combat")
+        # engine.log уже заменен на logger.log внутри _resolve_card_clash, но для UI лога оставим, если нужно
 
         logs = engine._resolve_card_clash(
             source, target, "Clash", act['is_left'],
@@ -137,6 +148,9 @@ def execute_single_action(engine, act, executed_slots):
 
         spd_def_val = 0
         if target_slot: spd_def_val = target_slot['speed']
+
+        logger.log(f"🏹 One-Sided: {source.name} -> {target.name} ({'Redirected' if is_redirected else 'Direct'})",
+                   LogLevel.NORMAL, "Combat")
 
         logs = engine._resolve_one_sided(
             source, target, f"{p_label} Hit",

@@ -1,5 +1,6 @@
 from core.enums import DiceType
 from logic.battle_flow.speed import calculate_speed_advantage
+from core.logging import logger, LogLevel
 
 
 def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent_atk=True, is_redirected=False):
@@ -7,8 +8,14 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
     card = source.current_card
     def_card = target.current_card
 
+    logger.log(f"One-Sided: {source.name} vs {target.name} (Spd: {spd_atk} vs {spd_d}, Redir={is_redirected})",
+               LogLevel.VERBOSE, "OneSided")
+
     # Расчет преимущества скорости
     adv_atk, adv_def, _, destroy_def = calculate_speed_advantage(spd_atk, spd_d, intent_atk, True)
+
+    if destroy_def:
+        logger.log(f"Speed Advantage: {source.name} breaks {target.name}'s defense die", LogLevel.VERBOSE, "OneSided")
 
     # 1. Break Check (Empty Slot Break)
     defender_breaks_attacker = False
@@ -18,6 +25,8 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
                 for mech in target.iter_mechanics():
                     if hasattr(mech, "can_break_empty_slot") and mech.can_break_empty_slot(target):
                         defender_breaks_attacker = True
+                        logger.log(f"Empty Slot Break: {target.name} breaks {source.name} (Spd Diff > 8)",
+                                   LogLevel.VERBOSE, "OneSided")
                         break
 
     # 2. Prevent Destruction (Passive)
@@ -31,6 +40,7 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
     if destroy_def and prevent_dest:
         destroy_def = False
         adv_atk = True
+        logger.log(f"Destruction Prevented for {target.name} (Immunity)", LogLevel.VERBOSE, "OneSided")
 
     on_use_logs = []
     engine._process_card_self_scripts("on_use", source, target, custom_log_list=on_use_logs)
@@ -47,9 +57,10 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
                 if hasattr(unit, "iter_mechanics"):
                     for mech in unit.iter_mechanics():
                         if mech.can_use_counter_die_while_staggered(unit):
-                            can_use = True;
+                            can_use = True
                             break
                 if not can_use: return None
+            logger.log(f"{unit.name} retrieves Stored Die", LogLevel.VERBOSE, "OneSided")
             return unit.stored_dice.pop(0)
 
         # 2. Counter Dice
@@ -59,9 +70,10 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
                 if hasattr(unit, "iter_mechanics"):
                     for mech in unit.iter_mechanics():
                         if mech.can_use_counter_die_while_staggered(unit):
-                            can_use = True;
+                            can_use = True
                             break
                 if not can_use: return None
+            logger.log(f"{unit.name} retrieves Counter Die", LogLevel.VERBOSE, "OneSided")
             return unit.counter_dice.pop(0)
         return None
 
@@ -72,7 +84,10 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
         cur_iter += 1
         die = attacker_queue[att_idx]
 
-        if source.is_dead() or target.is_dead() or source.is_staggered(): break
+        if source.is_dead() or target.is_dead() or source.is_staggered():
+            logger.log("One-Sided flow interrupted (Death/Stagger)", LogLevel.VERBOSE, "OneSided")
+            break
+
         source.current_die = die
 
         detail_logs = []
@@ -80,6 +95,7 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
 
         # A. Break Check
         if defender_breaks_attacker:
+            logger.log(f"Attacker Die {att_idx + 1} Broken by Speed", LogLevel.NORMAL, "OneSided")
             report.append({
                 "type": "onesided",
                 "round": f"{round_label} (Break)",
@@ -106,6 +122,8 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
 
             val_atk = ctx_atk.final_value
             val_cnt = ctx_cnt.final_value
+
+            logger.log(f"Counter Clash: Atk({val_atk}) vs Cnt({val_cnt})", LogLevel.VERBOSE, "OneSided")
 
             outcome = ""
 
@@ -147,6 +165,8 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
                 outcome = "🤝 Draw (Counter Broken)"
                 active_counter_die = None
 
+            logger.log(f"Counter Result: {outcome}", LogLevel.NORMAL, "OneSided")
+
             l_lbl = die.dtype.name
             r_lbl = f"{active_counter_die.dtype.name if active_counter_die else 'Broken'} (Cnt)"
 
@@ -170,6 +190,7 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
             if candidate.dtype in [DiceType.BLOCK, DiceType.EVADE]:
                 def_die = candidate
                 target.current_die = def_die
+                logger.log(f"Triggering Passive Defense: {def_die.dtype.name}", LogLevel.VERBOSE, "OneSided")
 
         if destroy_def: def_die = None
 
@@ -204,6 +225,8 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
                 engine._handle_clash_draw(ctx_atk)
                 engine._handle_clash_draw(ctx_def)
 
+            logger.log(f"Passive Clash Result: {outcome}", LogLevel.NORMAL, "OneSided")
+
             report.append({
                 "type": "clash",
                 "round": f"{round_label} (Passive)",
@@ -226,6 +249,7 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
 
         if die.dtype in ATK_TYPES:
             # Атака -> Наносим урон
+            logger.log(f"⚔️ Direct Hit! {ctx_atk.final_value} Dmg", LogLevel.NORMAL, "OneSided")
             engine._apply_damage(ctx_atk, None, "hp")
 
         elif die.dtype == DiceType.EVADE:
@@ -234,11 +258,12 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
                 source.stored_dice = []
             source.stored_dice.append(die)
             outcome = "🏃 Evade Stored"
+            logger.log("🏃 Evade die stored (Unopposed)", LogLevel.VERBOSE, "OneSided")
 
         # [FIX] Блок в атаке -> Игнорируется (пропуск)
         elif die.dtype == DiceType.BLOCK:
             outcome = "🛡️ Block (Ignored)"
-            # Ничего не делаем, не запасаем, не наносим урон
+            logger.log("🛡️ Offensive Block ignored", LogLevel.VERBOSE, "OneSided")
 
         else:
             outcome += " (Skipped)"
@@ -264,5 +289,6 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
         if not hasattr(target, 'stored_dice') or not isinstance(target.stored_dice, list):
             target.stored_dice = []
         target.stored_dice.insert(0, active_counter_die)
+        logger.log(f"{target.name} keeps unused counter die", LogLevel.VERBOSE, "OneSided")
 
     return report

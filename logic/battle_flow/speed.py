@@ -1,3 +1,5 @@
+from core.logging import logger, LogLevel
+
 def calculate_speed_advantage(spd_a: int, spd_d: int, intent_a: bool = True, intent_d: bool = True):
     """
     intent_X = True: Разрушить карту (Destroy) при разнице 8+
@@ -29,5 +31,14 @@ def calculate_speed_advantage(spd_a: int, spd_d: int, intent_a: bool = True, int
             adv_d = True  # Защитник медленнее -> помеха ему
         else:
             adv_a = True  # Атакующий медленнее -> помеха ему
+
+    # Логируем только если есть какой-то эффект (чтобы не спамить пустыми логами)
+    if destroy_a or destroy_d or adv_a or adv_d:
+        logger.log(
+            f"Speed Calc: {spd_a} vs {spd_d} (Diff {diff}) -> "
+            f"Break(A:{destroy_a}, D:{destroy_d}), Adv(A:{adv_a}, D:{adv_d})",
+            LogLevel.VERBOSE,
+            "Speed"
+        )
 
     return adv_a, adv_d, destroy_a, destroy_d

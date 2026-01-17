@@ -1,5 +1,6 @@
 from core.enums import DiceType
 from logic.battle_flow.speed import calculate_speed_advantage
+from core.logging import logger, LogLevel
 
 
 def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d, intent_a=True, intent_d=True):
@@ -7,13 +8,23 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
     ac = attacker.current_card
     dc = defender.current_card
 
+    logger.log(f"⚔️ Clash Start: {attacker.name} vs {defender.name} (Spd: {spd_a} vs {spd_d})", LogLevel.NORMAL,
+               "Clash")
+
     # Скрипты On Use
     on_use_logs = []
     engine._process_card_self_scripts("on_use", attacker, defender, custom_log_list=on_use_logs)
     engine._process_card_self_scripts("on_use", defender, attacker, custom_log_list=on_use_logs)
 
+    for log in on_use_logs:
+        logger.log(f"On Use: {log}", LogLevel.VERBOSE, "Script")
+
     # Расчет преимущества скорости
     adv_a, adv_d, destroy_a, destroy_d = calculate_speed_advantage(spd_a, spd_d, intent_a, intent_d)
+
+    if destroy_a or destroy_d:
+        logger.log(f"Speed Break: {attacker.name} destroy={destroy_a}, {defender.name} destroy={destroy_d}",
+                   LogLevel.VERBOSE, "Clash")
 
     # Проверка иммунитета к уничтожению кубиков
     prevent_dest_a = False
@@ -24,6 +35,7 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                 break
 
     if destroy_d and prevent_dest_a:
+        logger.log(f"{defender.name}'s dice saved by immunity", LogLevel.VERBOSE, "Clash")
         destroy_d = False
         adv_a = True
 
@@ -35,6 +47,7 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                 break
 
     if destroy_a and prevent_dest_d:
+        logger.log(f"{attacker.name}'s dice saved by immunity", LogLevel.VERBOSE, "Clash")
         destroy_a = False
         adv_d = True
 
@@ -57,10 +70,12 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                 if hasattr(unit, "iter_mechanics"):
                     for mech in unit.iter_mechanics():
                         if mech.prevents_specific_die_destruction(unit, card_die):
-                            is_saved = True;
+                            is_saved = True
                             break
                 if not is_saved:
                     card_die = None
+                else:
+                    logger.log(f"{unit.name}: Die #{idx + 1} saved from destruction", LogLevel.VERBOSE, "Clash")
 
         if not card_die:
             if hasattr(unit, 'stored_dice') and isinstance(unit.stored_dice, list) and unit.stored_dice:
@@ -69,9 +84,10 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                     if hasattr(unit, "iter_mechanics"):
                         for mech in unit.iter_mechanics():
                             if mech.can_use_counter_die_while_staggered(unit):
-                                can_use = True;
+                                can_use = True
                                 break
                     if not can_use: return None, False
+                logger.log(f"{unit.name}: Using Stored Dice", LogLevel.VERBOSE, "Clash")
                 return unit.stored_dice.pop(0), True
 
             if unit.counter_dice:
@@ -80,9 +96,10 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                     if hasattr(unit, "iter_mechanics"):
                         for mech in unit.iter_mechanics():
                             if mech.can_use_counter_die_while_staggered(unit):
-                                can_use = True;
+                                can_use = True
                                 break
                     if not can_use: return None, False
+                logger.log(f"{unit.name}: Using Counter Dice", LogLevel.VERBOSE, "Clash")
                 return unit.counter_dice.pop(0), True
 
             return None, False
@@ -132,6 +149,9 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
         val_a = ctx_a.final_value if ctx_a else 0
         val_d = ctx_d.final_value if ctx_d else 0
 
+        logger.log(f"Clash {iteration}: {attacker.name}({val_a}) vs {defender.name}({val_d})", LogLevel.VERBOSE,
+                   "Clash")
+
         if ctx_a and ctx_d:
             ctx_a.opponent_ctx = ctx_d
             ctx_d.opponent_ctx = ctx_a
@@ -162,42 +182,35 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
             if not active_counter_a:
                 active_counter_a = (die_a, src_a)
                 if not src_a: idx_a += 1
+                logger.log(f"{attacker.name} recycled die", LogLevel.VERBOSE, "Clash")
 
         def recycle_die_d_fn():
             nonlocal active_counter_d, idx_d
             if not active_counter_d:
                 active_counter_d = (die_d, src_d)
                 if not src_d: idx_d += 1
+                logger.log(f"{defender.name} recycled die", LogLevel.VERBOSE, "Clash")
 
         def manual_save_die(unit, die):
             if not hasattr(unit, 'stored_dice') or not isinstance(unit.stored_dice, list):
                 unit.stored_dice = []
             unit.stored_dice.append(die)
             detail_logs.append(f"🛡️ {unit.name} Stored Evade (Auto)")
+            logger.log(f"{unit.name} stored evade die (auto-save)", LogLevel.NORMAL, "Clash")
 
         # --- RESOLVE ---
 
         # 1. Broken / Empty
         if not die_a and die_d:
-            # У защитника есть куб, у атакующего нет
             if is_evade_d:
-                # [FIX] Защитник сохраняет Evade и бой продолжается
                 manual_save_die(defender, die_d)
-
-                # Тратим сломанный слот атакующего
                 if idx_a < len(queue_a): idx_a += 1
-
-                # Тратим (пропускаем) текущий кубик защитника (он ушел в запас)
                 consume_die_d_fn()
-
                 outcome = "🏃 Evade Saved (Opponent Broken)"
-
             elif is_block_d:
-                # Block просто сгорает
                 consume_die_d_fn()
                 if idx_a < len(queue_a): idx_a += 1
                 outcome = "🛡️ Block Skipped (Opponent Broken)"
-
             else:
                 outcome = f"🚫 {attacker.name} Broken"
                 if is_atk_d: engine._apply_damage(ctx_d, None, "hp")
@@ -205,21 +218,15 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
                 consume_die_d_fn()
 
         elif die_a and not die_d:
-            # У атакующего есть куб, у защитника нет
             if is_evade_a:
-                # [FIX] Атакующий сохраняет Evade, бой идет дальше
                 manual_save_die(attacker, die_a)
-
                 if idx_d < len(queue_d): idx_d += 1
                 consume_die_a_fn()
-
                 outcome = "🏃 Evade Saved (Opponent Broken)"
-
             elif is_block_a:
                 consume_die_a_fn()
                 if idx_d < len(queue_d): idx_d += 1
                 outcome = "🛡️ Block Skipped (Opponent Broken)"
-
             else:
                 outcome = f"🚫 {defender.name} Broken"
                 if is_atk_a: engine._apply_damage(ctx_a, None, "hp")
@@ -237,6 +244,7 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
             if val_a > val_d:
                 engine._handle_clash_win(ctx_a)
                 engine._handle_clash_lose(ctx_d)
+                logger.log(f"{attacker.name} wins clash ({val_a} vs {val_d})", LogLevel.NORMAL, "Clash")
 
                 if is_atk_a and is_atk_d:
                     outcome = f"🏆 {attacker.name} Win (Hit)"
@@ -272,6 +280,7 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
             elif val_d > val_a:
                 engine._handle_clash_win(ctx_d)
                 engine._handle_clash_lose(ctx_a)
+                logger.log(f"{defender.name} wins clash ({val_d} vs {val_a})", LogLevel.NORMAL, "Clash")
 
                 if is_atk_d and is_atk_a:
                     outcome = f"🏆 {defender.name} Win (Hit)"
@@ -306,6 +315,7 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
 
             else:
                 outcome = "🤝 Draw"
+                logger.log(f"Clash Draw ({val_a})", LogLevel.NORMAL, "Clash")
                 engine._handle_clash_draw(ctx_a)
                 engine._handle_clash_draw(ctx_d)
                 consume_die_a_fn();
@@ -341,15 +351,16 @@ def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d
         if active_cnt_tuple:
             die, is_from_storage = active_cnt_tuple
             if die.dtype == DiceType.EVADE:
-                # Если активный кубик остался и это контр/запас - сохраняем
                 if is_from_storage:
                     unit.stored_dice.append(die)
+                    logger.log(f"{unit.name} kept counter evade", LogLevel.NORMAL, "Clash")
                     log_list.append({"type": "info", "outcome": f"🛡️ {unit.name} Kept Counter Evade", "details": []})
 
         while idx < len(queue):
             die = queue[idx]
             if die.dtype == DiceType.EVADE:
                 unit.stored_dice.append(die)
+                logger.log(f"{unit.name} stored unused evade", LogLevel.NORMAL, "Clash")
                 log_list.append({
                     "type": "info",
                     "outcome": f"🛡️ {unit.name} Stored Evade Die",

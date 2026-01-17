@@ -1,7 +1,8 @@
-# core/unit_library.py
+# core/unit/unit_library.py
 import os
 import json
 from core.unit.unit import Unit
+from core.logging import logger, LogLevel  # [LOG] Импорт логгера
 
 
 class UnitLibrary:
@@ -14,12 +15,13 @@ class UnitLibrary:
         cls._roster = {}
         if not os.path.exists(cls.DATA_PATH):
             os.makedirs(cls.DATA_PATH, exist_ok=True)
-            print(f"Created directory: {cls.DATA_PATH}")
+            logger.log(f"Created directory: {cls.DATA_PATH}", LogLevel.VERBOSE, "System")
             return {}
 
         files = [f for f in os.listdir(cls.DATA_PATH) if f.endswith('.json')]
-        print(f"Loading units from {cls.DATA_PATH}...")
+        logger.log(f"Loading units from {cls.DATA_PATH}...", LogLevel.VERBOSE, "System")
 
+        loaded_count = 0
         for filename in files:
             path = os.path.join(cls.DATA_PATH, filename)
             try:
@@ -27,9 +29,12 @@ class UnitLibrary:
                     data = json.load(f)
                     unit = Unit.from_dict(data)
                     cls._roster[unit.name] = unit
-                    print(f"✔ Loaded: {unit.name}")
+                    loaded_count += 1
             except Exception as e:
-                print(f"❌ Error loading {filename}: {e}")
+                logger.log(f"❌ Error loading {filename}: {e}", LogLevel.NORMAL, "System")
+
+        if loaded_count > 0:
+            logger.log(f"✔ Loaded {loaded_count} units into roster.", LogLevel.NORMAL, "System")
 
         return cls._roster
 
@@ -47,12 +52,12 @@ class UnitLibrary:
         try:
             with open(path, 'w', encoding='utf-8') as f:
                 json.dump(unit.to_dict(), f, indent=4, ensure_ascii=False)
-            print(f"💾 Saved unit: {unit.name} -> {path}")
+            logger.log(f"💾 Saved unit: {unit.name} -> {path}", LogLevel.NORMAL, "System")
             # Обновляем кэш
             cls._roster[unit.name] = unit
             return True
         except Exception as e:
-            print(f"Error saving unit: {e}")
+            logger.log(f"Error saving unit {unit.name}: {e}", LogLevel.NORMAL, "System")
             return False
 
     @classmethod
@@ -70,10 +75,10 @@ class UnitLibrary:
         if os.path.exists(path):
             try:
                 os.remove(path)
-                print(f"🗑️ Deleted unit file: {path}")
+                logger.log(f"🗑️ Deleted unit file: {path}", LogLevel.NORMAL, "System")
                 return True
             except Exception as e:
-                print(f"Error deleting unit file: {e}")
+                logger.log(f"Error deleting unit file {path}: {e}", LogLevel.NORMAL, "System")
                 return False
         return True
 

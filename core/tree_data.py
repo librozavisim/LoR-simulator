@@ -1,9 +1,4 @@
 # core/tree_data.py
-
-# Структура: "Branch Name": [ ("Code", "Talent_ID"), ... ]
-# Code - это номер на картинке (например, "3.2")
-# Talent_ID - это id из TALENT_REGISTRY (например, "defense_zafu")
-
 SKILL_TREE = {
     "Ветка 1: Искажение": [
         {"code": "1.1", "id": "keep_it_together", "req": None},

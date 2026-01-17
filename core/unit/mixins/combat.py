@@ -1,9 +1,6 @@
 import random
-from core.enums import DiceType
+from core.logging import logger, LogLevel
 
-
-# Импорты реестров делаем внутри методов или в начале, если нет циклических зависимостей.
-# Для надежности оставим динамический импорт в методе-генераторе.
 
 class UnitCombatMixin:
     """
@@ -48,20 +45,25 @@ class UnitCombatMixin:
         self.active_slots = []
         self.counter_dice = []
 
+        # [LOG] Старт фазы
+        logger.log(f"🎲 Rolling Speed Dice for {self.name}", LogLevel.VERBOSE, "System")
+
         # Проверка на смерть теперь через общий метод
         if self.is_dead():
+            logger.log(f"{self.name} is dead, skipping roll.", LogLevel.VERBOSE, "System")
             return
 
         slot_penalty = self.get_status("slot_lock")
+        if slot_penalty > 0:
+            logger.log(f"{self.name} has slot penalty: -{slot_penalty}", LogLevel.NORMAL, "Status")
 
         total_potential_slots = len(self.computed_speed_dice)
 
         # Вычитаем штраф (минимум 1 кубик всегда остается, если не стан)
-        # Если хотите, чтобы можно было оставить 0 кубиков (полный стан), уберите max(1, ...)
         slots_to_roll = max(1, total_potential_slots - slot_penalty)
-        # ===============================================
 
         # 1. Основные кубики (с учетом штрафа)
+        speed_rolls = []
         for i, (d_min, d_max) in enumerate(self.computed_speed_dice):
             if i >= slots_to_roll: break  # Пропускаем заблокированные слоты
 
@@ -70,6 +72,7 @@ class UnitCombatMixin:
             self.active_slots.append({
                 'speed': val, 'card': None, 'target_slot': None, 'is_aggro': False
             })
+            speed_rolls.append(val)
 
         # 2. Бонусные слоты и Модификация слотов (Все в одном цикле!)
         extra_dice_count = 0
@@ -80,7 +83,11 @@ class UnitCombatMixin:
         # А. Сбор бонусов к количеству кубиков
         for effect in active_mechanics:
             if hasattr(effect, "get_speed_dice_bonus"):
-                extra_dice_count += effect.get_speed_dice_bonus(self)
+                bonus = effect.get_speed_dice_bonus(self)
+                if bonus > 0:
+                    extra_dice_count += bonus
+                    # [LOG] Логируем источник бонуса
+                    logger.log(f"Extra Speed Die from {getattr(effect, 'id', 'Unknown')}", LogLevel.NORMAL, "Effect")
 
         # Б. Добавление бонусных кубиков
         if extra_dice_count > 0:
@@ -97,9 +104,12 @@ class UnitCombatMixin:
                     'speed': val, 'card': None, 'target_slot': None,
                     'is_aggro': False, 'source_effect': 'Bonus 🌟'
                 })
+                speed_rolls.append(f"{val} (Bonus)")
+
+        # [LOG] Итоговые роллы
+        logger.log(f"{self.name} speed rolls: {speed_rolls}", LogLevel.NORMAL, "Speed")
 
         # 3. Модификация слотов (Замена хардкода Red Lycoris)
-        # Эффекты могут менять свойства слотов (prevent_redirection и т.д.)
         for slot in self.active_slots:
             for effect in active_mechanics:
                 if hasattr(effect, "modify_active_slot"):
@@ -109,13 +119,18 @@ class UnitCombatMixin:
         if self.current_stagger > 0:
             return False
 
-            # Проверяем иммунитет к оглушению
+        # Проверяем иммунитет к оглушению
         for effect in self._iter_all_mechanics():
-            # [FIX] Теперь корректно вызываем метод, г8если это метод, или проверяем флаг
             attr = getattr(effect, "prevents_stagger", None)
             if callable(attr):
-                if attr(self): return False
+                if attr(self):
+                    # [LOG] Важная информация о спасении
+                    logger.log(f"{self.name} stagger prevented by {getattr(effect, 'id', 'Effect')}", LogLevel.NORMAL,
+                               "Immunity")
+                    return False
             elif attr:
+                logger.log(f"{self.name} stagger prevented by {getattr(effect, 'id', 'Effect')}", LogLevel.NORMAL,
+                           "Immunity")
                 return False
 
         return True
@@ -125,13 +140,18 @@ class UnitCombatMixin:
         if self.current_hp > 0:
             return False
 
-            # Проверяем иммунитет к смерти
+        # Проверяем иммунитет к смерти
         for effect in self._iter_all_mechanics():
-            # [FIX] Аналогичное исправление для смерти
             attr = getattr(effect, "prevents_death", None)
             if callable(attr):
-                if attr(self): return False
+                if attr(self):
+                    # [LOG] Спасение от смерти
+                    logger.log(f"{self.name} death prevented by {getattr(effect, 'id', 'Effect')}", LogLevel.NORMAL,
+                               "Immunity")
+                    return False
             elif attr:
+                logger.log(f"{self.name} death prevented by {getattr(effect, 'id', 'Effect')}", LogLevel.NORMAL,
+                           "Immunity")
                 return False
 
         return True
@@ -148,6 +168,8 @@ class UnitCombatMixin:
 
     def tick_cooldowns(self):
         # Удаляем истекшие кулдауны способностей (обычные словари)
+        old_cds_len = len(self.cooldowns) + len(self.active_buffs)
+
         self.cooldowns = {k: v - 1 for k, v in self.cooldowns.items() if v > 1}
         self.active_buffs = {k: v - 1 for k, v in self.active_buffs.items() if v > 1}
 
@@ -160,7 +182,6 @@ class UnitCombatMixin:
                     timers = [timers]
 
                 # Уменьшаем каждый таймер на 1, оставляем только те, что > 1
-                # (Если таймер стал 1, то в начале след раунда он станет 0, значит карта готова)
                 new_timers = [t - 1 for t in timers if t > 1]
 
                 if new_timers:
@@ -172,3 +193,8 @@ class UnitCombatMixin:
         if self.is_dead():
             self.active_buffs.clear()
             self.card_cooldowns.clear()
+            logger.log(f"{self.name} died, Cooldowns/Buffs cleared.", LogLevel.NORMAL, "System")
+
+        # [LOG] Пишем в Verbose, чтобы не спамить каждый ход, если ничего не изменилось
+        # (Или можно добавить проверку, если что-то изменилось)
+        logger.log(f"{self.name} cooldowns ticked.", LogLevel.VERBOSE, "System")

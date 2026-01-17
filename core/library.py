@@ -3,11 +3,12 @@ import json
 import os
 import glob
 from core.card import Card
+from core.logging import logger, LogLevel  # [LOG]
 
 
 class Library:
     _cards = {}  # Тут хранятся ВСЕ карты (из всех файлов) для игры
-    _sources = {}  # [NEW] Словарь: card_id -> filename
+    _sources = {}  # Словарь: card_id -> filename
 
     @classmethod
     def register(cls, card: Card):
@@ -22,7 +23,7 @@ class Library:
         for card in cls._cards.values():
             if card.name == key:
                 return copy.deepcopy(card)
-        # Fallback: return a minimal, well-formed Card using the key as name
+
         try:
             name = str(key)
         except Exception:
@@ -33,22 +34,21 @@ class Library:
     def get_all_cards(cls):
         return list(cls._cards.values())
 
-    # === [NEW] МЕТОД ПОЛУЧЕНИЯ ИСТОЧНИКА ===
     @classmethod
     def get_source(cls, card_id: str) -> str:
         """Возвращает имя файла, откуда карта была загружена."""
         return cls._sources.get(card_id)
 
-    # === ЗАГРУЗКА (ЧИТАЕТ ВСЮ ПАПКУ) ===
     @classmethod
     def load_all(cls, path="data/cards"):
         if not os.path.exists(path):
             os.makedirs(path, exist_ok=True)
+            logger.log(f"Created directory: {path}", LogLevel.VERBOSE, "System")
             return
 
         if os.path.isdir(path):
             files = glob.glob(os.path.join(path, "*.json"))
-            print(f"--- Загрузка карт из папки {path} ---")
+            logger.log(f"--- Loading cards from {path} ---", LogLevel.VERBOSE, "System")
             for filepath in files:
                 cls._load_single_file(filepath)
         else:
@@ -63,85 +63,74 @@ class Library:
             cards_list = data.get("cards", []) if isinstance(data, dict) else data
 
             count = 0
-            filename = os.path.basename(filepath)  # Берем только имя файла
+            filename = os.path.basename(filepath)
 
             for card_data in cards_list:
                 card = Card.from_dict(card_data)
                 cls.register(card)
 
-                # [NEW] Запоминаем источник
                 if card.id:
                     cls._sources[card.id] = filename
 
                 count += 1
-            print(f"✔ {filename}: {count} шт.")
-        except Exception as e:
-            print(f" Ошибка {filepath}: {e}")
 
-    # === СОХРАНЕНИЕ (ПИШЕТ ТОЛЬКО ОДНУ КАРТУ) ===
+            logger.log(f"✔ Loaded {count} cards from {filename}", LogLevel.NORMAL, "System")
+        except Exception as e:
+            logger.log(f"Error loading {filepath}: {e}", LogLevel.NORMAL, "System")
+
     @classmethod
     def save_card(cls, card: Card, filename="custom_cards.json"):
         """
         Сохраняет конкретную карту в конкретный файл.
-        Не перезаписывает всю библиотеку!
         """
         folder = "data/cards"
         filepath = os.path.join(folder, filename)
         os.makedirs(folder, exist_ok=True)
 
-        # 1. Читаем текущий файл (если он есть)
         current_data = {"cards": []}
         if os.path.exists(filepath):
             try:
                 with open(filepath, 'r', encoding='utf-8') as f:
                     content = json.load(f)
-                    # Поддержка старого формата (список) и нового (dict)
                     if isinstance(content, list):
                         current_data["cards"] = content
                     else:
                         current_data = content
             except Exception as e:
-                print(f"Ошибка чтения файла сохранения: {e}")
+                logger.log(f"Error reading save file: {e}", LogLevel.NORMAL, "System")
 
-        # 2. Ищем, есть ли карта с таким ID внутри этого файла
         card_dict = card.to_dict()
         found = False
 
         for i, existing in enumerate(current_data["cards"]):
             if existing.get("id") == card.id:
-                # Если нашли - обновляем
                 current_data["cards"][i] = card_dict
                 found = True
                 break
 
         if not found:
-            # Если не нашли - добавляем в конец
             current_data["cards"].append(card_dict)
 
-        # 3. Записываем обратно только в этот файл
-        with open(filepath, 'w', encoding='utf-8') as f:
-            json.dump(current_data, f, ensure_ascii=False, indent=2)
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(current_data, f, ensure_ascii=False, indent=2)
 
-        print(f" Карта '{card.name}' сохранена в {filename}")
+            logger.log(f"💾 Card '{card.name}' saved to {filename}", LogLevel.NORMAL, "System")
 
-        # 4. Не забываем обновить карту в памяти, чтобы сразу играть ей
-        cls.register(card)
-        # [NEW] Обновляем источник в памяти
-        cls._sources[card.id] = filename
+            cls.register(card)
+            cls._sources[card.id] = filename
+        except Exception as e:
+            logger.log(f"Error saving card to disk: {e}", LogLevel.NORMAL, "System")
 
-    # === УДАЛЕНИЕ ===
     @classmethod
     def delete_card(cls, card_id):
         """Удаляет карту из памяти и из файла."""
-        # 1. Удаляем из памяти
         if card_id in cls._cards:
             del cls._cards[card_id]
 
-        # [NEW] Удаляем из источников
         if card_id in cls._sources:
             del cls._sources[card_id]
 
-        # 2. Ищем и удаляем из файлов
         path = "data/cards"
         if os.path.exists(path) and os.path.isdir(path):
             files = glob.glob(os.path.join(path, "*.json"))
@@ -150,16 +139,13 @@ class Library:
                     with open(filepath, 'r', encoding='utf-8') as f:
                         data = json.load(f)
 
-                    # Поддержка обоих форматов
                     cards_list = data.get("cards", []) if isinstance(data, dict) else data
                     if not isinstance(cards_list, list): continue
 
-                    # Фильтруем (удаляем карту с нужным ID)
                     original_len = len(cards_list)
                     new_list = [c for c in cards_list if c.get("id") != card_id]
 
                     if len(new_list) != original_len:
-                        # Если что-то удалили -> Перезаписываем файл
                         if isinstance(data, dict):
                             data["cards"] = new_list
                         else:
@@ -168,10 +154,10 @@ class Library:
                         with open(filepath, 'w', encoding='utf-8') as f:
                             json.dump(data, f, ensure_ascii=False, indent=2)
 
-                        print(f"🗑️ Card {card_id} deleted from {filepath}")
+                        logger.log(f"🗑️ Card {card_id} deleted from {filepath}", LogLevel.NORMAL, "System")
                         return True
                 except Exception as e:
-                    print(f"Error deleting from {filepath}: {e}")
+                    logger.log(f"Error deleting from {filepath}: {e}", LogLevel.NORMAL, "System")
 
         return False
 

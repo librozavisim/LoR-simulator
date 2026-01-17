@@ -1,9 +1,14 @@
+from core.logging import logger, LogLevel
+
+
 def calculate_redirections(atk_team: list, def_team: list):
     """
     Рассчитывает перехваты.
     Правило LoR: Перехват возможен, только если Spd(Atk) > Spd(Def).
     Исключение: Если Def уже целится в Atk (В ТОТ ЖЕ СЛОТ), то это Clash по умолчанию.
     """
+    # logger.log("Calculating Redirections...", LogLevel.VERBOSE, "Targeting")
+
     for def_idx, defender in enumerate(def_team):
         if defender.is_dead(): continue
 
@@ -15,10 +20,7 @@ def calculate_redirections(atk_team: list, def_team: list):
 
             # Цель защитника (в кого он сам бьет)
             def_target_u_idx = s_def.get('target_unit_idx', -1)
-
-            # === [FIX] Достаем индекс слота цели ===
             def_target_s_idx = s_def.get('target_slot_idx', -1)
-            # =======================================
 
             valid_interceptors = []
 
@@ -26,17 +28,15 @@ def calculate_redirections(atk_team: list, def_team: list):
                 if atk_unit.is_dead(): continue
 
                 for s_atk_idx, s_atk in enumerate(atk_unit.active_slots):
-
                     if s_atk.get('is_ally_target'): continue
 
                     t_u = s_atk.get('target_unit_idx', -1)
                     t_s = s_atk.get('target_slot_idx', -1)
 
+                    # Если этот атакующий бьет в текущего защитника (в текущий слот)
                     if t_u == def_idx and t_s == s_def_idx:
-                        # === [FIX] Проверяем совпадение И Юнита, И Слота ===
-                        # Clash будет "естественным", только если защитник бьет именно в ЭТОТ слот атакующего
+                        # Проверяем "Естественный Клэш" (Def тоже бьет в Atk)
                         is_natural_clash = (def_target_u_idx == atk_u_idx and def_target_s_idx == s_atk_idx)
-                        # ===================================================
 
                         atk_spd = s_atk['speed']
 
@@ -52,27 +52,39 @@ def calculate_redirections(atk_team: list, def_team: list):
                         else:
                             can_redirect = atk_spd > def_spd
 
-                        if is_natural_clash or can_redirect:
-                            valid_interceptors.append(s_atk)
+                        if is_natural_clash:
+                            # logger.log(f"Natural Clash: {atk_unit.name} <-> {defender.name}", LogLevel.VERBOSE, "Targeting")
+                            valid_interceptors.append((s_atk, atk_unit.name))
+                        elif can_redirect:
+                            # logger.log(f"Redirection Possible: {atk_unit.name} ({atk_spd}) > {defender.name} ({def_spd})", LogLevel.VERBOSE, "Targeting")
+                            valid_interceptors.append((s_atk, atk_unit.name))
                         else:
                             # Скорости не хватает и мы не цель защитника -> One Sided
+                            # logger.log(f"Redirection Failed: {atk_unit.name} ({atk_spd}) too slow for {defender.name} ({def_spd})", LogLevel.VERBOSE, "Targeting")
                             s_atk['force_clash'] = False
                             s_atk['force_onesided'] = True
 
-            # ... (остальной код сортировки без изменений)
             if not valid_interceptors: continue
 
-            def sort_key(slot):
+            # Сортировка перехватчиков (кто быстрее/агрессивнее, тот и забирает клэш)
+            def sort_key(item):
+                slot, _ = item
                 aggro = 1000 if slot.get('is_aggro') else 0
                 return aggro + slot['speed']
 
             valid_interceptors.sort(key=sort_key, reverse=True)
-            best_match = valid_interceptors[0]
 
-            for s in valid_interceptors:
-                if s is best_match:
-                    s['force_clash'] = True
-                    s['force_onesided'] = False
+            best_match_slot, best_match_name = valid_interceptors[0]
+
+            # Применяем результаты
+            for slot, name in valid_interceptors:
+                if slot is best_match_slot:
+                    slot['force_clash'] = True
+                    slot['force_onesided'] = False
+                    logger.log(f"⚔️ Clash Confirmed: {name} intercepts {defender.name} (Slot {s_def_idx})",
+                               LogLevel.VERBOSE, "Targeting")
                 else:
-                    s['force_clash'] = False
-                    s['force_onesided'] = True
+                    slot['force_clash'] = False
+                    slot['force_onesided'] = True
+                    logger.log(f"🏹 Forced One-Sided: {name} vs {defender.name} (Outsped by ally)", LogLevel.VERBOSE,
+                               "Targeting")

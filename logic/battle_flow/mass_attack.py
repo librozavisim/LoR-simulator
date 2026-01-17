@@ -1,5 +1,6 @@
 import random
 from core.enums import CardType
+from core.logging import logger, LogLevel
 
 
 def process_mass_attack(engine, action, opposing_team, round_label):
@@ -15,14 +16,14 @@ def process_mass_attack(engine, action, opposing_team, round_label):
     report = []
 
     # 1. Логируем начало атаки
-    engine.log(f"💥 **{source.name}** uses Mass Attack: {card.name}")
+    atk_type_str = "Summation" if is_summation else "Individual"
+    logger.log(f"💥 {source.name} uses Mass Attack: {card.name} ({atk_type_str})", LogLevel.NORMAL, "MassAtk")
 
     # 2. Перебираем всех живых врагов
     for target in opposing_team:
         if target.is_dead(): continue
 
         # Выбираем случайный слот врага для атаки (по правилам LoR)
-        # Если у врага нет активных слотов (стаггер), он просто получает урон
         target_slot = None
         target_dice_list = []
 
@@ -32,6 +33,10 @@ def process_mass_attack(engine, action, opposing_team, round_label):
                 target_slot = random.choice(valid_slots)
                 if target_slot.get('card'):
                     target_dice_list = target_slot['card'].dice_list
+                    logger.log(f"Targeting {target.name} (Defending with {target_slot['card'].name})", LogLevel.VERBOSE,
+                               "MassAtk")
+        else:
+            logger.log(f"Targeting {target.name} (No defense/Staggered)", LogLevel.VERBOSE, "MassAtk")
 
         # === ЛОГИКА MASS-SUMMATION (Сумма на Сумму) ===
         if is_summation:
@@ -54,31 +59,31 @@ def process_mass_attack(engine, action, opposing_team, round_label):
             outcome = ""
             details = []
 
+            logger.log(f"∑ Clash: {source.name}({atk_sum}) vs {target.name}({def_sum})", LogLevel.VERBOSE, "MassAtk")
+
             # Сравнение
             if atk_sum > def_sum:
                 outcome = f"🎯 Hit! ({atk_sum} > {def_sum})"
-                # Уничтожаем карту врага (она больше не сыграет в этом раунде)
+
+                # Уничтожаем карту врага
                 if target_slot:
                     target_slot['card'] = None  # Destroy page
                     details.append(f"🚫 {target.name}'s page destroyed!")
+                    logger.log(f"🚫 {target.name}'s page destroyed by Mass Summation", LogLevel.NORMAL, "MassAtk")
 
-                # Наносим урон (обычно Масс атака имеет свой урон, но для простоты берем сумму или фиксированный скрипт)
-                # В LoR урон прописан в кубике. Здесь упростим: урон = разнице, или прогоним скрипты.
-                # Для корректности: применим урон первого кубика масс атаки?
-                # Обычно Mass Attack имеет Dice с типом "Atk". Нанесем его урон.
+                # Наносим урон каждого кубика
                 for d in card.dice_list:
-                    # Создаем контекст для урона
                     ctx_dmg = engine._create_roll_context(source, target, d)
-                    # Используем apply_damage, но без клэша
                     engine._apply_damage(ctx_dmg, None, "hp")
                     details.extend(ctx_dmg.log)
             else:
                 outcome = f"🛡️ Blocked ({def_sum} >= {atk_sum})"
                 details.append(f"{target.name} withstood the attack.")
+                logger.log(f"🛡️ {target.name} blocked Mass Attack", LogLevel.NORMAL, "MassAtk")
 
             # Добавляем в отчет
             report.append({
-                "type": "clash",  # Используем стиль клэша для отображения
+                "type": "clash",
                 "round": f"{round_label} (Mass)",
                 "left": {"unit": source.name, "card": "MASS SUM", "dice": "Sum", "val": atk_sum,
                          "range": f"Rolls: {','.join(atk_rolls)}"},
@@ -89,9 +94,6 @@ def process_mass_attack(engine, action, opposing_team, round_label):
 
         # === ЛОГИКА MASS-INDIVIDUAL (Кубик на Кубик) ===
         else:
-            # Сравниваем кубики по порядку: 1-й атакующий vs 1-й защитный и т.д.
-            # Если у защитника кончились кубики, он получает урон от оставшихся.
-
             num_checks = len(card.dice_list)
 
             for i in range(num_checks):
@@ -111,21 +113,19 @@ def process_mass_attack(engine, action, opposing_team, round_label):
                 details = []
                 outcome = ""
 
+                logger.log(f"Indiv Clash #{i + 1}: {val_atk} vs {val_def}", LogLevel.VERBOSE, "MassAtk")
+
                 if val_atk > val_def:
                     outcome = "🎯 Hit"
-                    # Уничтожаем кубик защитника
                     if target_slot and i < len(target_slot['card'].dice_list):
-                        # Помечаем кубик как уничтоженный (сложно удалить из списка, заменим на None или заглушку)
-                        # В нашей системе проще просто не использовать его потом.
-                        # Но для симулятора пометим в логе.
                         details.append(f"🚫 {target.name}'s Die #{i + 1} destroyed")
+                        logger.log(f"🚫 {target.name}'s Die #{i + 1} destroyed", LogLevel.NORMAL, "MassAtk")
 
                     engine._apply_damage(ctx_atk, None, "hp")
                     details.extend(ctx_atk.log)
                 else:
                     outcome = "🛡️ Blocked"
 
-                # Отчет по каждому кубику
                 r_dice_name = die_def.dtype.name if die_def else "None"
                 report.append({
                     "type": "clash",
