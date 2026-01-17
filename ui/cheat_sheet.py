@@ -34,6 +34,7 @@ def render_cheat_sheet_page():
         base_rolls_data.append((tmpl['level'], tmpl['rank_name'], rmin, rmax))
 
     base_rolls_data.sort(key=lambda x: x[0])
+
     # === ТАБ 1: СКОРОСТЬ ===
     with tab_speed:
         st.header("Скорость и Кубики Скорости")
@@ -50,7 +51,8 @@ def render_cheat_sheet_page():
              "Agility": "20 (+20)", "Speed": "25 (+16)"},
             {"Lvl": "43", "Rank": "Rank 3 (Кошмар)", "Dice Slots": "3x [16-19], 1x [13-16]", "Agility": "17 (+15)",
              "Speed": "22 (+12)"},
-            {"Lvl": "36", "Rank": "Rank 4 (Чума Усложнен)", "Dice Slots": "3x [15-18], 1x [10-13]", "Agility": "14 (+15)",
+            {"Lvl": "36", "Rank": "Rank 4 (Чума Усложнен)", "Dice Slots": "3x [15-18], 1x [10-13]",
+             "Agility": "14 (+15)",
              "Speed": "19 (+12)"},
             {"Lvl": "30", "Rank": "Rank 5 (Чума)", "Dice Slots": "2x [13-16], 1x [10-13]", "Agility": "12 (+10)",
              "Speed": "16 (+8)"},
@@ -81,7 +83,8 @@ def render_cheat_sheet_page():
                 "Total HP (Approx)": tmpl['hp_approx']
             })
 
-        st.dataframe(pd.DataFrame(hp_rows), width='stretch', hide_index=True)
+        st.dataframe(pd.DataFrame(hp_rows), width=1000, hide_index=True)  # width='stretch' deprecated warning fix
+
     # === ТАБ 3: РОЛЛЫ ===
     with tab_power:
         st.header("Чистые средние роллы карты")
@@ -187,10 +190,11 @@ def render_cheat_sheet_page():
             with st.container(border=True):
                 st.subheader("🤯 Паника / Искажение (SP < 0)")
                 st.markdown("...")  # (Текст механики)
-        # === ТАБ 6: БАЛАНС (КОНСТРУКТОР) ===
+
+    # === ТАБ 6: БАЛАНС (КАЛЬКУЛЯТОР) ===
     with tab_balance:
         st.header("⚖️ Конструктор Баланса Карт")
-        st.caption("Калькулятор значений на основе ваших базовых роллов.")
+        st.caption("Калькулятор значений на основе базовых роллов.")
 
         # --- 1. Таблица базовых бюджетов ---
         with st.expander("📊 Таблица Бюджетов (Power Budget)", expanded=True):
@@ -213,249 +217,256 @@ def render_cheat_sheet_page():
         st.divider()
 
         # --- 2. Калькулятор ---
-        # === ТАБ 4: БАЛАНС (КАЛЬКУЛЯТОР) ===
-        # === ТАБ 4: БАЛАНС (КАЛЬКУЛЯТОР) ===
-        # === ТАБ 4: БАЛАНС (КАЛЬКУЛЯТОР) ===
-        with tab_balance:
-            st.header("⚖️ Конструктор Баланса Карт")
-            st.caption("Калькулятор значений на основе уровня персонажа.")
+        with st.expander("ℹ️ Справка: Как работает баланс?"):
+            st.markdown("""
+                ### 🎲 Как создать "Хороший Куб"?
+                Система баланса построена на **Бюджете**. Ваш персонаж имеет базовую силу (зависит от уровня), которая умножается на ранг карты.
 
-            with st.expander("ℹ️ Справка: Как работает баланс?"):
-                st.markdown("""
-                    ### 🎲 Как создать "Хороший Куб"?
-                    Система баланса построена на **Бюджете**. Ваш персонаж имеет базовую силу (зависит от уровня), которая умножается на ранг карты.
+                **Чтобы получить сильные значения:**
+                1. **Тип карты**: Карты Mass Attack и Ranged стоят дороже в плане бюджета, но их значения могут быть выше за счет этого.
+                2. **Разброс (Variance)**: Старайтесь держать разброс в "Безопасной зоне" (30-70% от среднего). 
+                   - Слишком стабильные кубики (например, 5-5) получают штраф за надежность.
+                   - Слишком рандомные (1-20) получают штраф за нестабильность.
+                3. **Условия**: Добавляйте сложные условия (On Hit, High Roll), чтобы получить бонус к силе (+15%). Легкие условия (On Use) снижают силу (-7.5%).
+                4. **Концентрация**: Если вы используете меньше кубиков, чем положено рангу карты (например, 1 куб на карте 3 ранга), вы получаете бонус +20% за каждый сэкономленный слот.
 
-                    **Чтобы получить сильные значения:**
-                    1. **Тип карты**: Карты Mass Attack и Ranged стоят дороже в плане бюджета, но их значения могут быть выше за счет этого.
-                    2. **Разброс (Variance)**: Старайтесь держать разброс в "Безопасной зоне" (30-70% от среднего). 
-                       - Слишком стабильные кубики (например, 5-5) получают штраф за надежность.
-                       - Слишком рандомные (1-20) получают штраф за нестабильность.
-                    3. **Условия**: Добавляйте сложные условия (On Hit, High Roll), чтобы получить бонус к силе (+15%). Легкие условия (On Use) снижают силу (-7.5%).
-                    4. **Концентрация**: Если вы используете меньше кубиков, чем положено рангу карты (например, 1 куб на карте 3 ранга), вы получаете бонус +20% за каждый сэкономленный слот.
+                ### 📉 Откуда берутся штрафы?
+                * **Эффекты (-10%)**: Наложение статусов (Bleed, Burn, Buffs) снижает прямой урон карты.
+                * **Легкие условия (-7.5%)**: Гарантированные эффекты стоят части силы.
+                * **Разброс**: Отклонение от оптимального диапазона штрафуется на 2% за каждую единицу.
+                """)
 
-                    ### 📉 Откуда берутся штрафы?
-                    * **Эффекты (-10%)**: Наложение статусов (Bleed, Burn, Buffs) снижает прямой урон карты.
-                    * **Легкие условия (-7.5%)**: Гарантированные эффекты стоят части силы.
-                    * **Разброс**: Отклонение от оптимального диапазона штрафуется на 2% за каждую единицу.
-                    """)
+        c_set, c_res = st.columns([1, 1])
 
-            c_set, c_res = st.columns([1, 1])
+        # --- Variables init ---
+        base_avg = 2.0
+        char_level_display = 0
+        standard_dice_capacity = 1
 
-            # --- Variables init ---
-            base_avg = 2.0
-            char_level_display = 0
-            standard_dice_capacity = 1
+        with c_set:
+            st.subheader("🛠️ Настройка")
 
-            with c_set:
-                st.subheader("🛠️ Настройка")
+            # 1. Выбор персонажа
+            if 'roster' in st.session_state and st.session_state['roster']:
+                # [FIX 1] Сортировка списка
+                roster_names = sorted(list(st.session_state['roster'].keys()))
 
-                # 1. Выбор персонажа
-                if 'roster' in st.session_state and st.session_state['roster']:
-                    roster_names = list(st.session_state['roster'].keys())
-                    sel_char = st.selectbox("Персонаж", roster_names, key="bal_char_sel")
+                # [FIX 2] Восстановление выбора
+                current_key = st.session_state.get("bal_char_sel")
+                default_index = 0
+                if current_key in roster_names:
+                    default_index = roster_names.index(current_key)
 
-                    unit = st.session_state['roster'][sel_char]
-                    char_level_display = unit.level
+                # [FIX 3] Виджет с явным индексом
+                sel_char = st.selectbox(
+                    "Персонаж",
+                    roster_names,
+                    index=default_index,
+                    key="bal_char_sel"
+                )
 
-                    found_stat = base_rolls_data[0]
-                    for row in base_rolls_data:
-                        if char_level_display >= row[0]:
-                            found_stat = row
-                        else:
-                            break
+                unit = st.session_state['roster'][sel_char]
+                char_level_display = unit.level
 
-                    b_min, b_max = found_stat[2], found_stat[3]
-                    base_avg = (b_min + b_max) / 2
+                found_stat = base_rolls_data[0]
+                for row in base_rolls_data:
+                    if char_level_display >= row[0]:
+                        found_stat = row
+                    else:
+                        break
 
-                    st.caption(f"Lvl {char_level_display} ({found_stat[1]}) -> Base: {b_min}-{b_max} (Avg {base_avg})")
-                else:
-                    st.warning("Создайте персонажа для расчета!")
+                b_min, b_max = found_stat[2], found_stat[3]
+                base_avg = (b_min + b_max) / 2
 
-                # 2. Ранг
-                card_rank = st.selectbox("Ранг карты (Tier)", [1, 2, 3, 4, 5], index=0, key="bal_card_rank")
-                standard_dice_capacity = card_rank
+                st.caption(f"Lvl {char_level_display} ({found_stat[1]}) -> Base: {b_min}-{b_max} (Avg {base_avg})")
+            else:
+                st.warning("Создайте персонажа для расчета!")
 
-                # 3. Тип
-                type_opts = {
-                    "Melee (100%)": 1.0,
-                    "Offensive (115%)": 1.15,
-                    "Ranged (125%)": 1.25,
-                    "Mass Attack (140%)": 1.40,
-                    "On Play (50%)": 0.5,
-                    "Item (40%)": 0.4
-                }
-                ctype_label = st.selectbox("Тип карты", list(type_opts.keys()), index=0, key="bal_type")
-                type_mult = type_opts[ctype_label]
+            # 2. Ранг
+            card_rank = st.selectbox("Ранг карты (Tier)", [1, 2, 3, 4, 5], index=0, key="bal_card_rank")
+            standard_dice_capacity = card_rank
 
-                dice_count = st.slider("Количество дайсов", 1, 7, 2, key="bal_count")
+            # 3. Тип
+            type_opts = {
+                "Melee (100%)": 1.0,
+                "Offensive (115%)": 1.15,
+                "Ranged (125%)": 1.25,
+                "Mass Attack (140%)": 1.40,
+                "On Play (50%)": 0.5,
+                "Item (40%)": 0.4
+            }
+            ctype_label = st.selectbox("Тип карты", list(type_opts.keys()), index=0, key="bal_type")
+            type_mult = type_opts[ctype_label]
 
-                st.markdown("**Модификаторы:**")
-                effects_count = st.number_input("Кол-во эффектов (-10%)", 0, 100, 0)
-                cond_hard = st.number_input("Сложные условия (+15%)", 0, 100, 0)
-                cond_easy = st.number_input("Легкие условия (-7.5%)", 0, 100, 0)
+            dice_count = st.slider("Количество дайсов", 1, 7, 2, key="bal_count")
 
-                # --- DYNAMIC VARIANCE SLIDER ---
-                # Pre-calc budget to determine max variance
-                # Using MIN between rank and dice count for budget multiplier!
-                rank_budget_mult_est = min(standard_dice_capacity, dice_count)
-                est_total_budget = base_avg * rank_budget_mult_est * type_mult
+            st.markdown("**Модификаторы:**")
+            effects_count = st.number_input("Кол-во эффектов (-10%)", 0, 100, 0)
+            cond_hard = st.number_input("Сложные условия (+15%)", 0, 100, 0)
+            cond_easy = st.number_input("Легкие условия (-7.5%)", 0, 100, 0)
 
-                est_power_mod = 1.0 - (effects_count * 0.10) + ((cond_hard * 0.15) - (cond_easy * 0.075))
-                est_budget = est_total_budget * est_power_mod
+            # --- DYNAMIC VARIANCE SLIDER ---
+            # Pre-calc budget to determine max variance
+            # Using MIN between rank and dice count for budget multiplier!
+            rank_budget_mult_est = min(standard_dice_capacity, dice_count)
+            est_total_budget = base_avg * rank_budget_mult_est * type_mult
 
-                est_avg_die = est_budget / max(dice_count, 1)
-                if dice_count < standard_dice_capacity:
-                    bonus_mult = 1.3 ** abs(standard_dice_capacity - dice_count)
-                    est_avg_die *= bonus_mult
+            est_power_mod = 1.0 - (effects_count * 0.10) + ((cond_hard * 0.15) - (cond_easy * 0.075))
+            est_budget = est_total_budget * est_power_mod
 
-                max_var_dynamic = max(0, int((est_avg_die - 1) * 2))
-                def_var = min(4, max_var_dynamic)
+            est_avg_die = est_budget / max(dice_count, 1)
+            if dice_count < standard_dice_capacity:
+                bonus_mult = 1.3 ** abs(standard_dice_capacity - dice_count)
+                est_avg_die *= bonus_mult
 
-                variance = st.slider("Разброс (Variance)", 0, max_var_dynamic, def_var,
-                                     help=f"Лимит зависит от силы (Avg {est_avg_die:.1f}). Безопасно: 30-70%.")
+            max_var_dynamic = max(0, int((est_avg_die - 1) * 2))
+            def_var = min(4, max_var_dynamic)
 
-                # --- BUTTON: FIND BEST VARIANCE ---
-                if st.button("🔍 Найти лучший разброс"):
-                    best_v = 0
-                    best_score = -1.0
+            variance = st.slider("Разброс (Variance)", 0, max_var_dynamic, def_var,
+                                 help=f"Лимит зависит от силы (Avg {est_avg_die:.1f}). Безопасно: 30-70%.")
 
-                    for v_check in range(max_var_dynamic + 1):
-                        var_safe_min_c = est_avg_die * 0.30
-                        var_safe_max_c = est_avg_die * 0.70
+            # --- BUTTON: FIND BEST VARIANCE ---
+            if st.button("🔍 Найти лучший разброс"):
+                best_v = 0
+                best_score = -1.0
 
-                        pen = 0.0
-                        if v_check < var_safe_min_c:
-                            pen = (var_safe_min_c - v_check) * 0.02
-                        elif v_check > var_safe_max_c:
-                            pen = (v_check - var_safe_max_c) * 0.02
+                for v_check in range(max_var_dynamic + 1):
+                    var_safe_min_c = est_avg_die * 0.30
+                    var_safe_max_c = est_avg_die * 0.70
 
-                        factor = max(0.1, 1.0 - pen)
-                        score = est_avg_die * factor
+                    pen = 0.0
+                    if v_check < var_safe_min_c:
+                        pen = (var_safe_min_c - v_check) * 0.02
+                    elif v_check > var_safe_max_c:
+                        pen = (v_check - var_safe_max_c) * 0.02
 
-                        if score > best_score:
-                            best_score = score
-                            best_v = v_check
+                    factor = max(0.1, 1.0 - pen)
+                    score = est_avg_die * factor
 
-                    st.toast(f"Оптимальный разброс: {best_v}", icon="✨")
-                    st.info(f"Рекомендуемый разброс для макс. силы: **{best_v}**")
+                    if score > best_score:
+                        best_score = score
+                        best_v = v_check
 
-            with c_res:
-                st.subheader("🎯 Результат")
+                st.toast(f"Оптимальный разброс: {best_v}", icon="✨")
+                st.info(f"Рекомендуемый разброс для макс. силы: **{best_v}**")
 
-                # 1. Total Budget
-                # FIXED: Budget multiplier is min(Rank, Count)
-                rank_budget_mult = min(standard_dice_capacity, dice_count)
-                total_budget = base_avg * rank_budget_mult * type_mult
+        with c_res:
+            st.subheader("🎯 Результат")
 
-                # 2. Power Mods
-                eff_pen = effects_count * 0.10
-                cond_mod = (cond_hard * 0.15) - (cond_easy * 0.075)
-                power_mod = 1.0 - eff_pen + cond_mod
+            # 1. Total Budget
+            # FIXED: Budget multiplier is min(Rank, Count)
+            rank_budget_mult = min(standard_dice_capacity, dice_count)
+            total_budget = base_avg * rank_budget_mult * type_mult
 
-                effective_budget = total_budget * power_mod
+            # 2. Power Mods
+            eff_pen = effects_count * 0.10
+            cond_mod = (cond_hard * 0.15) - (cond_easy * 0.075)
+            power_mod = 1.0 - eff_pen + cond_mod
 
-                # 3. Split with Concentration Bonus
-                avg_per_die = effective_budget / dice_count
+            effective_budget = total_budget * power_mod
 
-                split_bonus_val = 1.0
-                split_bonus_applied = False
+            # 3. Split with Concentration Bonus
+            avg_per_die = effective_budget / dice_count
 
-                if dice_count < standard_dice_capacity:
-                    split_bonus_val = 1.3 ** abs(standard_dice_capacity - dice_count)
-                    avg_per_die *= split_bonus_val
-                    split_bonus_applied = True
+            split_bonus_val = 1.0
+            split_bonus_applied = False
 
-                # 4. Variance Adjustment
-                var_safe_min = avg_per_die * 0.30
-                var_safe_max = avg_per_die * 0.70
+            if dice_count < standard_dice_capacity:
+                split_bonus_val = 1.3 ** abs(standard_dice_capacity - dice_count)
+                avg_per_die *= split_bonus_val
+                split_bonus_applied = True
 
-                var_penalty = 0.0
+            # 4. Variance Adjustment
+            var_safe_min = avg_per_die * 0.30
+            var_safe_max = avg_per_die * 0.70
 
-                if variance < var_safe_min:
-                    diff = var_safe_min - variance
-                    var_penalty = diff * 0.02
-                elif variance > var_safe_max:
-                    diff = variance - var_safe_max
-                    var_penalty = diff * 0.02
+            var_penalty = 0.0
 
-                var_factor = max(0.1, 1.0 - var_penalty)
-                final_avg_die = avg_per_die * var_factor
+            if variance < var_safe_min:
+                diff = var_safe_min - variance
+                var_penalty = diff * 0.02
+            elif variance > var_safe_max:
+                diff = variance - var_safe_max
+                var_penalty = diff * 0.02
 
-                # --- HELPER: RANGE CALCULATION ---
-                def calculate_min_max_from_avg(avg, var):
-                    t_sum = int(round(avg * 2))
-                    eff_v = var
-                    # Parity check
-                    if (t_sum % 2) != (eff_v % 2):
-                        if eff_v > 0:
-                            eff_v -= 1
-                        else:
-                            eff_v += 1
+            var_factor = max(0.1, 1.0 - var_penalty)
+            final_avg_die = avg_per_die * var_factor
 
-                    mn = (t_sum - eff_v) // 2
-                    mx = (t_sum + eff_v) // 2
+            # --- HELPER: RANGE CALCULATION ---
+            def calculate_min_max_from_avg(avg, var):
+                t_sum = int(round(avg * 2))
+                eff_v = var
+                # Parity check
+                if (t_sum % 2) != (eff_v % 2):
+                    if eff_v > 0:
+                        eff_v -= 1
+                    else:
+                        eff_v += 1
 
-                    if mn < 1:
-                        sh = 1 - mn
-                        mn += sh
-                        mx += sh
-                    return mn, mx
+                mn = (t_sum - eff_v) // 2
+                mx = (t_sum + eff_v) // 2
 
-                # Main Result
-                d_min, d_max = calculate_min_max_from_avg(final_avg_die, variance)
+                if mn < 1:
+                    sh = 1 - mn
+                    mn += sh
+                    mx += sh
+                return mn, mx
 
-                with st.container(border=True):
-                    st.metric("Среднее (1 кубик)", f"{final_avg_die:.3f}")
-                    st.markdown(f"### 🎲 {d_min} ~ {d_max}")
+            # Main Result
+            d_min, d_max = calculate_min_max_from_avg(final_avg_die, variance)
 
-                    st.caption(f"Rank Cap: {standard_dice_capacity} dice | Split: {dice_count}")
+            with st.container(border=True):
+                st.metric("Среднее (1 кубик)", f"{final_avg_die:.3f}")
+                st.markdown(f"### 🎲 {d_min} ~ {d_max}")
 
-                st.info(f"""
-                        **Логика:**
-                        * **Base**: {base_avg} (Lvl {char_level_display})
-                        * **Rank Budget**: x{rank_budget_mult} (min(Tier, Count))
-                        * **Mods**: {int(power_mod * 100)}%
-                        * **Split Mod**: x{split_bonus_val:.2f} {'(+Bonus)' if split_bonus_applied else ''}
-                        * **Safe Var**: {var_safe_min:.1f} - {var_safe_max:.1f}
-                        * **Var Penalty**: -{int(var_penalty * 100)}%
-                    """)
+                st.caption(f"Rank Cap: {standard_dice_capacity} dice | Split: {dice_count}")
 
-                # --- 5. DIFFERENT DICE DISTRIBUTOR (NEW) ---
-                if dice_count > 1:
+            st.info(f"""
+                    **Логика:**
+                    * **Base**: {base_avg} (Lvl {char_level_display})
+                    * **Rank Budget**: x{rank_budget_mult} (min(Tier, Count))
+                    * **Mods**: {int(power_mod * 100)}%
+                    * **Split Mod**: x{split_bonus_val:.2f} {'(+Bonus)' if split_bonus_applied else ''}
+                    * **Safe Var**: {var_safe_min:.1f} - {var_safe_max:.1f}
+                    * **Var Penalty**: -{int(var_penalty * 100)}%
+                """)
+
+            # --- 5. DIFFERENT DICE DISTRIBUTOR (NEW) ---
+            if dice_count > 1:
+                st.divider()
+                with st.expander("🎛️ Настроить разные кубики (Распределение)"):
+                    total_power_budget = final_avg_die * dice_count
+                    st.caption(f"Общий бюджет (Avg): **{total_power_budget:.1f}**")
+
+                    remaining = total_power_budget
+
+                    # Manual Dice (All except last)
+                    for i in range(dice_count - 1):
+                        c1, c2, c3 = st.columns([1, 1, 2])
+                        with c1:
+                            # Default values to meaningful starting points
+                            def_min = int(final_avg_die - 2) if (final_avg_die - 2) > 1 else 1
+                            val_min = st.number_input(f"D{i + 1} Min", 1, 200, def_min, key=f"md_min_{i}")
+                        with c2:
+                            def_max = int(final_avg_die + 2)
+                            val_max = st.number_input(f"D{i + 1} Max", 1, 200, def_max, key=f"md_max_{i}")
+                        with c3:
+                            val_avg = (val_min + val_max) / 2
+                            st.metric(f"D{i + 1} Avg", f"{val_avg:.1f}")
+                            remaining -= val_avg
+
+                    # Last Die (Auto)
                     st.divider()
-                    with st.expander("🎛️ Настроить разные кубики (Распределение)"):
-                        total_power_budget = final_avg_die * dice_count
-                        st.caption(f"Общий бюджет (Avg): **{total_power_budget:.1f}**")
+                    c_last_1, c_last_2 = st.columns([1, 2])
+                    with c_last_1:
+                        st.markdown(f"**Кубик {dice_count} (Auto)**")
+                        st.metric("Остаток (Avg)", f"{remaining:.1f}")
 
-                        remaining = total_power_budget
-
-                        # Manual Dice (All except last)
-                        for i in range(dice_count - 1):
-                            c1, c2, c3 = st.columns([1, 1, 2])
-                            with c1:
-                                # Default values to meaningful starting points
-                                def_min = int(final_avg_die - 2) if (final_avg_die - 2) > 1 else 1
-                                val_min = st.number_input(f"D{i + 1} Min", 1, 200, def_min, key=f"md_min_{i}")
-                            with c2:
-                                def_max = int(final_avg_die + 2)
-                                val_max = st.number_input(f"D{i + 1} Max", 1, 200, def_max, key=f"md_max_{i}")
-                            with c3:
-                                val_avg = (val_min + val_max) / 2
-                                st.metric(f"D{i + 1} Avg", f"{val_avg:.1f}")
-                                remaining -= val_avg
-
-                        # Last Die (Auto)
-                        st.divider()
-                        c_last_1, c_last_2 = st.columns([1, 2])
-                        with c_last_1:
-                            st.markdown(f"**Кубик {dice_count} (Auto)**")
-                            st.metric("Остаток (Avg)", f"{remaining:.1f}")
-
-                        with c_last_2:
-                            if remaining < 1.0:
-                                st.error("Бюджет исчерпан!")
-                            else:
-                                # Calculate ranges based on global variance
-                                l_min, l_max = calculate_min_max_from_avg(remaining, variance)
-                                st.markdown(f"### 🎲 {l_min} ~ {l_max}")
-                                st.caption(f"Based on Var {variance}")
+                    with c_last_2:
+                        if remaining < 1.0:
+                            st.error("Бюджет исчерпан!")
+                        else:
+                            # Calculate ranges based on global variance
+                            l_min, l_max = calculate_min_max_from_avg(remaining, variance)
+                            st.markdown(f"### 🎲 {l_min} ~ {l_max}")
+                            st.caption(f"Based on Var {variance}")

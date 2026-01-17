@@ -481,13 +481,22 @@ def render_checks_page():
         st.warning("Ростер пуст.")
         return
 
-    roster_names = list(st.session_state['roster'].keys())
+    # [FIX 1] Сортируем список имен
+    roster_names = sorted(list(st.session_state['roster'].keys()))
+
+    # [FIX 2] Восстанавливаем индекс из стейта
+    current_key = st.session_state.get("checks_selected_unit")
+    default_index = 0
+
+    if current_key in roster_names:
+        default_index = roster_names.index(current_key)
 
     # === ВЫБОР ПЕРСОНАЖА (С СОХРАНЕНИЕМ) ===
     c_sel, _ = st.columns([1, 1])
     selected_name = c_sel.selectbox(
         "Персонаж",
         roster_names,
+        index=default_index,  # <--- Явно задаем индекс
         key="checks_selected_unit",
         on_change=st.session_state.get('save_callback')
     )

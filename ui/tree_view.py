@@ -18,11 +18,20 @@ def render_skill_tree_page():
         st.warning("Ростер пуст. Создайте персонажа в профиле.")
         return
 
-    roster_names = list(st.session_state['roster'].keys())
+    # [FIX 1] Сортируем список имен для стабильности
+    roster_names = sorted(list(st.session_state['roster'].keys()))
+
+    # [FIX 2] Вычисляем индекс на основе восстановленного стейта
+    current_key = st.session_state.get("tree_selected_unit")
+    default_index = 0
+
+    if current_key in roster_names:
+        default_index = roster_names.index(current_key)
 
     selected_name = st.selectbox(
         "Выберите персонажа для прокачки:",
         roster_names,
+        index=default_index,  # <--- Явно задаем индекс
         key="tree_selected_unit",
         on_change=st.session_state.get('save_callback')
     )

@@ -37,11 +37,6 @@ def get_target_xp_value(player_lvl: int, target_lvl: int) -> int:
     _, r_pen, e_pen = calculate_rank_penalty_values(player_lvl, target_lvl)
 
     # Эффективный уровень награды
-    # Мы не вычитаем уровень игрока здесь, так как считаем "Стоимость" цели в абсолютных единицах XP.
-    # В примере: (60 + 1 - 45 - Pen) -> Это прирост.
-    # Прирост + Текущий = Новый.
-    # XP(Target) = 2^(Target - Pen).
-
     eff_lvl = max(0, target_lvl - r_pen - e_pen) - 1
     return 2 ** eff_lvl
 
@@ -53,13 +48,24 @@ def render_leveling_page():
         st.warning("Ростер пуст.")
         return
 
-    roster_names = list(st.session_state['roster'].keys())
+    # [FIX 1] Сортируем список имен
+    roster_names = sorted(list(st.session_state['roster'].keys()))
+
+    # [FIX 2] Восстанавливаем индекс из стейта
+    current_key = st.session_state.get("leveling_selected_unit")
+    default_index = 0
+
+    if current_key in roster_names:
+        default_index = roster_names.index(current_key)
+
     selected_name = st.selectbox(
         "Персонаж",
         roster_names,
+        index=default_index,  # <--- Явно задаем индекс
         key="leveling_selected_unit",
         on_change=st.session_state.get('save_callback')
     )
+
     unit = st.session_state['roster'][selected_name]
 
     cur_tier, cur_rank_name = get_rank_info(unit.level)

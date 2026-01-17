@@ -29,17 +29,12 @@ def create_character_from_template(template, roster):
     u.attributes["agility"] = template["agility"]
     u.skills["speed"] = template["speed_skill"]
 
-    # Для баланса заполняем остальные статы средними значениями,
-    # чтобы персонаж не был "голым" по силе
+    # Для баланса заполняем остальные статы средними значениями
     avg_stat = template["endurance"] // 2
     u.attributes["strength"] = avg_stat
     u.skills["strike_power"] = avg_stat
     u.skills["tough_skin"] = template["endurance"] // 2
 
-    # Генерируем "историю" прокачки (Level Rolls),
-    # чтобы HP соответствовало уровню
-    # Каждые 3 уровня персонаж получает бонус.
-    # Эмулируем средний бросок (3 HP, 3 SP)
     for lvl in range(3, u.level + 1, 3):
         u.level_rolls[str(lvl)] = {"hp": 3, "sp": 3}
 
@@ -50,10 +45,7 @@ def create_character_from_template(template, roster):
 def delete_unit_action(unit_name):
     """Callback для безопасного удаления персонажа."""
     if UnitLibrary.delete_unit(unit_name):
-        # Обновляем селектор (state)
         roster = UnitLibrary.get_roster()
-
-        # Если остались персонажи, выбираем первого, иначе сбрасываем
         current_keys = sorted(list(roster.keys()))
         if current_keys:
             st.session_state["profile_selected_unit"] = current_keys[0]
@@ -61,10 +53,9 @@ def delete_unit_action(unit_name):
             st.session_state["profile_selected_unit"] = None
 
         st.toast(f"Персонаж {unit_name} удален.", icon="🗑️")
-
-        # Принудительно сохраняем состояние сессии (чтобы обновился json)
         if 'save_callback' in st.session_state:
             st.session_state['save_callback']()
+
 
 def render_header(roster):
     # --- HEADER / SELECTION ---
@@ -74,7 +65,6 @@ def render_header(roster):
     with c2.popover("➕ Создать", use_container_width=True):
         st.markdown("**Выберите шаблон:**")
 
-        # Опция "Пустой"
         if st.button("Крыса (Пустой)", use_container_width=True):
             n = f"Unit_{len(roster) + 1}"
             u = Unit(n)
@@ -86,11 +76,8 @@ def render_header(roster):
 
         st.divider()
 
-        # Шаблоны из файла
         for tmpl in CHARACTER_TEMPLATES:
-            # Пропускаем крысу, она выше
             if tmpl["tier"] == 0: continue
-
             label = f"{tmpl['name']} (Lvl {tmpl['level']})"
             if st.button(label, key=f"create_{tmpl['tier']}", use_container_width=True):
                 u, n = create_character_from_template(tmpl, roster)
@@ -100,10 +87,23 @@ def render_header(roster):
                 if 'save_callback' in st.session_state: st.session_state['save_callback']()
                 st.rerun()
 
-    # Рисуем селектор с привязкой к сохранению
+    # === [FIX] ЯВНОЕ ЗАДАНИЕ ИНДЕКСА ДЛЯ SELECTBOX ===
+    # 1. Получаем список ключей
+    roster_keys = sorted(list(roster.keys()))
+
+    # 2. Получаем текущее значение из стейта (которое мы восстановили в app.py)
+    current_key = st.session_state.get("profile_selected_unit")
+
+    # 3. Вычисляем индекс для UI
+    default_index = 0
+    if current_key in roster_keys:
+        default_index = roster_keys.index(current_key)
+
+    # 4. Рисуем виджет с index
     sel = c1.selectbox(
         "Персонаж",
-        list(roster.keys()),
+        roster_keys,
+        index=default_index,  # <--- Ключевое изменение
         key="profile_selected_unit",
         on_change=st.session_state.get('save_callback')
     )
@@ -121,7 +121,6 @@ def render_header(roster):
     with c_del:
         with st.popover("🗑️", use_container_width=True):
             st.warning(f"Удалить {unit.name}?")
-            # Используем callback для избежания ошибки изменения state после рендера
             st.button(
                 "Да, удалить",
                 type="primary",
@@ -132,7 +131,6 @@ def render_header(roster):
 
     st.divider()
     return unit, u_key
-
 def render_basic_info(unit, u_key):
     # Avatar
     img = unit.avatar if unit.avatar and os.path.exists(
@@ -174,11 +172,9 @@ def render_basic_info(unit, u_key):
     st.markdown("**Ранг Фиксера**")
     r_c1, r_c2 = st.columns(2)
 
-    # Выбор ранга
     unit.rank = r_c1.number_input("Текущий (Tier)", -5, 10, unit.rank, help="Официальный ранг (0-11)",
                                   key=f"rank_cur_{u_key}")
 
-    # === ОТОБРАЖЕНИЕ НАЗВАНИЯ РАНГА ===
     rank_name = "Неизвестный ранг"
     rank_color = "gray"
 
@@ -197,7 +193,6 @@ def render_basic_info(unit, u_key):
 
     r_c1.markdown(f":{rank_color}[**{rank_name}**]")
 
-    # Status Rank (Текстовое поле)
     status_rank = unit.memory.get("status_rank", "9 (Fixer)")
     new_status = r_c2.text_input("Статус (Текст)", status_rank, help="Ранг репутации (текстовое описание)",
                                  key=f"rank_stat_{u_key}")
@@ -205,7 +200,6 @@ def render_basic_info(unit, u_key):
 
     st.divider()
 
-    # Speed
     st.markdown(f"**🧊 Скорость:**")
     if unit.computed_speed_dice:
         for d in unit.computed_speed_dice:
@@ -215,7 +209,6 @@ def render_basic_info(unit, u_key):
 
     st.divider()
 
-    # === BIOGRAPHY AND NOTES ===
     with st.expander("📝 Биография и Заметки", expanded=False):
         unit.biography = st.text_area(
             "История персонажа",
