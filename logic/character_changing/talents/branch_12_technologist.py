@@ -1,4 +1,5 @@
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================
@@ -15,6 +16,7 @@ class TalentProjection(BasePassive):
 
     def activate(self, unit, log_func, **kwargs):
         if log_func: log_func("🛠️ **Верстак**: Меню крафта открыто (Заглушка).")
+        logger.log(f"🛠️ Workbench activated by {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -38,6 +40,7 @@ class TalentHacker(BasePassive):
         import random
         roll = random.randint(1, 20) + prog
         if log_func: log_func(f"💻 **Взлом**: Бросок {roll} (1d20+{prog}).")
+        logger.log(f"💻 Hacker attempt by {unit.name}: Roll {roll}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -56,6 +59,7 @@ class TalentLittleHelper(BasePassive):
 
     def activate(self, unit, log_func, **kwargs):
         if log_func: log_func("🤖 **Меню ботов**: Создание/Управление (Заглушка).")
+        logger.log(f"🤖 Bot Menu opened by {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
     # Бонусы к статам должны зависеть от активных ботов.
@@ -95,11 +99,13 @@ class TalentPortableShield(BasePassive):
         # Резисты щита сложно наложить поверх резистов юнита без сложной системы слоев.
         # Пока просто даем барьер.
         if log_func: log_func(f"🛡️ **Щит**: Активирован (+{shield_hp} Barrier).")
+        logger.log(f"🛡️ Portable Shield: +{shield_hp} Barrier for {unit.name}", LogLevel.NORMAL, "Talent")
 
     def on_round_end(self, unit, log_func, **kwargs):
         regen = int(unit.max_hp * 0.03)
         unit.add_status("barrier", regen, duration=99)  # Barrier стакается
         if log_func: log_func(f"🛡️ **Щит**: Регенерация +{regen}.")
+        logger.log(f"🛡️ Portable Shield Regen: +{regen} Barrier for {unit.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -132,6 +138,7 @@ class TalentEnergyCycle(BasePassive):
             barrier = int(unit.max_hp * mult * excess)
             unit.add_status("barrier", barrier, duration=2)
             if log_func: log_func(f"⚡ **Круговорот**: {excess} Charge -> {barrier} Barrier.")
+            logger.log(f"⚡ Energy Cycle: Converted {excess} Charge to {barrier} Barrier", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -150,6 +157,7 @@ class TalentModulation(BasePassive):
 
     def activate(self, unit, log_func, **kwargs):
         if log_func: log_func("🔧 **Модули**: Установка улучшений (Заглушка).")
+        logger.log(f"🔧 Modulation Menu opened by {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 

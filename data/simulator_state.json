@@ -46,9 +46,9 @@
       ],
       "stored_dice": [],
       "base_stats": {
-        "current_hp": 97,
+        "current_hp": 91,
         "current_sp": 135,
-        "current_stagger": 47
+        "current_stagger": 41
       },
       "defense": {
         "armor_name": "Standard Fixer Suit",
@@ -65,7 +65,17 @@
         },
         "weapon_id": "skalalaz_iceaxe"
       },
-      "card_cooldowns": {},
+      "card_cooldowns": {
+        "lima_one_furious_shot": [
+          1
+        ],
+        "lima_ram": [
+          1
+        ],
+        "lima_purge_toxin": [
+          1
+        ]
+      },
       "attributes": {
         "strength": 2,
         "endurance": 5,
@@ -150,7 +160,7 @@
         }
       },
       "cooldowns": {
-        "art_of_self_defense": 3
+        "art_of_self_defense": 2
       },
       "active_buffs": {},
       "resources": {},
@@ -240,9 +250,15 @@
         "weapon_id": "dual_blades"
       },
       "card_cooldowns": {
-        "azgick_rule_1": 1,
-        "azgick_rule_2": 1,
-        "azgick_rule_3": 1
+        "azgick_rule_2": [
+          1
+        ],
+        "azgick_rule_3": [
+          1
+        ],
+        "cheese_cheddar": [
+          4
+        ]
       },
       "attributes": {
         "strength": 6,
@@ -400,8 +416,8 @@
       ],
       "stored_dice": [],
       "base_stats": {
-        "current_hp": 186,
-        "current_sp": 177,
+        "current_hp": 200,
+        "current_sp": 197,
         "current_stagger": 59
       },
       "defense": {
@@ -419,7 +435,17 @@
         },
         "weapon_id": "cleaver_7"
       },
-      "card_cooldowns": {},
+      "card_cooldowns": {
+        "warp_img": [
+          1
+        ],
+        "series_normal_strikes_img": [
+          1
+        ],
+        "not_the_limit_img": [
+          1
+        ]
+      },
       "attributes": {
         "strength": 5,
         "endurance": 22,

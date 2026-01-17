@@ -1,6 +1,7 @@
 import random
 
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================
@@ -45,6 +46,8 @@ class TalentSecondChance(BasePassive):
 
         if log_func: log_func(
             f"🍀 **{self.name}**: Активировано! Следующий бросок можно считать переброшенным (Advantage).")
+
+        logger.log(f"🍀 Second Chance: {unit.name} gains Advantage for 1 turn", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -96,6 +99,7 @@ class TalentJustSkill(BasePassive):
         # Заглушка использования
         roll = random.randint(1, 5) + 5
         if log_func: log_func(f"🎲 **Золотая кость**: +{roll} к результату!")
+        logger.log(f"🎲 Golden Die: Added +{roll} to {unit.name}'s check", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -117,6 +121,7 @@ class TalentRaiseStakes(BasePassive):
 
     def activate(self, unit, log_func, **kwargs):
         if log_func: log_func("🎰 **Ставки сделаны**: (Логика азартной игры).")
+        logger.log(f"🎰 Raise Stakes activated by {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -168,6 +173,7 @@ class TalentAceSleeve(BasePassive):
         bonus = luck // difficulty
         roll = random.randint(1, 20) + bonus
         if log_func: log_func(f"🃏 **Туз в рукаве**: {roll} (1d20+{bonus})")
+        logger.log(f"🃏 Ace in the Sleeve: {unit.name} rolled {roll} (Bonus +{bonus})", LogLevel.NORMAL, "Talent")
         return True
 
 

@@ -1,6 +1,7 @@
 from core.dice import Dice
 from core.enums import DiceType
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================
@@ -21,6 +22,7 @@ class TalentNakedDefense(BasePassive):
             unit.hp_resists.pierce = min(unit.hp_resists.pierce, 1.0)
             unit.hp_resists.blunt = min(unit.hp_resists.blunt, 1.0)
             if log_func: log_func(f"🛡️ **{self.name}**: Броня снята. Резисты = 1.0")
+            logger.log(f"🛡️ Naked Defense: Resists capped at 1.0 for {unit.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -48,8 +50,11 @@ class TalentVengefulPayback(BasePassive):
                 log_func(
                     f"🩸 **{self.name}**: Потеря здоровья (Порог {previous_chunks}->{current_chunks}) -> +{bonus} Силы")
 
+            logger.log(f"🩸 Vengeful Payback: +{bonus} Strength for {unit.name} (HP Loss)", LogLevel.VERBOSE, "Talent")
+
         if current_chunks != previous_chunks:
             unit.memory[mem_key] = current_chunks
+
 
 # ==========================================
 # 5.3 Ярость
@@ -76,8 +81,10 @@ class TalentBerserkerRage(BasePassive):
             unit.add_status("strength", 2, duration=3)
             unit.add_status("dmg_up", 2, duration=3)
             if log_func: log_func(f"😡 **{self.name} (Буйствующая)**: +Слот, +2 Силы, +2 Урона!")
+            logger.log(f"😡 Raging Fury activated by {unit.name}", LogLevel.NORMAL, "Talent")
         else:
             if log_func: log_func(f"😡 **{self.name}**: Активирована! (+1 Слот)")
+            logger.log(f"😡 Berserker Rage activated by {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
     # === [NEW] Универсальный хук для бонусных кубиков ===
@@ -86,6 +93,7 @@ class TalentBerserkerRage(BasePassive):
         if unit.active_buffs.get(self.id, 0) > 0:
             return 1
         return 0
+
 
 # ==========================================
 # 5.3 (Опц) Встроенная броня 2
@@ -105,6 +113,8 @@ class TalentNakedDefense2(BasePassive):
             unit.hp_resists.slash = max(0.5, unit.hp_resists.slash - 0.25)
             unit.hp_resists.blunt = max(0.5, unit.hp_resists.blunt - 0.25)
             if log_func: log_func(f"🛡️ **{self.name}**: Резисты Slash/Blunt снижены на 0.25")
+            logger.log(f"🛡️ Naked Defense 2: Reduced Slash/Blunt resist by 0.25 for {unit.name}", LogLevel.VERBOSE,
+                       "Talent")
 
 
 # ==========================================
@@ -125,6 +135,7 @@ class TalentCalmMind(BasePassive):
 
         ctx.source.add_status("self_control", bonus, duration=99)
         ctx.log.append(f"🧠 **{self.name}**: +{bonus} Self-Control")
+        logger.log(f"🧠 Calm Mind: +{bonus} Self-Control on hit for {ctx.source.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -156,6 +167,9 @@ class TalentFrenzy(BasePassive):
         if log_func:
             log_func(f"😡 **{self.name}**: {msg}")
 
+        logger.log(f"😡 Frenzy: Added counter dice for {unit.name}", LogLevel.VERBOSE, "Talent")
+
+
 # ==========================================
 # 5.5 (Опц) Перевести дух
 # ==========================================
@@ -169,6 +183,7 @@ class TalentCatchBreath(BasePassive):
         heal = int(unit.max_hp * 0.2)
         unit.heal_hp(heal)
         if log_func: log_func(f"💤 **Перевести дух**: +{heal} HP")
+        logger.log(f"💤 Catch Breath: Healed {heal} HP for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -210,6 +225,7 @@ class TalentFullConcentration(BasePassive):
         unit.cooldowns[self.id] = self.cooldown
 
         if log_func: log_func(f"🧘 **{self.name}**: Мин = Макс! Самообладание x2.")
+        logger.log(f"🧘 Full Concentration activated by {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
     def on_roll(self, ctx, **kwargs):
@@ -240,6 +256,8 @@ class TalentNakedDefense3(BasePassive):
             unit.hp_resists.slash = max(0.5, unit.hp_resists.slash - 0.25)
             unit.hp_resists.pierce = max(0.5, unit.hp_resists.pierce - 0.25)  # Другой тип для разнообразия
             if log_func: log_func(f"🛡️ **{self.name}**: Резисты Slash/Pierce снижены на 0.25")
+            logger.log(f"🛡️ Naked Defense 3: Reduced Slash/Pierce resist by 0.25 for {unit.name}", LogLevel.VERBOSE,
+                       "Talent")
 
 
 # ==========================================
@@ -278,6 +296,7 @@ class TalentSteadyHand(BasePassive):
         bonus = min(2, stacks // 10)
         if bonus > 0:
             ctx.modify_power(bonus, "Steady Hand")
+            logger.log(f"🖐️ Steady Hand: +{bonus} Power for {ctx.source.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -297,6 +316,7 @@ class TalentKeyMoment(BasePassive):
             if unit.active_buffs.get("full_concentration", 0) <= 0:
                 unit.active_buffs["full_concentration"] = 3
                 if log_func: log_func(f"⚡ **{self.name}**: Критическое состояние! Сосредоточенность активирована.")
+                logger.log(f"⚡ Key Moment activated for {unit.name}", LogLevel.NORMAL, "Talent")
 
 
 # ==========================================

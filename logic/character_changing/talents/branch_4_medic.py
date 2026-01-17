@@ -1,4 +1,5 @@
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================
@@ -49,6 +50,7 @@ class TalentRemedyGood(BasePassive):
         heal = 25
         unit.heal_hp(heal)
         if log_func: log_func(f"💊 **Remedy**: Восстановлено {heal} HP.")
+        logger.log(f"💊 Remedy used by {unit.name}: Healed {heal} HP", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -77,6 +79,9 @@ class TalentCheese(BasePassive):
         if log_func and added > 0:
             log_func(f"🧀 **Сыровар**: {added} видов сыра добавлено в инвентарь.")
 
+        if added > 0:
+            logger.log(f"🧀 Cheese Maker: Added {added} cheese cards to {unit.name}", LogLevel.NORMAL, "Talent")
+
 
 class TalentConfete(BasePassive):
     id = "confete"
@@ -101,6 +106,9 @@ class TalentConfete(BasePassive):
 
         if log_func and added > 0:
             log_func(f"🍬 **Кондитер**: {added} видов сладостей добавлено в инвентарь.")
+
+        if added > 0:
+            logger.log(f"🍬 Confectioner: Added {added} candy cards to {unit.name}", LogLevel.NORMAL, "Talent")
 
 
 class TalentYouWontDieGood(BasePassive):
@@ -170,6 +178,7 @@ class TalentToxicologyWeapon(BasePassive):
 
     def on_combat_start(self, unit, log_func, **kwargs):
         if log_func: log_func(f"☠️ **{self.name}**: Оружие отравлено.")
+        logger.log(f"☠️ Toxicology Weapon active for {unit.name}", LogLevel.VERBOSE, "Talent")
 
 
 class TalentRemedyBad(BasePassive):
@@ -183,6 +192,7 @@ class TalentRemedyBad(BasePassive):
     def activate(self, unit, log_func, **kwargs):
         unit.heal_hp(25)
         if log_func: log_func("💊 **Remedy**: Восстановлено 25 HP.")
+        logger.log(f"💊 Remedy used by {unit.name}: Healed 25 HP", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -257,4 +267,5 @@ class TalentGeniusToxicologist(BasePassive):
 
     def activate(self, unit, log_func, **kwargs):
         if log_func: log_func("☠️ **Смертельный яд**: Применен! (150 Poison, 3 Fragile)")
+        logger.log(f"☠️ Deadly Poison activated by {unit.name}", LogLevel.NORMAL, "Talent")
         return True

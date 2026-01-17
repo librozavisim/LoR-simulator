@@ -1,5 +1,6 @@
 from core.enums import DiceType
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================
@@ -35,6 +36,8 @@ class TalentCenser(BasePassive):
 
         unit.cooldowns[self.id] = self.cooldown
         if log_func: log_func(f"🚬 **Кадильница**: Потрачено {smoke} дыма -> Исцеление {heal_amount} HP (АоЕ).")
+        logger.log(f"🚬 Censer activated by {unit.name}: Healed {heal_amount} HP using {smoke} Smoke", LogLevel.NORMAL,
+                   "Talent")
         return True
 
 
@@ -61,6 +64,7 @@ class TalentArdentDefense(BasePassive):
         if has_rage:
             if ctx.dice.dtype in [DiceType.BLOCK, DiceType.EVADE]:
                 ctx.modify_power(2, "Ardent Defense")
+                logger.log(f"🛡️ Ardent Defense: +2 Power to Defense Die for {unit.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -92,12 +96,14 @@ class TalentThermalEnergy(BasePassive):
         # 1. Извлекаем функцию логгирования (вернет None, если её нет)
         log_func = kwargs.get("log_func")
         dmg_type = kwargs.get("dmg_type")
+
         # Предположим dmg_type == "burn" (нужна поддержка в системе статусов)
         if dmg_type == "burn" and amount > 0:
             charge_gain = amount // 5
             if charge_gain > 0:
                 unit.add_status("charge", charge_gain, duration=99)
                 if log_func: log_func(f"⚡ **Термическая энергия**: {amount} урона огнем -> +{charge_gain} Заряда.")
+                logger.log(f"⚡ Thermal Energy: Gained {charge_gain} Charge from Burn dmg", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -123,3 +129,4 @@ class TalentScorchingMastery(BasePassive):
             if ctx.target:
                 ctx.target.add_status("burn", 4, duration=99)
                 ctx.log.append("🔥 **Обжигающее мастерство**: Враг получил 4 Горения (3-я победа).")
+                logger.log(f"🔥 Scorching Mastery: Applied 4 Burn to {ctx.target.name}", LogLevel.VERBOSE, "Talent")

@@ -1,10 +1,12 @@
 import streamlit as st
 
 from core.library import Library
+# Импортируем скрипты механик
+from logic.mechanics.scripts import process_card_self_scripts
 
 
 def use_item_action(unit, card):
-    # Проверка наличия доступных копий (дублирует UI, но для надежности)
+    # Проверка наличия доступных копий
     cds = unit.card_cooldowns.get(card.id, [])
     if isinstance(cds, int): cds = [cds]
 
@@ -16,37 +18,37 @@ def use_item_action(unit, card):
     msg = f"💊 **{unit.name}** uses **{card.name}**!"
     item_logs = [msg]
 
-    # Используем process_card_self_scripts, передавая item_logs как custom_log_list
-    # target=None, так как предметы обычно на себя (self). Если нужен таргет, придется усложнять UI.
-    # Пока считаем, что таблетки пьют сами.
-    from logic.mechanics.scripts import process_card_self_scripts
-    process_card_self_scripts("on_use", unit, None, logs=None, custom_log_list=item_logs, card_override=card)
+    # [FIX] Убрали аргумент logs=None
+    # target=None, так как предметы обычно применяются на себя (self)
+    process_card_self_scripts("on_use", unit, None, custom_log_list=item_logs, card_override=card)
 
+    # Накладываем кулдаун
     cooldown = max(0, card.tier - 1)
     if cooldown > 0:
         if card.id not in unit.card_cooldowns:
             unit.card_cooldowns[card.id] = []
-        # Добавляем 1 инстанс кулдауна
         unit.card_cooldowns[card.id].append(cooldown)
-        # Можно добавить лог про кд, если нужно, но обычно это визуально видно
-        # item_logs.append(f"(Cooldown: {cooldown})")
-    # Добавляем в общий лог боя
+
+    # Добавляем в общий лог боя для визуализации
+    if 'battle_logs' not in st.session_state:
+        st.session_state['battle_logs'] = []
+
     st.session_state['battle_logs'].append({
         "round": "Item",
         "rolls": "Consumable",
         "details": item_logs
     })
 
+
+# Функция рендера инвентаря (если она нужна в этом файле)
 def render_inventory(unit, unit_key):
     """
     Рендерит секцию инвентаря с предметами (CardType.ITEM).
     """
-    # Фильтруем карты в колоде, оставляя только предметы
     inventory_cards = []
     if unit.deck:
         for cid in unit.deck:
             card = Library.get_card(cid)
-            # Проверяем тип
             if card and str(card.card_type).lower() == "item":
                 inventory_cards.append(card)
 
@@ -60,6 +62,5 @@ def render_inventory(unit, unit_key):
 
             # Кнопка использования
             if st.button(f"💊 {card.name}", key=btn_key, help=desc, width='stretch'):
-                from ui.simulator.logic.simulator_logic import use_item_action
                 use_item_action(unit, card)
                 st.rerun()

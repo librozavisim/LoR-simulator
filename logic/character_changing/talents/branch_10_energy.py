@@ -1,4 +1,5 @@
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================
@@ -71,6 +72,9 @@ class TalentEmergencyProtection(BasePassive):
         unit.add_status("barrier", barrier_amt, duration=1)
 
         if log_func: log_func(f"🛡️ **{self.name}**: {charge} Заряда -> {barrier_amt} Барьера.")
+
+        logger.log(f"🛡️ Emergency Protection: Converted {charge} Charge to {barrier_amt} Barrier for {unit.name}",
+                   LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -104,6 +108,7 @@ class TalentEnteringRhythm(BasePassive):
         if amount > 0:
             unit.remove_status("rhythm", 1)
             if log_func: log_func(f"💔 **{self.name}**: Ритм сбит (-1).")
+            logger.log(f"💔 Entering Rhythm: Rhythm lost due to damage for {unit.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ========================================== ПОМЕНЯТЬ ВСЕ ОН ТЕЙК ДМАГЕ
@@ -137,6 +142,7 @@ class TalentOvervoltage(BasePassive):
 
     def activate(self, unit, log_func, **kwargs):
         if log_func: log_func("⚡ **Перенапряжение**: Атака заряжена (Заглушка).")
+        logger.log(f"⚡ Overvoltage activated for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -240,6 +246,8 @@ class TalentGrounding(BasePassive):
 
         unit.cooldowns[self.id] = self.cooldown
         if log_func: log_func(f"⚡ **Заземление**: Дебаффы сняты, +Stats!")
+
+        logger.log(f"⚡ Grounding activated for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -279,6 +287,8 @@ class TalentRuptureApplication(BasePassive):
             # В движке rupture - это int. Эмуляция Count сложнее.
             ctx.target.add_status("rupture", 1, duration=3)
             if ctx.log: ctx.log.append("🩸 **10.8**: Наложен начальный Разрыв.")
+            logger.log(f"🩸 Rupture Application: Applied initial rupture to {ctx.target.name}", LogLevel.VERBOSE,
+                       "Talent")
 
 
 # ==========================================
@@ -296,6 +306,7 @@ class TalentRiftingSpace(BasePassive):
 
     def activate(self, unit, log_func, **kwargs):
         if log_func: log_func("🌌 **Разрывая пространство**: Атака инициирована.")
+        logger.log(f"🌌 Rifting Space activated by {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -361,4 +372,5 @@ class TalentPrideOfSeven(BasePassive):
 
         unit.cooldowns[self.id] = self.cooldown
         if log_func: log_func("💎 **Разбить алмаз**: Удар нанесен! (Паралич 4, Stagger Dmg).")
+        logger.log(f"💎 Pride of Seven: Diamond Shatter activated by {unit.name}", LogLevel.NORMAL, "Talent")
         return True

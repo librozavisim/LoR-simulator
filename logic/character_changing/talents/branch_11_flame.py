@@ -1,4 +1,5 @@
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 # Список ID талантов ветки 11 (используется для расчёта прокачки)
 BRANCH_11_IDS = [
@@ -77,7 +78,8 @@ class TalentSpark(BasePassive):
             # Build script to apply burn on hit
             burn_script = {
                 "on_hit": [
-                    {"script_id": "apply_status", "params": {"status": "burn", "base": burn_amount, "duration": 99, "target": "target"}}
+                    {"script_id": "apply_status",
+                     "params": {"status": "burn", "base": burn_amount, "duration": 99, "target": "target"}}
                 ]
             }
 
@@ -103,15 +105,18 @@ class TalentSpark(BasePassive):
             unit.deck.append(spark_card_id)
             if log_func:
                 log_func(f"🃏 {unit.name} received card: {spark_card_id}")
+            logger.log(f"🃏 Spark: Added {spark_card_id} to {unit.name}", LogLevel.NORMAL, "Talent")
 
         # Ifrit улучшение: временная иммунизация к урону от Горения на следующий раунд
         if "ifrit" in getattr(unit, "talents", []):
             unit.active_buffs["ifrit_burn_immunity"] = unit.active_buffs.get("ifrit_burn_immunity", 0) + 1
             if log_func:
                 log_func("✨ Ifrit: next round immune to Burn damage.")
+            logger.log(f"✨ Ifrit Immunity active for {unit.name}", LogLevel.VERBOSE, "Talent")
 
         unit.cooldowns[self.id] = self.cooldown
         if log_func: log_func("🔥 **Искра**: Атака проведена!")
+        logger.log(f"🔥 Spark activated by {unit.name} (Burn +{burn_amount})", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -138,6 +143,7 @@ class TalentCauterization(BasePassive):
             actual_remove = min(bleed, remove_bleed)
             unit.remove_status("bleed", actual_remove)
             if log_func: log_func(f"❤️‍🔥 **{self.name}**: Сожжено {actual_remove} Кровотечения.")
+            logger.log(f"❤️‍🔥 Cauterization: Removed {actual_remove} Bleed for {unit.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -157,6 +163,7 @@ class TalentHot(BasePassive):
 
     def activate(self, unit, log_func, **kwargs):
         if log_func: log_func("🎤 **Roast**: Попытка унизить врага (Логика броска).")
+        logger.log(f"🎤 Roast activated by {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -190,6 +197,7 @@ class TalentHearthOfPower(BasePassive):
         if bonus > 0:
             unit.add_status("strength", bonus, duration=1)
             if log_func: log_func(f"💪 **{self.name}**: {burn} Горения -> +{bonus} Сила.")
+            logger.log(f"💪 Hearth of Power: +{bonus} Strength for {unit.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -248,6 +256,7 @@ class TalentFieryTemper(BasePassive):
                 source.add_status("burn", 2, duration=99)
                 if log_func:
                     log_func(f"🔥 **{self.name}**: {source.name} receives 2 Burn (retaliation)")
+                logger.log(f"🔥 Fiery Temper: Retaliated 2 Burn to {source.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -278,12 +287,15 @@ class TalentIfrit(BasePassive):
             heal = amount // 3
             if heal > 0:
                 unit.current_stagger = min(unit.max_stagger, unit.current_stagger + heal)
+                logger.log(f"✨ Ifrit (Immunity): Absorbed burn damage, healed {heal} Stagger", LogLevel.VERBOSE,
+                           "Talent")
             return 0
 
         # Иначе — восстанавливаем 1/3 от урона в Stagger и пропускаем оставшийся урон
         heal = amount // 3
         if heal > 0:
             unit.current_stagger = min(unit.max_stagger, unit.current_stagger + heal)
+            logger.log(f"✨ Ifrit: Healed {heal} Stagger from {amount} Burn", LogLevel.VERBOSE, "Talent")
 
         # Возвращаем оригинальный урон (не уменьшаем здесь — это делает burn_me_down)
         return amount
@@ -320,6 +332,8 @@ class TalentFirestorm(BasePassive):
         else:
             unit.active_buffs["firestorm_aura"] = 999
             if log_func: log_func("🌪️ **Огненный шторм**: Активирован (Аура).")
+
+        logger.log(f"🌪️ Firestorm Aura toggled for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
     def on_round_start(self, unit, log_func, enemies=None, allies=None, **kwargs):
@@ -351,6 +365,9 @@ class TalentFirestorm(BasePassive):
         if applied and log_func:
             log_func(f"🌪️ Огненный шторм: +3 Burn -> {', '.join(applied)}")
 
+        if applied:
+            logger.log(f"🌪️ Firestorm applied burn to {len(applied)} targets", LogLevel.VERBOSE, "Talent")
+
 
 # ==========================================
 # 11.10 Сожги меня дотла
@@ -372,6 +389,7 @@ class TalentBurnMeDown(BasePassive):
         unit.add_status("burn", 50, duration=99)
         unit.cooldowns[self.id] = self.cooldown
         if log_func: log_func("🔥 **Огненный смерч**: Вы получили 50 Горения. Атака всем врагам!")
+        logger.log(f"🔥 Burn Me Down activated for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
     def modify_incoming_damage(self, unit, amount: int, damage_type: str, stack=0) -> int:
@@ -379,5 +397,7 @@ class TalentBurnMeDown(BasePassive):
         Уменьшает входящий урон от Горения вдвое.
         """
         if damage_type == "burn" and amount > 0:
-            return amount // 2
+            new_amount = amount // 2
+            logger.log(f"🔥 Burn Me Down: Reduced burn dmg {amount} -> {new_amount}", LogLevel.VERBOSE, "Talent")
+            return new_amount
         return amount

@@ -1,6 +1,7 @@
 from core.dice import Dice
 from core.enums import DiceType
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================
@@ -18,6 +19,7 @@ class TalentHidingInSmoke(BasePassive):
     def on_combat_start(self, unit, log_func, **kwargs):
         # Ставим флаг: Дым теперь дает защиту, а не уязвимость
         unit.memory["smoke_is_defensive"] = True
+        logger.log(f"🚬 Hiding in Smoke: {unit.name} smoke is now defensive", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -46,7 +48,7 @@ class TalentSmokeUniversality(BasePassive):
         "3 Smoke -> 1 Protection": {"cost": 3, "stat": "protection", "amt": 1},
     }
 
-    def activate(self, unit, log_func, choice_key=None):
+    def activate(self, unit, log_func, choice_key=None, **kwargs):
         """
         choice_key: Строка-ключ из conversion_options (например, "4 Smoke -> 1 Strength")
         """
@@ -74,12 +76,16 @@ class TalentSmokeUniversality(BasePassive):
         # но для унификации оставим 3, либо сделаем исключение.
         duration = 3
         if target_stat == "self_control":
-            duration = 99 # Самообладание обычно не спадает само по себе так быстро
+            duration = 99  # Самообладание обычно не спадает само по себе так быстро
 
         unit.add_status(target_stat, amount, duration=duration)
 
         if log_func:
-            log_func(f"🌫️➡️✨ **{self.name}**: Потрачено {cost} Дыма -> Получено +{amount} {target_stat.capitalize()} (на {duration} раунда)!")
+            log_func(
+                f"🌫️➡️✨ **{self.name}**: Потрачено {cost} Дыма -> Получено +{amount} {target_stat.capitalize()} (на {duration} раунда)!")
+
+        logger.log(f"🌫️ Smoke Universality: {unit.name} converted {cost} smoke to {amount} {target_stat}",
+                   LogLevel.NORMAL, "Talent")
 
         return True
 
@@ -122,6 +128,8 @@ class TalentAerialFoot(BasePassive):
         if log_func:
             log_func(f"🦶 **{self.name}**: Добавлено {total_count} контр-уклонений (Smoke: {smoke}).")
 
+        logger.log(f"🦶 Aerial Foot: Added {total_count} evade counters to {unit.name}", LogLevel.VERBOSE, "Talent")
+
 
 # ==========================================
 # 6.3 (Опционально) Дымовая завеса
@@ -139,6 +147,7 @@ class TalentSmokeScreen(BasePassive):
     def activate(self, unit, log_func, **kwargs):
         # Заглушка массового наложения
         if log_func: log_func("💨 **Дымовая завеса**: Все враги получают Дым (3/5).")
+        logger.log(f"💨 Smoke Screen activated by {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -168,6 +177,7 @@ class TalentSelfPreservation(BasePassive):
 
     def activate(self, unit, log_func, **kwargs):
         if log_func: log_func("🚑 Очистка от дебаффов активирована.")
+        logger.log(f"🚑 Self Preservation activated by {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -202,6 +212,7 @@ class TalentExperiencedSmoker(BasePassive):
         amt = 8 if "smoke_and_mirrors" in unit.talents else 5
         unit.add_status("smoke", amt, duration=99)
         if log_func: log_func(f"🚬 **{self.name}**: Старт с {amt} Дыма.")
+        logger.log(f"🚬 Experienced Smoker: {unit.name} starts with {amt} smoke", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -248,6 +259,8 @@ class TalentSmokeAdvantage(BasePassive):
             bonus = smoke // 5
             if bonus > 0:
                 ctx.modify_power(bonus, "Smoke Adv")
+                logger.log(f"🚬 Smoke Advantage: +{bonus} Power for {ctx.source.name} vs {ctx.target.name}",
+                           LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -299,4 +312,5 @@ class TalentSmokeAndMirrors(BasePassive):
 
         unit.remove_status("smoke", 10)
         if log_func: log_func("🪞 **Дым и зеркала**: Копия создана! (Логика уворота заглушена)")
+        logger.log(f"🪞 Smoke and Mirrors: Copy created for {unit.name}", LogLevel.NORMAL, "Talent")
         return True

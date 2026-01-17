@@ -1,4 +1,5 @@
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================
@@ -15,8 +16,11 @@ class TalentAthletic(BasePassive):
 
     def on_round_start(self, unit, log_func, **kwargs):
         unit.add_status("haste", 1, 1)
+        if log_func: log_func(f"🏃 **{self.name}**: +1 Haste")
+        logger.log(f"🏃 Athletic: +1 Haste for {unit.name}", LogLevel.VERBOSE, "Talent")
 
     def can_redirect_on_equal_speed(self, unit) -> bool:
+        logger.log(f"🏃 Athletic: {unit.name} allowed to redirect on equal speed", LogLevel.VERBOSE, "Talent")
         return True
 
 
@@ -38,6 +42,7 @@ class TalentFastHands(BasePassive):
     def activate(self, unit, log_func, **kwargs):
         # Заглушка использования карты перезарядки
         if log_func: log_func("🔫 **Перезарядка**: Магазин полон (симуляция).")
+        logger.log(f"🔫 Fast Hands: Reload activated for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -58,6 +63,7 @@ class TalentLeader(BasePassive):
         # В симуляторе 1 на 1 сложно реализовать ауру на союзников.
         # Просто пишем в лог.
         if log_func: log_func(f"🚩 **{self.name}**: Аура лидера активна (+Урон вам, +Защита союзникам).")
+        logger.log(f"🚩 Leader Aura active for {unit.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -87,6 +93,8 @@ class TalentAddiction(BasePassive):
 
         unit.cooldowns[self.id] = self.cooldown
         if log_func: log_func(f"💊 **Зависимость**: Прилив сил! (+{heal_sp} SP, +Str, +Spd)")
+
+        logger.log(f"💊 Addiction activated for {unit.name}: +{heal_sp} SP, Buffs applied", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -141,6 +149,8 @@ class TalentFindVulnerability(BasePassive):
             # В движке Vulnerability обычно +1 урон. Для +25% нужен спец статус или Fragile.
             ctx.target.add_status("vulnerability", 3, duration=2)
             ctx.log.append(f"🎯 **{self.name}**: Цель помечена (Уязвимость)!")
+            logger.log(f"🎯 Find Vulnerability: {ctx.target.name} marked by {ctx.source.name}", LogLevel.NORMAL,
+                       "Talent")
 
 
 # ==========================================

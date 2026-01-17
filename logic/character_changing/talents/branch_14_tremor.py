@@ -1,6 +1,7 @@
 import random
 
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================
@@ -93,6 +94,7 @@ class TalentOwnTremor(BasePassive):
         unit.memory["tremor_type"] = next_type
 
         if log_func: log_func(f"🫨 **Тип Сотрясения**: Сменен на {next_type.upper()}.")
+        logger.log(f"🫨 Tremor Type switched to {next_type} for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
     def on_status_applied(self, unit, status_id, amount, target):
@@ -100,6 +102,7 @@ class TalentOwnTremor(BasePassive):
         if status_id == "tremor" and unit.memory.get("tremor_type") != "base":
             target.memory["active_tremor_conversion"] = unit.memory["tremor_type"]
             # Таймер сброса нужно делать отдельно
+            logger.log(f"🫨 Tremor Conversion applied to {target.name} ({unit.memory['tremor_type']})", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -118,6 +121,7 @@ class TalentReadinessForEverything(BasePassive):
     def on_combat_start(self, unit, log_func, **kwargs):
         unit.add_status("tremor", 15, duration=99)
         if log_func: log_func(f"🛡️ **{self.name}**: Старт с 15 Tremor.")
+        logger.log(f"🛡️ Readiness for Everything: +15 Tremor for {unit.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -145,6 +149,7 @@ class TalentKeepGoing(BasePassive):
                     unit.current_hp = 1  # Не умираем
                     unit.memory["heal_next_round"] = tremor
                     if log_func: log_func(f"❤️‍🩹 **{self.name}**: Смерть предотвращена! (Roll {roll} < {tremor}).")
+                    logger.log(f"❤️‍🩹 Keep Going: Death prevented for {unit.name} (Roll {roll} < {tremor})", LogLevel.NORMAL, "Talent")
                     return  # Прерываем получение урона (в идеале нужно вернуть 0 в систему урона)
 
     def on_round_start(self, unit, log_func, **kwargs):
@@ -152,6 +157,7 @@ class TalentKeepGoing(BasePassive):
         if heal > 0:
             unit.heal_hp(heal)
             if log_func: log_func(f"❤️‍🩹 **{self.name}**: Восстановлено {heal} HP.")
+            logger.log(f"❤️‍🩹 Keep Going: Healed {heal} HP for {unit.name}", LogLevel.NORMAL, "Talent")
 
 
 # ==========================================
@@ -169,6 +175,7 @@ class TalentResonance(BasePassive):
             bonus = min(3, tremor // 10)
             if bonus > 0:
                 ctx.modify_power(bonus, "Resonance")
+                logger.log(f"🫨 Resonance: +{bonus} Power for {ctx.source.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================

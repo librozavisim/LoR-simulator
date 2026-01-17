@@ -2,6 +2,7 @@ from core.dice import Dice
 from core.enums import DiceType
 from core.ranks import get_base_roll_by_level
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================
@@ -62,6 +63,9 @@ class TalentDefense(BasePassive):
         if log_func:
             log_func(f"🛡️ **{self.name}**: Добавлено {count} контр-кубиков Блока ({base_min}-{base_max}).")
 
+        logger.log(f"🛡️ Defense: Added {count} counter blocks ({base_min}-{base_max}) to {unit.name}", LogLevel.VERBOSE,
+                   "Talent")
+
     def on_clash_win(self, ctx, **kwargs):
         # ... (код без изменений) ...
         stack = kwargs.get("stack", 0)
@@ -73,6 +77,8 @@ class TalentDefense(BasePassive):
                 if "despiteAdversities" in ctx.source.talents:
                     ctx.source.add_status("protection", 1, duration=3)
                     ctx.log.append(f"🛡️ **{self.name}**: Победа -> +1 Защита")
+                    logger.log(f"🛡️ Defense (Despite Adversities): +1 Protection on win for {ctx.source.name}",
+                               LogLevel.VERBOSE, "Talent")
 
     def on_clash_lose(self, ctx, **kwargs):
         # ... (код без изменений) ...
@@ -85,6 +91,8 @@ class TalentDefense(BasePassive):
                 if "survivor" in ctx.source.talents:
                     ctx.source.add_status("strength", 1, duration=3)
                     ctx.log.append(f"💪 **{self.name}**: Проигрыш -> +1 Сила")
+                    logger.log(f"💪 Defense (Survivor): +1 Strength on lose for {ctx.source.name}", LogLevel.VERBOSE,
+                               "Talent")
 
 
 # ==========================================
@@ -111,6 +119,8 @@ class TalentCommendableConstitution(BasePassive):
         unit.add_status("protection", amt, duration=2)
         if log_func: log_func(f"🛡️ **{self.name}**: +{amt} protection")
 
+        logger.log(f"🛡️ Commendable Constitution: +{amt} Protection for {unit.name}", LogLevel.VERBOSE, "Talent")
+
     def activate(self, unit, log_func, **kwargs):
         if unit.cooldowns.get(self.id, 0) > 0: return False
 
@@ -123,6 +133,7 @@ class TalentCommendableConstitution(BasePassive):
         unit.cooldowns[self.id] = self.cooldown
 
         if log_func: log_func(f"💤 **Отдых**: Восстановлено {actual} HP ({int(pct * 100)}%)")
+        logger.log(f"💤 Short Rest: Healed {actual} HP for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -184,6 +195,8 @@ class TalentRock(BasePassive):
             if log_func:
                 log_func(f"🪨 **Скала**: Броня непробиваема! Отражено {reflect_amt} урона.")
 
+            logger.log(f"🪨 Rock: Reflected {reflect_amt} damage to {source.name}", LogLevel.NORMAL, "Talent")
+
 
 # ==========================================
 # 3.5 Не взирая на невзгоды
@@ -204,9 +217,12 @@ class TalentDespiteAdversities(BasePassive):
 
         # Если есть улучшение 3.10 (Прилив сил)
         if "surgeOfStrength" in unit.talents:
+            logger.log(f"🛡️ Despite Adversities (Surge): Stagger multiplier set to 1.25 for {unit.name}",
+                       LogLevel.VERBOSE, "Talent")
             return 1.25
 
         # Иначе просто эффект этого таланта
+        logger.log(f"🛡️ Despite Adversities: Stagger multiplier set to 1.5 for {unit.name}", LogLevel.VERBOSE, "Talent")
         return 1.5
 
 
@@ -243,6 +259,8 @@ class TalentAdaptationTireless(BasePassive):
         active_type = unit.memory.get("adaptation_active_type")
         if active_type and log_func:
             log_func(f"🧬 **{self.name}**: Активна защита от {active_type.name} (-25% урона).")
+            logger.log(f"🧬 Adaptation: Active resistance to {active_type.name} for {unit.name}", LogLevel.VERBOSE,
+                       "Talent")
 
     def modify_incoming_damage(self, unit, amount: int, damage_type, **kwargs) -> int:
         """
@@ -255,6 +273,7 @@ class TalentAdaptationTireless(BasePassive):
             # Снижаем урон на 25%
             new_amount = int(amount * 0.75)
             # (Опционально можно вывести лог, если передается log_func, но в modify_ обычно тихо)
+            logger.log(f"🧬 Adaptation reduced damage: {amount} -> {new_amount}", LogLevel.VERBOSE, "Talent")
             return new_amount
 
         return amount
@@ -263,7 +282,7 @@ class TalentAdaptationTireless(BasePassive):
         """
         Считаем полученный урон для статистики (чтобы выбрать адаптацию на СЛЕДУЮЩИЙ раунд).
         """
-        damage_type = None
+        damage_type = kwargs.get("damage_type")
         if amount > 0 and damage_type:
             stats = unit.memory.get("adaptation_stats")
             # Если по какой-то причине stats нет (первый удар в бою до старта раунда), создаем
@@ -295,6 +314,8 @@ class TalentAdaptationTireless(BasePassive):
             unit.memory["adaptation_active_type"] = best_type
             if log_func:
                 log_func(f"🧬 **{self.name}**: Организм перестроился! Адаптация к {best_type.name}.")
+            logger.log(f"🧬 Adaptation: New resistance type is {best_type.name} (took {max_dmg} dmg)", LogLevel.NORMAL,
+                       "Talent")
 
 
 # ==========================================
@@ -319,6 +340,7 @@ class TalentToughAsSteel(BasePassive):
             if target:
                 target.add_status("fragile", 1, duration=3)
                 ctx.log.append(f"🧱 **{self.name}**: Враг получил +1 Хрупкость")
+                logger.log(f"🧱 Tough As Steel: Applied Fragile to {target.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -365,6 +387,7 @@ class TalentSurvivor(BasePassive):
                 actual = unit.heal_hp(heal_amount)
                 if log_func:
                     log_func(f"❤️ **{self.name}**: Критическое состояние! Регенерация +{actual} HP.")
+                logger.log(f"❤️ Survivor: Critical HP regen +{actual} HP for {unit.name}", LogLevel.NORMAL, "Talent")
 
     def modify_incoming_damage(self, unit, amount: int, damage_type, **kwargs) -> int:
         """
@@ -372,7 +395,9 @@ class TalentSurvivor(BasePassive):
         """
         dtype_str = str(damage_type).lower()
         if dtype_str == "bleed":
-            return int(amount * 0.67)  # -33%
+            new_amount = int(amount * 0.67)
+            logger.log(f"❤️ Survivor: Reduced Bleed damage {amount} -> {new_amount}", LogLevel.VERBOSE, "Talent")
+            return new_amount  # -33%
         return amount
 
     def on_skill_check(self, unit, skill_name: str, ctx):
@@ -386,6 +411,7 @@ class TalentSurvivor(BasePassive):
             # Можно добавить лог, если ctx поддерживает это
             if hasattr(ctx, "log"):
                 ctx.log.append(f"🎲 **{self.name}**: Применено Преимущество к проверке Стойкости!")
+            logger.log(f"🎲 Survivor: Advantage on Endurance check for {unit.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -402,6 +428,8 @@ class TalentMuscleOverstrain(BasePassive):
         unit.current_hp = max(1, unit.current_hp - 5)
         unit.add_status("strength", 1, duration=1)
         if log_func: log_func("💪 **Перенапряжение**: -5 HP -> +1 Сила")
+
+        logger.log(f"💪 Muscle Overstrain: -5 HP for +1 Strength for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -429,6 +457,9 @@ class TalentIdolOath(BasePassive):
             mods["power_attack"] = 2  # Для Атаки (Slash/Pierce/Blunt)
             mods["power_block"] = 2  # Для Блока
             mods["power_evade"] = 2  # Для Уклонения
+
+            # Log this effect only once per recalc cycle ideally, or rely on stats diff
+            # logger.log(f"💪 Idol Oath: HP < 25% -> +2 Power activated for {unit.name}", LogLevel.VERBOSE, "Talent")
 
         return mods
 

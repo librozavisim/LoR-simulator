@@ -307,11 +307,3 @@ def finalize_state(unit, mods):
     unit.current_hp = min(unit.current_hp, unit.max_hp)
     unit.current_sp = min(unit.current_sp, unit.max_sp)
     unit.current_stagger = min(unit.current_stagger, unit.max_stagger)
-
-    if mods["disable_block"]["flat"] > 0:
-        mods["power_block"]["flat"] = -999
-        logger.log("🚫 Блок отключен", LogLevel.NORMAL, "Stats")
-
-    if mods["disable_evade"]["flat"] > 0:
-        mods["power_evade"]["flat"] = -999
-        logger.log("🚫 Уклонение отключено", LogLevel.NORMAL, "Stats")

@@ -3,6 +3,7 @@ from collections import Counter
 import streamlit as st
 
 from core.library import Library
+from ui.simulator.logic.item_show import use_item_action
 
 
 def render_inventory(unit, unit_key):
@@ -49,6 +50,5 @@ def render_inventory(unit, unit_key):
 
                 if st.button(label, key=btn_key, help=desc, width='stretch'):
                     # Отложенный импорт для избежания циклических ссылок, если логика использует компоненты
-                    from ui.simulator.logic.simulator_logic import use_item_action
                     use_item_action(unit, card)
                     st.rerun()

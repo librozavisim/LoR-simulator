@@ -1,6 +1,7 @@
 import random
 
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================
@@ -76,6 +77,7 @@ class TalentBehaviorStudy(BasePassive):
 
     def can_break_empty_slot(self, unit) -> bool:
         """Разрешает ломать кубики врага пустым слотом при высокой скорости."""
+        logger.log(f"🧠 Behavior Study: {unit.name} allowed to break enemy dice with empty slot", LogLevel.VERBOSE, "Talent")
         return True
 
 

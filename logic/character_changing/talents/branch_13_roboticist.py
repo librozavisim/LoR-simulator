@@ -1,4 +1,5 @@
 from logic.character_changing.passives.base_passive import BasePassive
+from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================
@@ -19,6 +20,7 @@ class TalentBestFriendsForever(BasePassive):
 
     def activate(self, unit, log_func, **kwargs):
         if log_func: log_func("🤖 **Создание робота**: Меню крафта спутника (Заглушка).")
+        logger.log(f"🤖 Robot Crafting Menu opened by {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -121,6 +123,7 @@ class TalentChimeraCore(BasePassive):
 
     def activate(self, unit, log_func, **kwargs):
         if log_func: log_func("🔄 **Трансформация**: Робот меняет форму (Заглушка).")
+        logger.log(f"🔄 Chimera Core transformation for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -188,6 +191,7 @@ class TalentMachinaExDeo(BasePassive):
 
         unit.cooldowns[self.id] = self.cooldown
         if log_func: log_func("🤖 **Iron Warden**: Слияние с роботом! Характеристики усилены.")
+        logger.log(f"🤖 Iron Warden activated for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 

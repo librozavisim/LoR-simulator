@@ -102,6 +102,15 @@ class BattleLogger:
             if entry['level'] <= filter_level
         ]
 
+    def get_logs(self):
+        """
+        Возвращает простой список сообщений (строк) из текущей сессии.
+        Используется в профиле для отображения лога расчета.
+        """
+        if 'battle_log_storage' not in st.session_state:
+            return []
+        return [entry['message'] for entry in st.session_state['battle_log_storage']]
+
 
 # Глобальный экземпляр логгера для импорта в других файлах
 logger = BattleLogger()

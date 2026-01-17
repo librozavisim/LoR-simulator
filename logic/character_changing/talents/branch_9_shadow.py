@@ -4,6 +4,8 @@ from core.enums import DiceType
 from core.tree_data import SKILL_TREE
 from logic.character_changing.passives.base_passive import BasePassive
 from logic.context import RollContext
+from core.logging import logger, LogLevel  # [NEW] Import
+
 
 # ==========================================
 # 9.1 А: Атлетичность
@@ -16,6 +18,7 @@ class TalentAthleticismShadow(BasePassive):
 
     def on_calculate_stats(self, unit) -> dict:
         return {"agility": 5}
+
 
 # ==========================================
 # 9.1 Б: Месть
@@ -32,6 +35,8 @@ class TalentRevenge(BasePassive):
             # Просто вешаем статус. Логика урона теперь внутри RevengeDmgUpStatus.
             unit.add_status("revenge_dmg_up", 1, duration=2)
             if log_func: log_func(f"🩸 **{self.name}**: Получен урон! След. атака усилена (x1.5).")
+            logger.log(f"🩸 Revenge: Triggered by {amount} damage on {unit.name}", LogLevel.VERBOSE, "Talent")
+
 
 # ==========================================
 # 9.2 А: Невеликое внимание
@@ -90,6 +95,7 @@ class TalentSmashingBlade(BasePassive):
             # Если цель имеет иммунитет, логика внезапности не срабатывает
             # Можно добавить лог, если нужно (опционально)
             ctx.log.append(f"🛡️ {target.name} immune to Surprise Attack!")
+            logger.log(f"🛡️ Smashing Blade: {target.name} immune to surprise", LogLevel.VERBOSE, "Talent")
             return
 
         # === 1. ОПРЕДЕЛЕНИЕ "ВНЕЗАПНОСТИ" ===
@@ -138,6 +144,8 @@ class TalentSmashingBlade(BasePassive):
             target.add_status("bleed", bleed_stack, duration=3)
 
             ctx.log.append(f"🗡️ **Sudden Attack**: x{multiplier} Dmg & {bleed_stack} Bleed ({', '.join(reasons)})")
+            logger.log(f"🗡️ Smashing Blade: Sudden Attack x{multiplier} on {target.name}", LogLevel.NORMAL, "Talent")
+
 
 # ==========================================
 # 9.3 Б Резня (Slaughter)
@@ -173,6 +181,8 @@ class TalentSlaughter(BasePassive):
             if target:
                 target.add_status("bleed", bleed_amt, duration=3)  # Длительность bleed стандартно убывает сама
                 ctx.log.append(f"🩸 {self.name}: Последний куб -> +{bleed_amt} Bleed")
+                logger.log(f"🩸 Slaughter: Applied {bleed_amt} Bleed to {target.name}", LogLevel.VERBOSE, "Talent")
+
 
 # ==========================================
 # 9.3 (Опц) Trapmaster
@@ -218,6 +228,7 @@ class TalentAggressiveParry(BasePassive):
             # Наносим прямой урон выдержке (Stagger)
             ctx.target.current_stagger = max(0, ctx.target.current_stagger - dmg)
             ctx.log.append(f"⚔️ **Парирование**: Враг получил {dmg} урон по Выдержке.")
+            logger.log(f"⚔️ Aggressive Parry: Dealt {dmg} Stagger Dmg to {ctx.target.name}", LogLevel.NORMAL, "Talent")
 
 
 # ==========================================
@@ -242,6 +253,8 @@ class TalentStepIntoShadow(BasePassive):
 
         if log_func:
             log_func(f"👻 **{self.name}**: Растворился в тени (Невидимость на 3 х.)")
+
+        logger.log(f"👻 Step Into Shadow activated for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -265,6 +278,7 @@ class TalentTasteOfVictory(BasePassive):
         unit.add_status("strength", 1, duration=5)
         unit.add_status("haste", 1, duration=5)
         if log_func: log_func(f"🍖 **Вкус победы**: +{heal} HP, баффы получены.")
+        logger.log(f"🍖 Taste of Victory activated for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -314,10 +328,12 @@ class TalentCatReflexes(BasePassive):
                 # Даем +2 Силы (Strength) до конца раунда
                 ctx.source.add_status("strength", 2, duration=3)
                 ctx.log.append("🐱 **Кошачьи рефлексы**: Успешное уклонение! +2 Силы.")
+                logger.log(f"🐱 Cat Reflexes triggered: +2 Strength for {ctx.source.name}", LogLevel.VERBOSE, "Talent")
 
     def prevents_specific_die_destruction(self, unit, die) -> bool:
         # Спасает только Уклонение
         return die.dtype == DiceType.EVADE
+
 
 # ==========================================
 # 9.6 Б: Уроки выдержки
@@ -334,6 +350,7 @@ class TalentEnduranceLessons(BasePassive):
         heal = int(unit.max_hp * 0.02)
         unit.restore_stagger(heal)
         if log_func: log_func(f"🛡️ **{self.name}**: +{heal} Stagger.")
+        logger.log(f"🛡️ Endurance Lessons: +{heal} Stagger for {unit.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -407,6 +424,7 @@ class TalentCoveringTracks(BasePassive):
             if target:
                 target.add_status("bind", 1, duration=3)
                 ctx.log.append(f"👣 **Фальшивый след**: Враг замедлен (Bind 1).")
+                logger.log(f"👣 Covering Tracks: {target.name} slowed by Bind", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
@@ -429,6 +447,7 @@ class TalentCompetentAdrenaline(BasePassive):
         unit.add_status("endurance", 3, duration=3)
         unit.cooldowns[self.id] = self.cooldown
         if log_func: log_func(f"💉 **Адреналин**: +3 Str/End на 3 раунда.")
+        logger.log(f"💉 Competent Adrenaline activated for {unit.name}", LogLevel.NORMAL, "Talent")
         return True
 
 
@@ -479,6 +498,7 @@ class TalentKnifeInBack(BasePassive):
             target.add_status("bleed", 5, duration=3)
 
             ctx.log.append(f"🔪 **Нож в спину**: Враг открылся! (+5 Fragile, +5 Bleed)")
+            logger.log(f"🔪 Knife In Back: Applied Fragile/Bleed to {target.name}", LogLevel.VERBOSE, "Talent")
 
 
 # ==========================================
