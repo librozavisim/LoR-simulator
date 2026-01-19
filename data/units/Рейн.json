@@ -33,7 +33,7 @@
     "base_stats": {
         "current_hp": 200,
         "current_sp": 192,
-        "current_stagger": 102
+        "current_stagger": 10
     },
     "defense": {
         "armor_name": "Standard Fixer Suit",

@@ -54,7 +54,9 @@ class TalentRedLycoris(BasePassive):
     duration = 1
 
     def activate(self, unit, log_func, **kwargs):
-        from logic.statuses.status_definitions import NEGATIVE_STATUSES
+
+        from logic.statuses.status_constants import NEGATIVE_STATUSES
+
 
         if unit.cooldowns.get(self.id, 0) > 0:
             return False
@@ -126,7 +128,8 @@ class TalentRedLycoris(BasePassive):
 
     # === [НОВОЕ] Перехват наложения статусов ===
     def on_before_status_add(self, unit, status_id, amount):
-        from logic.statuses.status_definitions import NEGATIVE_STATUSES
+
+        from logic.statuses.status_constants import NEGATIVE_STATUSES
 
         # Если Ликорис активен -> Блокируем только негативные статусы
         if unit.get_status("red_lycoris") > 0:

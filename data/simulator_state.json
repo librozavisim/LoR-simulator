@@ -9,7 +9,7 @@
     "Рейн"
   ],
   "tree_unit": "Roland",
-  "profile_unit": "Генри Фаэнон",
+  "profile_unit": "Рейн",
   "leveling_unit": "Roland",
   "checks_unit": "Roland",
   "team_left_data": [
@@ -46,9 +46,9 @@
       ],
       "stored_dice": [],
       "base_stats": {
-        "current_hp": 126,
-        "current_sp": 65,
-        "current_stagger": 79
+        "current_hp": 344,
+        "current_sp": 102,
+        "current_stagger": 197
       },
       "defense": {
         "armor_name": "Standard Fixer Suit",
@@ -220,11 +220,11 @@
         "series_normal_strikes_img",
         "not_the_limit_img"
       ],
-      "stored_dice": [],
+      "stored_dice": 0,
       "base_stats": {
-        "current_hp": 80,
-        "current_sp": 202,
-        "current_stagger": 21
+        "current_hp": 200,
+        "current_sp": 192,
+        "current_stagger": 10
       },
       "defense": {
         "armor_name": "Standard Fixer Suit",
@@ -241,7 +241,11 @@
         },
         "weapon_id": "cleaver_7"
       },
-      "card_cooldowns": {},
+      "card_cooldowns": {
+        "warp_img": 1,
+        "series_normal_strikes_img": 1,
+        "not_the_limit_img": 1
+      },
       "attributes": {
         "strength": 5,
         "endurance": 22,
@@ -328,9 +332,7 @@
           "sp": 1
         }
       },
-      "cooldowns": {
-        "red_lycoris": 7
-      },
+      "cooldowns": {},
       "active_buffs": {},
       "resources": {
         "luck": 124

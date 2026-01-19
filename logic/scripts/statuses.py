@@ -32,9 +32,13 @@ def apply_status(ctx: 'RollContext', params: dict):
     targets = _get_targets(ctx, target_mode)
     if status_name == "smoke": duration = 99
 
+    # [FIX] Импортируем список негативных статусов для проверки
+    from logic.statuses.status_constants import NEGATIVE_STATUSES
+
     for u in targets:
-        if u.get_status("red_lycoris") > 0 and status_name != "red_lycoris":
-            ctx.log.append(f"🚫 {u.name} Immune to {status_name}")
+        # [FIX] Ликорис блокирует ТОЛЬКО негативные статусы
+        if u.get_status("red_lycoris") > 0 and status_name in NEGATIVE_STATUSES:
+            ctx.log.append(f"🚫 {u.name} Immune to {status_name} (Lycoris)")
             continue
 
         if status_name == "mental_protection":
@@ -100,7 +104,6 @@ def remove_status_script(ctx: 'RollContext', params: dict):
     status_name = params.get("status")
     target_mode = params.get("target", "target")
 
-    # Считаем количество (можно скейлить)
     amount = _resolve_value(ctx.source, ctx.target, params)
 
     targets = _get_targets(ctx, target_mode)
