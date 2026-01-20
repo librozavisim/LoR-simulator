@@ -1,6 +1,7 @@
 from logic.character_changing.passives.base_passive import BasePassive
 from core.enums import DiceType
 from core.logging import logger, LogLevel  # [NEW] Import
+from logic.statuses.status_constants import NEGATIVE_STATUSES
 
 
 # ==========================================
@@ -203,7 +204,6 @@ class TalentPeakSanity(BasePassive):
                 unit.memory["clarity_cooldown_counter"] = counter
 
     def on_before_status_add(self, unit, status_id, amount):
-        from logic.statuses.status_definitions import NEGATIVE_STATUSES
 
         if status_id in NEGATIVE_STATUSES:
             clarity = unit.get_status("clarity")
