@@ -2,6 +2,8 @@ from logic.character_changing.passives.asgick_passives import PassiveWitnessOfGr
     PassiveDistortionGroGoroth
 from logic.character_changing.passives.equipment_passives import PassiveAnnihilator, PassiveBanganrang, PassiveGanitar, \
     PassiveLimagun, PassivePhantomRazors, PassiveCoagulation
+from logic.character_changing.passives.fanat_passives import PassiveFanatReflect, PassiveFanatMarkHunter, \
+    PassiveFanatAntiDefense, PassiveFanatStaggerRecovery, PassiveFanatUnwavering
 from logic.character_changing.passives.lilith_passives import PassiveHedonism, PassiveWagTail, PassiveBackstreetDemon, \
     PassiveDaughterOfBackstreets, PassiveLiveFastDieYoung
 from logic.character_changing.passives.lima_passives import PassiveAcceleratedLearning, TalentArtOfSelfDefense, \
@@ -42,4 +44,10 @@ PASSIVE_REGISTRY = {
 "distortionGroGoroth": PassiveDistortionGroGoroth(),
 "mech_phantom_razors": PassivePhantomRazors(),
 "coagulation": PassiveCoagulation(),
+
+"fanat_stagger_recovery": PassiveFanatStaggerRecovery(),
+    "fanat_anti_defense": PassiveFanatAntiDefense(),
+    "fanat_mark_hunter": PassiveFanatMarkHunter(),
+    "fanat_reflect": PassiveFanatReflect(),
+"fanat_unwavering": PassiveFanatUnwavering(),
 }

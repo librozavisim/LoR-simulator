@@ -3,7 +3,7 @@
     "level": 29,
     "rank": 5,
     "avatar": "data/avatars/ФанатBA.png",
-    "base_intellect": 28,
+    "base_intellect": 29,
     "total_xp": 0,
     "pct_mods": {
         "imp_hp": 99,
@@ -15,19 +15,32 @@
     },
     "flat_mods": {
         "imp_hp": 133,
-        "imp_sp": 635,
+        "imp_sp": 200,
         "imp_stg": -300
     },
     "deck": [
-        "unbridled_cruelty",
-        "thrill_of_battle",
-        "furious_assault"
+        "fanat_branding",
+        "fanat_blind_faith",
+        "fanat_frenzy_barrage",
+        "fanat_living_shield",
+        "fanat_idols_voice",
+        "fanat_meat_grinder",
+        "fanat_sacrifice",
+        "fanat_holy_crusade",
+        "tea_dark",
+        "tea_green",
+        "tea_fruit",
+        "tea_sakura",
+        "tea_berry",
+        "tea_red",
+        "tea_ginger",
+        "tea_coffee"
     ],
     "stored_dice": [],
     "base_stats": {
-        "current_hp": 20,
-        "current_sp": 20,
-        "current_stagger": 3
+        "current_hp": 1009,
+        "current_sp": 868,
+        "current_stagger": 203
     },
     "defense": {
         "armor_name": "Standard Fixer Suit",
@@ -70,7 +83,13 @@
         "engineering": 0,
         "programming": 0
     },
-    "passives": [],
+    "passives": [
+        "fanat_unwavering",
+        "fanat_stagger_recovery",
+        "fanat_anti_defense",
+        "fanat_mark_hunter",
+        "fanat_reflect"
+    ],
     "talents": [
         "tea_master",
         "mind_power",

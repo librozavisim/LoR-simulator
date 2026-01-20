@@ -17,6 +17,21 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
     if destroy_def:
         logger.log(f"Speed Advantage: {source.name} breaks {target.name}'s defense die", LogLevel.VERBOSE, "OneSided")
 
+    source_immune = False
+    if hasattr(source, "iter_mechanics"):
+        for mech in source.iter_mechanics():
+            if mech.prevents_dice_destruction_by_speed(source):
+                source_immune = True
+                break
+
+    # Проверяем иммунитет ЗАЩИТНИКА (target)
+    target_immune = False
+    if hasattr(target, "iter_mechanics"):
+        for mech in target.iter_mechanics():
+            if mech.prevents_dice_destruction_by_speed(target):
+                target_immune = True
+                break
+
     # 1. Break Check (Empty Slot Break)
     defender_breaks_attacker = False
     if not def_card:
@@ -24,20 +39,18 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
             if hasattr(target, "iter_mechanics"):
                 for mech in target.iter_mechanics():
                     if hasattr(mech, "can_break_empty_slot") and mech.can_break_empty_slot(target):
-                        defender_breaks_attacker = True
-                        logger.log(f"Empty Slot Break: {target.name} breaks {source.name} (Spd Diff > 8)",
-                                   LogLevel.VERBOSE, "OneSided")
+                        # [FIX] Если у атакующего иммунитет - не ломаем
+                        if source_immune:
+                            logger.log(f"🛡️ Empty Slot Break prevented by Immunity for {source.name}", LogLevel.VERBOSE,
+                                       "OneSided")
+                        else:
+                            defender_breaks_attacker = True
+                            logger.log(f"Empty Slot Break: {target.name} breaks {source.name} (Spd Diff > 8)",
+                                       LogLevel.VERBOSE, "OneSided")
                         break
 
-    # 2. Prevent Destruction (Passive)
-    prevent_dest = False
-    if hasattr(source, "iter_mechanics"):
-        for mech in source.iter_mechanics():
-            if mech.prevents_dice_destruction_by_speed(source):
-                prevent_dest = True
-                break
-
-    if destroy_def and prevent_dest:
+    # 2. Prevent Destruction (Target)
+    if destroy_def and target_immune:
         destroy_def = False
         adv_atk = True
         logger.log(f"Destruction Prevented for {target.name} (Immunity)", LogLevel.VERBOSE, "OneSided")
@@ -48,6 +61,7 @@ def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent
     attacker_queue = list(card.dice_list)
     att_idx = 0
     active_counter_die = None
+
 
     def fetch_next_counter(unit):
         # 1. Stored Dice

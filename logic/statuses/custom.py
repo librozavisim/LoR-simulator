@@ -240,3 +240,9 @@ class RevengeDmgUpStatus(StatusEffect):
 
 class TauntStatus(StatusEffect):
     id = "taunt"
+
+
+class FanatMarkStatus(StatusEffect):
+    id = "fanat_mark"
+    name = "Метка Фаната"
+    description = "Цель получает +20 входящего урона от кубиков Фаната (через пассивку)."

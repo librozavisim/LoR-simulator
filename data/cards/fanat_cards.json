@@ -1,0 +1,230 @@
+{
+  "cards": [
+    {
+      "id": "fanat_branding",
+      "name": "Клеймо Фаната",
+      "tier": 1,
+      "type": "Melee",
+      "description": "Наносит Метку Фаната. Ваша пассивка дает +20 силы против меченых.",
+      "flags": ["offensive"],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "apply_status",
+            "params": {
+              "status": "fanat_mark",
+              "base": 1,
+              "duration": 3,
+              "target": "target"
+            }
+          }
+        ]
+      },
+      "dice": [
+        {
+          "type": "slash",
+          "base_min": 4,
+          "base_max": 8,
+          "scripts": {}
+        },
+        {
+          "type": "blunt",
+          "base_min": 5,
+          "base_max": 9,
+          "scripts": {
+             "on_hit": [
+               {
+                 "script_id": "apply_status",
+                 "params": { "status": "fragile", "base": 1, "target": "target" }
+               }
+             ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "fanat_blind_faith",
+      "name": "Слепая Вера",
+      "tier": 1,
+      "type": "Melee",
+      "description": "Дает 2 Защиты и 2 Стойкости на этот ход.",
+      "flags": ["defensive"],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "apply_status",
+            "params": { "status": "protection", "base": 2, "duration": 1, "target": "self" }
+          },
+          {
+            "script_id": "apply_status",
+            "params": { "status": "endurance", "base": 2, "duration": 1, "target": "self" }
+          }
+        ]
+      },
+      "dice": [
+        {
+          "type": "block",
+          "base_min": 6,
+          "base_max": 10,
+          "scripts": {}
+        },
+        {
+          "type": "blunt",
+          "base_min": 4,
+          "base_max": 7,
+          "scripts": {}
+        }
+      ]
+    },
+    {
+      "id": "fanat_frenzy_barrage",
+      "name": "Безумный Напор",
+      "tier": 2,
+      "type": "Melee",
+      "description": "Серия быстрых ударов.",
+      "flags": ["offensive"],
+      "scripts": {},
+      "dice": [
+        {
+          "type": "pierce",
+          "base_min": 4,
+          "base_max": 7
+        },
+        {
+          "type": "slash",
+          "base_min": 4,
+          "base_max": 7
+        },
+        {
+          "type": "blunt",
+          "base_min": 5,
+          "base_max": 9
+        }
+      ]
+    },
+    {
+      "id": "fanat_living_shield",
+      "name": "Живой Щит",
+      "tier": 2,
+      "type": "Melee",
+      "description": "Мощная защита. Если выигрывает столкновение блоком — восстанавливает Stagger.",
+      "flags": ["defensive"],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "apply_status",
+            "params": { "status": "protection", "base": 4, "duration": 1, "target": "self" }
+          }
+        ]
+      },
+      "dice": [
+        {
+          "type": "block",
+          "base_min": 8,
+          "base_max": 14,
+          "scripts": {
+            "on_clash_win": [
+               { "script_id": "restore_resource", "params": { "type": "stagger", "base": 100, "target": "self" } }
+            ]
+          }
+        },
+        {
+          "type": "block",
+          "base_min": 5,
+          "base_max": 9
+        },
+        {
+          "type": "blunt",
+          "base_min": 4,
+          "base_max": 8,
+          "is_counter": true
+        }
+      ]
+    },
+    {
+      "id": "fanat_idols_voice",
+      "name": "Голос Идола",
+      "tier": 3,
+      "type": "Mass Summation",
+      "description": "Массовая атака (Сумма). Оглушает врагов криком.",
+      "flags": ["offensive"],
+      "scripts": {},
+      "dice": [
+        {
+          "type": "blunt",
+          "base_min": 18,
+          "base_max": 25,
+          "scripts": {
+            "on_hit": [
+              {
+                "script_id": "deal_effect_damage",
+                "params": { "type": "stagger", "base": 10, "target": "target" }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "fanat_meat_grinder",
+      "name": "Мясорубка",
+      "tier": 3,
+      "type": "Melee",
+      "description": "Агрессивная атака. 4 кубика.",
+      "flags": ["offensive"],
+      "scripts": {},
+      "dice": [
+        { "type": "slash", "base_min": 5, "base_max": 9 },
+        { "type": "slash", "base_min": 5, "base_max": 9 },
+        { "type": "slash", "base_min": 5, "base_max": 9 },
+        { "type": "pierce", "base_min": 6, "base_max": 10,
+          "scripts": {
+             "on_hit": [{ "script_id": "apply_status", "params": { "status": "bleed", "base": 3, "target": "target" } }]
+          }
+        }
+      ]
+    },
+    {
+      "id": "fanat_sacrifice",
+      "name": "Жертвоприношение",
+      "tier": 3,
+      "type": "Melee",
+      "description": "Наносит вам 30 урона, но дает огромную силу на этот ход.",
+      "flags": ["offensive"],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "restore_resource",
+            "params": { "type": "hp", "base": -30, "target": "self" }
+          },
+          {
+            "script_id": "apply_status",
+            "params": { "status": "strength", "base": 5, "duration": 1, "target": "self" }
+          }
+        ]
+      },
+      "dice": [
+        { "type": "blunt", "base_min": 10, "base_max": 20 },
+        { "type": "blunt", "base_min": 10, "base_max": 20 }
+      ]
+    },
+    {
+      "id": "fanat_holy_crusade",
+      "name": "Священный Поход",
+      "tier": 4,
+      "type": "Mass Individual",
+      "description": "Массовая атака (Индивидуальная). Проверяет каждого врага 3 ударами.",
+      "flags": ["offensive"],
+      "scripts": {},
+      "dice": [
+        { "type": "slash", "base_min": 6, "base_max": 10 },
+        { "type": "slash", "base_min": 6, "base_max": 10 },
+        { "type": "pierce", "base_min": 8, "base_max": 14,
+          "scripts": {
+             "on_hit": [{ "script_id": "apply_status", "params": { "status": "vulnerability", "base": 2, "target": "target" } }]
+          }
+        }
+      ]
+    }
+  ]
+}
