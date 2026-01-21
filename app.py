@@ -1,9 +1,8 @@
-# app.py
 import copy
-import json
-import os
-
 import streamlit as st
+
+# Импортируем менеджер состояния
+from logic.state_manager import StateManager
 
 from core.unit.unit import Unit
 from core.unit.unit_library import UnitLibrary
@@ -16,143 +15,112 @@ from ui.simulator.simulator import render_simulator_page
 from ui.styles import apply_styles
 from ui.tree_view import render_skill_tree_page
 
+# Применяем стили
 apply_styles()
 
-STATE_FILE = "data/simulator_state.json"
-
-
-def load_from_disk():
-    if os.path.exists(STATE_FILE):
-        try:
-            with open(STATE_FILE, "r", encoding="utf-8") as f:
-                content = f.read().strip()
-                if content: return json.loads(content)
-        except Exception as e:
-            print(f"Error loading: {e}")
-    return {}
-
-
-def save_to_disk(data):
-    try:
-        os.makedirs("data", exist_ok=True)
-        with open(STATE_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-            f.flush()
-            os.fsync(f.fileno())
-    except Exception as e:
-        print(f"Error saving: {e}")
-
-
-# --- 1. INITIALIZE ROSTER FIRST ---
+# --- 1. ИНИЦИАЛИЗАЦИЯ РОСТЕРА ---
 if 'roster' not in st.session_state:
     st.session_state['roster'] = UnitLibrary.load_all() or {"Roland": Unit("Roland")}
 
 roster_keys = sorted(list(st.session_state['roster'].keys()))
 if not roster_keys: st.stop()
 
-# --- 2. STATE MANAGEMENT ---
 
-# Load from disk only once per session start
-if 'persistent_state' not in st.session_state:
-    st.session_state['persistent_state'] = load_from_disk()
-
-p_state = st.session_state['persistent_state']
-
-# Mappings: JSON Key -> Session State Key
-selector_mapping = {
-    "profile_unit": "profile_selected_unit",
-    "leveling_unit": "leveling_selected_unit",
-    "tree_unit": "tree_selected_unit",
-    "checks_unit": "checks_selected_unit",
-}
-
-# --- CRITICAL FIX: Restore selection on EVERY rerun if widget state is lost ---
-for json_key, session_key in selector_mapping.items():
-    # 1. Get the value stored in the JSON file/persistent state
-    saved_val = p_state.get(json_key)
-
-    # 2. If the session state doesn't have this key (e.g., page refresh/nav), restore it
-    if session_key not in st.session_state:
-        if saved_val and saved_val in roster_keys:
-            st.session_state[session_key] = saved_val
-        elif roster_keys:
-            # Fallback to first available if saved value is invalid
-            st.session_state[session_key] = roster_keys[0]
-
-    # 3. If session state exists but differs from saved (and is valid), update persistent
-    # This handles the case where the user changed it in the UI
-    elif st.session_state[session_key] in roster_keys:
-        p_state[json_key] = st.session_state[session_key]
-
-# --- Rest of initialization ---
-if 'nav_page' not in st.session_state:
-    st.session_state['nav_page'] = p_state.get("page", "⚔️ Simulator")
-
-# Restore teams only once
-if 'teams_loaded' not in st.session_state:
-    # Left Team
-    left_data = p_state.get("team_left_data", [])
-    restored_left = []
-    for u_data in left_data:
-        try:
-            u = Unit.from_dict(u_data)
-            u.recalculate_stats()
-            restored_left.append(u)
-        except Exception as e:
-            print(f"Error restoring unit: {e}")
-    st.session_state['team_left'] = restored_left
-
-    # Right Team
-    right_data = p_state.get("team_right_data", [])
-    restored_right = []
-    for u_data in right_data:
-        try:
-            u = Unit.from_dict(u_data)
-            u.recalculate_stats()
-            restored_right.append(u)
-        except:
-            pass
-    st.session_state['team_right'] = restored_right
-
-    st.session_state['teams_loaded'] = True
-
-
+# --- 2. ФУНКЦИЯ СОХРАНЕНИЯ (CALLBACK) ---
 def update_and_save_state():
-    """Save current session state to disk."""
-    # Sync selectors
-    for json_k, session_k in selector_mapping.items():
-        if session_k in st.session_state:
-            p_state[json_k] = st.session_state[session_k]
-
-    # Sync Page
-    p_state["page"] = st.session_state.get("nav_page", "⚔️ Simulator")
-
-    # Sync Teams
-    if "team_left" in st.session_state:
-        p_state["team_left_data"] = [u.to_dict() for u in st.session_state["team_left"]]
-
-    if "team_right" in st.session_state:
-        p_state["team_right_data"] = [u.to_dict() for u in st.session_state["team_right"]]
-
-    st.session_state['persistent_state'] = p_state
-    save_to_disk(p_state)
+    """
+    Сохраняет полное состояние сессии через StateManager.
+    Вызывается при любом изменении в UI (on_change).
+    """
+    StateManager.save_state(st.session_state)
 
 
 if 'save_callback' not in st.session_state:
     st.session_state['save_callback'] = update_and_save_state
 
-# --- ГЛОБАЛЬНЫЕ ОБЪЕКТЫ ---
-if 'team_left' not in st.session_state: st.session_state['team_left'] = []
-if 'team_right' not in st.session_state: st.session_state['team_right'] = []
-if 'battle_logs' not in st.session_state: st.session_state['battle_logs'] = []
-if 'script_logs' not in st.session_state: st.session_state['script_logs'] = ""
+# --- 3. ЗАГРУЗКА СОСТОЯНИЯ (RESTORE) ---
+if 'teams_loaded' not in st.session_state:
+    # 1. Загружаем сырые данные из JSON
+    saved_data = StateManager.load_state()
 
-# --- ОТРИСОВКА ---
+    # 2. Восстанавливаем команды (Юниты + их слоты/статусы/карты)
+    l_data = saved_data.get("team_left_data", [])
+    r_data = saved_data.get("team_right_data", [])
+
+    team_left = []
+    for d in l_data:
+        try:
+            u = Unit.from_dict(d)
+            team_left.append(u)
+        except Exception as e:
+            print(f"Error loading left unit: {e}")
+
+    team_right = []
+    for d in r_data:
+        try:
+            u = Unit.from_dict(d)
+            team_right.append(u)
+        except Exception as e:
+            print(f"Error loading right unit: {e}")
+
+    # Обязательный пересчет статов после загрузки
+    for u in team_left + team_right:
+        u.recalculate_stats()
+
+    st.session_state['team_left'] = team_left
+    st.session_state['team_right'] = team_right
+
+    # 3. Восстанавливаем глобальные переменные боя
+    st.session_state['phase'] = saved_data.get('phase', 'roll')
+    st.session_state['round_number'] = saved_data.get('round_number', 1)
+    st.session_state['turn_message'] = saved_data.get('turn_message', "")
+    st.session_state['battle_logs'] = saved_data.get('battle_logs', [])
+    st.session_state['script_logs'] = saved_data.get('script_logs', "")
+
+    st.session_state['turn_phase'] = saved_data.get('turn_phase', 'planning')
+    st.session_state['action_idx'] = saved_data.get('action_idx', 0)
+
+    # Восстанавливаем сет выполненных слотов (из списка)
+    st.session_state['executed_slots'] = set()
+    for item in saved_data.get('executed_slots', []):
+        st.session_state['executed_slots'].add(tuple(item))  # (name, idx)
+
+    # 4. Восстанавливаем Очередь Действий (Actions)
+    # Это самое важное для продолжения боя после перезагрузки страницы
+    raw_actions = saved_data.get('turn_actions', [])
+    if raw_actions:
+        st.session_state['turn_actions'] = StateManager.restore_actions(
+            raw_actions, team_left, team_right
+        )
+    else:
+        st.session_state['turn_actions'] = []
+
+    # 5. Восстанавливаем селекторы UI
+    selector_mapping = {
+        "profile_unit": "profile_selected_unit",
+        "leveling_unit": "leveling_selected_unit",
+        "tree_unit": "tree_selected_unit",
+        "checks_unit": "checks_selected_unit",
+    }
+
+    for json_key, session_key in selector_mapping.items():
+        saved_val = saved_data.get(json_key)
+        if saved_val and saved_val in roster_keys:
+            st.session_state[session_key] = saved_val
+        elif roster_keys and session_key not in st.session_state:
+            st.session_state[session_key] = roster_keys[0]
+
+    # Восстанавливаем навигацию
+    st.session_state['nav_page'] = saved_data.get("page", "⚔️ Simulator")
+
+    st.session_state['teams_loaded'] = True
+
+# --- 4. ОТРИСОВКА ИНТЕРФЕЙСА ---
 st.sidebar.title("Navigation")
 
-# Список страниц
 pages = ["⚔️ Simulator", "👤 Profile", "🌳 Skill Tree", "📈 Leveling", "🛠️ Card Editor", "🎲 Checks", "📚 Cheat Sheet"]
 
+# Навигация с коллбэком сохранения
 page = st.sidebar.radio("Go to", pages, key="nav_page", on_change=update_and_save_state)
 
 # === СТРАНИЦА: SIMULATOR ===
@@ -166,7 +134,7 @@ if "Simulator" in page:
     if is_team_locked:
         st.sidebar.info("🔒 Идет бой. Изменение команд заблокировано.")
 
-    # 1. Выбор юнита
+    # 1. Выбор юнита для добавления
     unit_to_add_name = st.sidebar.selectbox(
         "Выберите персонажа",
         roster_keys,
@@ -177,7 +145,7 @@ if "Simulator" in page:
     as_template = st.sidebar.checkbox(
         "Добавить как копию (Шаблон)",
         value=False,
-        help="Если включено: создает независимую копию. Если выключено: добавляет ссылку на оригинал.",
+        help="Вкл: создает независимую копию. Выкл: добавляет ссылку на оригинал.",
         disabled=is_team_locked
     )
 
@@ -203,6 +171,7 @@ if "Simulator" in page:
                 return
             unit_to_add = base_unit
 
+        # Инициализация боевой памяти
         unit_to_add.memory['start_of_battle_stats'] = {
             'hp': unit_to_add.current_hp,
             'sp': unit_to_add.current_sp,

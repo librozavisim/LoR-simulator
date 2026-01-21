@@ -2,12 +2,14 @@ import streamlit as st
 from collections import Counter
 from core.library import Library
 from core.enums import DiceType  # [NEW] Для проверки типов кубиков
+from logic.state_manager import StateManager
 from logic.weapon_definitions import WEAPON_REGISTRY
 from ui.components import _format_script_text
 from ui.icons import get_icon_html
 from ui.styles import TYPE_COLORS
 from ui.simulator.components.common import CARD_TYPE_ICONS
-
+def save_cb():
+    StateManager.save_state(st.session_state)
 
 def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
     """
@@ -167,7 +169,8 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
         idx_sel = target_options.index(current_val_str) if current_val_str in target_options else 0
         selected_tgt_str = c_tgt.selectbox(
             "Target", target_options, index=idx_sel,
-            key=f"{key_prefix}_{unit.name}_tgt_{slot_idx}", label_visibility="collapsed"
+            key=f"{key_prefix}_{unit.name}_tgt_{slot_idx}", label_visibility="collapsed",
+            on_change=save_cb
         )
 
         if selected_tgt_str == "None":
@@ -211,7 +214,8 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
                 return f"{emoji} [{x.tier}] {x.name}"
 
             new_card = c_sel.selectbox("Page", display_cards, format_func=format_card_option, index=c_idx,
-                                       key=f"{key_prefix}_{unit.name}_card_{slot_idx}", label_visibility="collapsed")
+                                       key=f"{key_prefix}_{unit.name}_card_{slot_idx}", label_visibility="collapsed",
+                                       on_change=save_cb)
             slot['card'] = new_card
 
             # --- ОПЦИИ ---
@@ -242,14 +246,17 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
 
                 if slot.get('is_ally_target'):
                     c_opt1.checkbox("Aggro", value=False, disabled=True,
-                                    key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}", label_visibility="collapsed")
+                                    key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}", label_visibility="collapsed",
+                                    on_change=save_cb)
                     if aggro_val: slot['is_aggro'] = False
                 elif can_redirect:
                     c_opt1.checkbox("Aggro", value=aggro_val, key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}",
-                                    label_visibility="collapsed")
+                                    label_visibility="collapsed",
+                                    on_change=save_cb)
                 else:
                     c_opt1.checkbox("Aggro", value=False, disabled=True,
-                                    key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}", label_visibility="collapsed")
+                                    key=f"{key_prefix}_{unit.name}_aggro_{slot_idx}", label_visibility="collapsed",
+                                    on_change=save_cb)
                     if aggro_val: slot['is_aggro'] = False
 
             slot_destroy = slot.get('destroy_on_speed', True)
@@ -259,7 +266,8 @@ def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
                             unsafe_allow_html=True)
                 new_destroy = st.checkbox("Break", value=slot_destroy,
                                           key=f"{key_prefix}_{unit.name}_destroy_{slot_idx}",
-                                          label_visibility="collapsed")
+                                          label_visibility="collapsed",
+                                          on_change=save_cb)
                 slot['destroy_on_speed'] = new_destroy
 
         # --- ИНФОРМАЦИЯ О КАРТЕ ---

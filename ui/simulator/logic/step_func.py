@@ -80,6 +80,9 @@ def roll_phase():
     st.session_state['phase'] = 'planning'
     st.session_state['turn_message'] = "🎲 Speed Rolled (Targets Auto-Assigned)"
 
+    from logic.state_manager import StateManager
+    StateManager.save_state(st.session_state)
+
 
 def step_start():
     """Начало пошагового боя."""
@@ -110,9 +113,14 @@ def step_next():
         st.session_state['battle_logs'].extend(logs)
         st.session_state['action_idx'] += 1
 
+    from logic.state_manager import StateManager
+    StateManager.save_state(st.session_state)
+
     # Если действия кончились, завершаем раунд
     if st.session_state['action_idx'] >= len(actions):
         step_finish()
+
+
 
 
 def step_finish():

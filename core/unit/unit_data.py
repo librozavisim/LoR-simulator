@@ -146,6 +146,8 @@ class UnitData:
             "money_log": self.money_log,
             "death_count": self.death_count,  # [NEW]
             "overkill_damage": self.overkill_damage,  # [NEW]
+            "active_slots": [self._serialize_slot(s) for s in self.active_slots],
+            "memory": self.memory
         }
 
     @classmethod
@@ -183,6 +185,9 @@ class UnitData:
 
         u.card_cooldowns = data.get("card_cooldowns", {})
 
+        raw_slots = data.get("active_slots", [])
+        u.active_slots = [cls._deserialize_slot(s) for s in raw_slots]
+
         # Текущее состояние
         base = data.get("base_stats", {})
         u.current_hp = base.get("current_hp", 20)
@@ -217,4 +222,27 @@ class UnitData:
         u.cooldowns = data.get("cooldowns", {})
         u.active_buffs = data.get("active_buffs", {})
 
+        u.memory = data.get("memory", {})
+
         return u
+
+    def _serialize_slot(self, slot):
+        """Превращает слот (с объектом карты) в словарь для JSON."""
+        s_copy = slot.copy()
+        if s_copy.get('card'):
+            # Сохраняем только ID карты, чтобы не дублировать данные
+            s_copy['card'] = s_copy['card'].id
+        return s_copy
+
+    @classmethod
+    def _deserialize_slot(cls, slot_data):
+        """Восстанавливает объект карты из ID."""
+        from core.library import Library  # Импорт внутри метода во избежание циклов
+        if slot_data.get('card') and isinstance(slot_data['card'], str):
+            found_card = Library.get_card(slot_data['card'])
+            if found_card.id != "unknown":
+                slot_data['card'] = found_card
+            else:
+                # Если карта удалена/не найдена, ставим None
+                slot_data['card'] = None
+        return slot_data
