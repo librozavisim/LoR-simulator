@@ -30,9 +30,10 @@
         "lima_purge_toxin"
     ],
     "stored_dice": [],
+    "counter_dice": [],
     "base_stats": {
         "current_hp": 115,
-        "current_sp": 135,
+        "current_sp": 85,
         "current_stagger": 57
     },
     "defense": {
@@ -147,5 +148,13 @@
             "amount": -3700000,
             "reason": "Шопинг, стрелы, гранаты"
         }
-    ]
+    ],
+    "death_count": 0,
+    "overkill_damage": 0,
+    "_status_effects": {},
+    "delayed_queue": [],
+    "memory": {
+        "status_rank": "9 (Fixer)"
+    },
+    "active_slots": []
 }
