@@ -69,7 +69,32 @@
         },
         "weapon_id": "none"
       },
-      "card_cooldowns": {},
+      "card_cooldowns": {
+        "tea_fruit": [
+          4
+        ],
+        "tea_red": [
+          4
+        ],
+        "fanat_frenzy_barrage": [
+          1
+        ],
+        "fanat_living_shield": [
+          1
+        ],
+        "fanat_idols_voice": [
+          2
+        ],
+        "fanat_meat_grinder": [
+          2
+        ],
+        "fanat_sacrifice": [
+          2
+        ],
+        "fanat_holy_crusade": [
+          3
+        ]
+      },
       "attributes": {
         "strength": 20,
         "endurance": 67,
@@ -151,7 +176,9 @@
           "sp": 2
         }
       },
-      "cooldowns": {},
+      "cooldowns": {
+        "mind_power": 1
+      },
       "active_buffs": {},
       "resources": {},
       "biography": "",
@@ -163,7 +190,24 @@
       ],
       "death_count": 1,
       "overkill_damage": 0,
-      "_status_effects": {},
+      "_status_effects": {
+        "strength": [
+          {
+            "amount": 5,
+            "duration": 1
+          },
+          {
+            "amount": 1,
+            "duration": 3
+          }
+        ],
+        "haste": [
+          {
+            "amount": 2,
+            "duration": 3
+          }
+        ]
+      },
       "delayed_queue": [],
       "memory": {
         "status_rank": "9 (Fixer)",
@@ -178,9 +222,61 @@
         "emo_level": 0,
         "emo_progress": 0,
         "emo_coins_pos": 0,
-        "emo_coins_neg": 0
+        "emo_coins_neg": 0,
+        "battle_initialized": true
       },
-      "active_slots": []
+      "active_slots": [
+        {
+          "speed": 8,
+          "card": "fanat_branding",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 0,
+          "target_slot_idx": 0,
+          "force_clash": false,
+          "ui_status": {
+            "text": "ONE SIDED (Провал) -> Лима | Слаб",
+            "icon": "🐌",
+            "color": "orange"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": true
+        },
+        {
+          "speed": 9,
+          "card": "fanat_blind_faith",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 0,
+          "target_slot_idx": 1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "ONE SIDED (Провал) -> Лима | Слаб",
+            "icon": "🐌",
+            "color": "orange"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": true
+        },
+        {
+          "speed": 5,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        }
+      ]
     }
   ],
   "team_right_data": [
@@ -219,7 +315,7 @@
       "counter_dice": [],
       "base_stats": {
         "current_hp": 115,
-        "current_sp": 85,
+        "current_sp": 74,
         "current_stagger": 57
       },
       "defense": {
@@ -237,7 +333,26 @@
         },
         "weapon_id": "skalalaz_iceaxe"
       },
-      "card_cooldowns": {},
+      "card_cooldowns": {
+        "lima_hit_and_run": [
+          1
+        ],
+        "lima_inertia": [
+          1
+        ],
+        "lima_morphine_dart": [
+          1
+        ],
+        "lima_one_furious_shot": [
+          2
+        ],
+        "lima_ram": [
+          2
+        ],
+        "lima_purge_toxin": [
+          2
+        ]
+      },
       "attributes": {
         "strength": 2,
         "endurance": 5,
@@ -337,7 +452,18 @@
       ],
       "death_count": 0,
       "overkill_damage": 0,
-      "_status_effects": {},
+      "_status_effects": {
+        "haste": [
+          {
+            "amount": 1,
+            "duration": 1
+          },
+          {
+            "amount": 1,
+            "duration": 1
+          }
+        ]
+      },
       "delayed_queue": [],
       "memory": {
         "status_rank": "9 (Fixer)",
@@ -346,9 +472,75 @@
           "sp": 85,
           "stagger": 57
         },
-        "mind_suppression_bonus": 15
+        "mind_suppression_bonus": 15,
+        "battle_initialized": true
       },
-      "active_slots": []
+      "active_slots": [
+        {
+          "speed": 19,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        },
+        {
+          "speed": 18,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        },
+        {
+          "speed": 19,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        },
+        {
+          "speed": 14,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        }
+      ]
     },
     {
       "name": "Лилит",
@@ -407,7 +599,7 @@
       ],
       "base_stats": {
         "current_hp": 130,
-        "current_sp": 77,
+        "current_sp": 66,
         "current_stagger": 65
       },
       "defense": {
@@ -425,7 +617,26 @@
         },
         "weapon_id": "lilith_scythe"
       },
-      "card_cooldowns": {},
+      "card_cooldowns": {
+        "bad_habit": [
+          1
+        ],
+        "trip_up": [
+          1
+        ],
+        "inhale_exhale": [
+          1
+        ],
+        "smoke_arts": [
+          2
+        ],
+        "demon_scream": [
+          2
+        ],
+        "smoke_silhouette": [
+          2
+        ]
+      },
       "attributes": {
         "strength": 18,
         "endurance": 15,
@@ -514,7 +725,20 @@
       ],
       "death_count": 0,
       "overkill_damage": 0,
-      "_status_effects": {},
+      "_status_effects": {
+        "strength": [
+          {
+            "amount": 4,
+            "duration": 1
+          }
+        ],
+        "endurance": [
+          {
+            "amount": 4,
+            "duration": 1
+          }
+        ]
+      },
       "delayed_queue": [],
       "memory": {
         "start_of_battle_stats": {
@@ -523,9 +747,75 @@
           "stagger": 65
         },
         "smoke_is_defensive": true,
-        "smoke_limit_bonus": 5
+        "smoke_limit_bonus": 5,
+        "battle_initialized": true
       },
-      "active_slots": []
+      "active_slots": [
+        {
+          "speed": 12,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        },
+        {
+          "speed": 12,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        },
+        {
+          "speed": 13,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        },
+        {
+          "speed": 6,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        }
+      ]
     },
     {
       "name": "Зафиэль",
@@ -584,7 +874,7 @@
       ],
       "base_stats": {
         "current_hp": 178,
-        "current_sp": 65,
+        "current_sp": 54,
         "current_stagger": 90
       },
       "defense": {
@@ -602,7 +892,18 @@
         },
         "weapon_id": "none"
       },
-      "card_cooldowns": {},
+      "card_cooldowns": {
+        "thrill_of_battle": [
+          1,
+          1,
+          1
+        ],
+        "furious_assault": [
+          2,
+          2,
+          2
+        ]
+      },
       "attributes": {
         "strength": 30,
         "endurance": 13,
@@ -694,7 +995,20 @@
       ],
       "death_count": 0,
       "overkill_damage": 0,
-      "_status_effects": {},
+      "_status_effects": {
+        "adaptation": [
+          {
+            "amount": 1,
+            "duration": 99
+          }
+        ],
+        "protection": [
+          {
+            "amount": 2,
+            "duration": 2
+          }
+        ]
+      },
       "delayed_queue": [],
       "memory": {
         "start_of_battle_stats": {
@@ -706,15 +1020,180 @@
           "slash": 0,
           "pierce": 0,
           "blunt": 0
-        }
+        },
+        "battle_initialized": true
       },
-      "active_slots": []
+      "active_slots": [
+        {
+          "speed": 10,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        },
+        {
+          "speed": 10,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        },
+        {
+          "speed": 9,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        },
+        {
+          "speed": 6,
+          "card": null,
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        }
+      ]
     }
   ],
-  "phase": "roll",
+  "phase": "planning",
   "round_number": 1,
-  "turn_message": "Game Reset to Pre-Battle State. Press 'Roll Initiative'.",
-  "battle_logs": [],
+  "turn_message": "🎲 Speed Rolled (Targets Auto-Assigned)",
+  "battle_logs": [
+    {
+      "round": "Skill",
+      "rolls": "Activate",
+      "details": "🧠 **Умопомрачительная сила**: Пожертвовано 50 SP -> Получено +5 Силы!"
+    },
+    {
+      "round": "Item",
+      "rolls": "Consumable",
+      "details": [
+        "💊 **ФанатBA** uses **Особый Фруктовый чай**!",
+        "🧠 **ФанатBA**: +50 SP",
+        "🧪 **ФанатBA**: +2 Haste"
+      ]
+    },
+    {
+      "round": "Item",
+      "rolls": "Consumable",
+      "details": [
+        "💊 **ФанатBA** uses **Красный чай**!",
+        "🧠 **ФанатBA**: +0 SP",
+        "🧪 **ФанатBA**: +1 Strength"
+      ]
+    },
+    {
+      "round": "Start",
+      "rolls": "Event",
+      "details": "🚩 **ФанатBA**: ☕ **Чайный Мастер**: 0 видов чая добавлено в инвентарь."
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **ФанатBA**: 👁️ **Невыносимое присутствие [WIP roll advantage]**: 3 врагов подавлены (-11 SP)"
+    },
+    {
+      "round": "Start",
+      "rolls": "Event",
+      "details": "🚩 **Лима**: 🧠 **Подавление разумом**: Интеллект 18 vs 3. Бонус +15 к Красноречию."
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **Лима**: 🏃 **Атлетичный**: +1 Haste"
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **Лима**: ⚡ **Лима**: Экзоскелет активирует сервоприводы (Спешка +1)."
+    },
+    {
+      "round": "Start",
+      "rolls": "Event",
+      "details": "🚩 **Лилит**: 🛡️ **Встроенная Броня**: Броня снята. Резисты = 1.0"
+    },
+    {
+      "round": "Start",
+      "rolls": "Event",
+      "details": "🚩 **Лилит**: 🌬️ **Тату 'Благословение Ветра'**: Лимит дыма увеличен до 15"
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **Зафиэль**: 🧬 Адаптация: Рост -> Уровень 1"
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **Зафиэль**: 🛡️ **Похвальное телосложение**: +2 protection"
+    },
+    {
+      "round": "Speed Roll",
+      "rolls": "Passive",
+      "details": "⚡ **ФанатBA**: 🛡️ **Оборона**: Добавлено 1 контр-кубиков Блока (7-10)."
+    },
+    {
+      "round": "Speed Roll",
+      "rolls": "Passive",
+      "details": "⚡ **Лилит**: 🐈 **Махнуть хвостиком**: +1 Counter Evade (7-10) added to pool."
+    },
+    {
+      "round": "Speed Roll",
+      "rolls": "Passive",
+      "details": "⚡ **Лилит**: ⚡ **Живи быстро, умирай молодым**: +4 Силы и Стойкости (за 4 слота)"
+    },
+    {
+      "round": "Speed Roll",
+      "rolls": "Passive",
+      "details": "⚡ **Лилит**: 😡 **Неистовство**: Frenzy (+1 Counter 5-7)"
+    },
+    {
+      "round": "Speed Roll",
+      "rolls": "Passive",
+      "details": "⚡ **Лилит**: 🦶 **Воздушная стопа**: Добавлено 1 контр-уклонений (Smoke: 0)."
+    },
+    {
+      "round": "Speed Roll",
+      "rolls": "Passive",
+      "details": "⚡ **Зафиэль**: 🛡️ **Оборона**: Добавлено 3 контр-кубиков Блока (7-10)."
+    }
+  ],
   "script_logs": "",
   "turn_phase": "done",
   "action_idx": 0,
