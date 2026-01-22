@@ -823,27 +823,28 @@
       "active_slots": [
         {
           "speed": 11,
-          "card": null,
+          "card": "release_steam",
           "target_slot": null,
           "is_aggro": false,
-          "target_unit_idx": -1,
-          "target_slot_idx": -1,
+          "target_unit_idx": 0,
+          "target_slot_idx": 0,
           "force_clash": false,
           "ui_status": {
-            "text": "НЕТ ЦЕЛИ",
-            "icon": "⛔",
-            "color": "gray"
+            "text": "ONE SIDED (Провал) -> ФанатBA | Слаб",
+            "icon": "🐌",
+            "color": "orange"
           },
           "is_ally_target": false,
-          "destroy_on_speed": true
+          "destroy_on_speed": true,
+          "force_onesided": true
         },
         {
           "speed": 11,
-          "card": null,
+          "card": "smoke_silhouette",
           "target_slot": null,
           "is_aggro": false,
-          "target_unit_idx": -1,
-          "target_slot_idx": -1,
+          "target_unit_idx": 0,
+          "target_slot_idx": 0,
           "force_clash": false,
           "ui_status": {
             "text": "CLASH vs ФанатBA [S2] | Перехвачен (11 < 15)",
@@ -851,11 +852,12 @@
             "color": "orange"
           },
           "is_ally_target": false,
-          "destroy_on_speed": true
+          "destroy_on_speed": true,
+          "force_onesided": true
         },
         {
           "speed": 13,
-          "card": null,
+          "card": "puff",
           "target_slot": null,
           "is_aggro": false,
           "target_unit_idx": -1,
@@ -871,7 +873,7 @@
         },
         {
           "speed": 7,
-          "card": null,
+          "card": "demon_scream",
           "target_slot": null,
           "is_aggro": false,
           "target_unit_idx": -1,

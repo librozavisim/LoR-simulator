@@ -2,9 +2,12 @@
 from logic.character_changing.talents.branch_1_mindgames import TalentKeepItTogether, TalentCenterOfBalance, TalentControlledDistortion, \
     TalentSafeEGO, TalentEmotionalStorm, TalentUnbearablePresence, TalentTeaMaster, TalentMindPower, TalentPeakSanity, \
     TalentPsychicStrain
-from logic.character_changing.talents.branch_2_best import TalentOnTheWaveOfSuccess, TalentTacticalAnalysis, TalentRemarkable, \
-    TalentBehaviorStudy, TalentSpeechMaster, TalentPathfinder, TalentAceOfAllTrades, TalentKnowYourEnemy, \
-    TalentAlwaysReady, TalentStrategist
+from logic.character_changing.talents.branch_2_best import TalentForesight, TalentHoarder, TalentImprovisation, \
+    TalentSocialEngineer, TalentPuppetMaster, TalentMerchantOfDeath, TalentPokerFace, TalentExposeWeakness, \
+    TalentCardShuffler, TalentKnowYourEnemy, TalentPredictiveAlgo, TalentVerbalBarrier, \
+    TalentViciousMockery, TalentDominant, TalentUniversalSoldier, TalentPlotArmor, TalentLimitBreaker, TalentMomentum, \
+    TalentTireless, TalentSynergy, TalentAceOfAllTrades, TalentLogistics, TalentDeepPockets, TalentScanner, \
+    TalentTacticalAnalysis
 from logic.character_changing.talents.branch_3_tireless import (
     TalentBigGuy, TalentDefense, TalentCommendableConstitution, TalentBigHeart,
     TalentRock, TalentDespiteAdversities, TalentHeatResistant,
@@ -95,16 +98,37 @@ TALENT_REGISTRY = {
     "controlled_distortion": TalentControlledDistortion(),
 
 # === ВЕТКА 2: ЛУЧШИЙ ИЗ ЛУЧШИХ ===
-    "remarkable": TalentRemarkable(),
-    "on_the_wave_of_success": TalentOnTheWaveOfSuccess(),
-    "tactical_analysis": TalentTacticalAnalysis(),
-    "behavior_study": TalentBehaviorStudy(),
-    "speech_master": TalentSpeechMaster(),
-    "pathfinder": TalentPathfinder(),
+    "scanner": TalentScanner(),
+
+    # Ветка А: Идеал
+    "deep_pockets": TalentDeepPockets(),
+    "logistics": TalentLogistics(),
     "ace_of_all_trades": TalentAceOfAllTrades(),
+    "skill_synergy": TalentSynergy(),
+    "tireless_paragon": TalentTireless(),
+    "momentum": TalentMomentum(),
+    "limit_breaker": TalentLimitBreaker(),
+    "plot_armor": TalentPlotArmor(),
+    "universal_soldier": TalentUniversalSoldier(),
+    "dominant": TalentDominant(),
+
+    # Ветка Б: Кукловод
+    "vicious_mockery": TalentViciousMockery(),
+    "verbal_barrier": TalentVerbalBarrier(),
+    "tactical_analysis": TalentTacticalAnalysis(),
     "know_your_enemy": TalentKnowYourEnemy(),
-    "strategist": TalentStrategist(),
-    "always_ready": TalentAlwaysReady(),
+    "card_shuffler": TalentCardShuffler(),
+    "predictive_algo": TalentPredictiveAlgo(),
+    "expose_weakness": TalentExposeWeakness(),
+    "poker_face_rework": TalentPokerFace(),
+    "merchant_of_death": TalentMerchantOfDeath(),
+    "puppet_master": TalentPuppetMaster(),
+
+    # Опциональные и Ультимейт
+    "opt_improvisation": TalentImprovisation(),
+    "opt_social_eng": TalentSocialEngineer(),
+    "opt_hoarder": TalentHoarder(),
+    "foresight": TalentForesight(),
 
 # === ВЕТКА 3: НЕУТОМИМЫЙ ===
     "big_guy": TalentBigGuy(),
