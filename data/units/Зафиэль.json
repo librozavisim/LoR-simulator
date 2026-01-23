@@ -1,10 +1,10 @@
 {
     "name": "Зафиэль",
-    "level": 28,
+    "level": 29,
     "rank": 6,
     "avatar": "data/avatars/Зафиэль.jpg",
     "base_intellect": 5,
-    "total_xp": 159383552,
+    "total_xp": 293601280,
     "pct_mods": {
         "imp_hp": 0,
         "imp_sp": 0,
@@ -18,6 +18,15 @@
         "imp_sp": 0,
         "imp_stg": 0
     },
+    "current_hp": 180,
+    "current_sp": 65,
+    "current_stagger": 93,
+    "resources": {},
+    "cooldowns": {},
+    "card_cooldowns": {},
+    "active_buffs": {},
+    "_status_effects": {},
+    "delayed_queue": [],
     "deck": [
         "unbridled_cruelty",
         "unbridled_cruelty",
@@ -29,11 +38,24 @@
         "furious_assault",
         "furious_assault"
     ],
+    "active_slots": [],
     "stored_dice": [],
+    "counter_dice": [],
+    "memory": {
+        "status_rank": "9 (Fixer)"
+    },
+    "death_count": 0,
+    "overkill_damage": 0,
+    "money_log": [
+        {
+            "amount": 14460000,
+            "reason": ""
+        }
+    ],
     "base_stats": {
-        "current_hp": 181,
-        "current_sp": 182,
-        "current_stagger": 183
+        "current_hp": 180,
+        "current_sp": 65,
+        "current_stagger": 93
     },
     "defense": {
         "armor_name": "Standard Fixer Suit",
@@ -50,10 +72,9 @@
         },
         "weapon_id": "none"
     },
-    "card_cooldowns": {},
     "attributes": {
         "strength": 30,
-        "endurance": 13,
+        "endurance": 14,
         "agility": 9,
         "wisdom": 0,
         "psych": 0
@@ -61,7 +82,7 @@
     "skills": {
         "strike_power": 15,
         "medicine": 0,
-        "willpower": 2,
+        "willpower": 4,
         "luck": 0,
         "acrobatics": 0,
         "shields": 15,
@@ -130,16 +151,5 @@
             "sp": 3
         }
     },
-    "cooldowns": {},
-    "active_buffs": {},
-    "resources": {},
-    "biography": "",
-    "money_log": [
-        {
-            "amount": 14460000,
-            "reason": ""
-        }
-    ],
-    "death_count": 0,
-    "overkill_damage": 0
+    "biography": ""
 }

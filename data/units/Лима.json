@@ -4,7 +4,7 @@
     "rank": 6,
     "avatar": "data/avatars/Лима.png",
     "base_intellect": 8,
-    "total_xp": 134206336,
+    "total_xp": 268424064,
     "pct_mods": {
         "imp_hp": 0,
         "imp_sp": 0,
@@ -18,6 +18,15 @@
         "imp_sp": 0,
         "imp_stg": 0
     },
+    "current_hp": 115,
+    "current_sp": 85,
+    "current_stagger": 57,
+    "resources": {},
+    "cooldowns": {},
+    "card_cooldowns": {},
+    "active_buffs": {},
+    "_status_effects": {},
+    "delayed_queue": [],
     "deck": [
         "lima_little_tricks",
         "lima_jump_shooting",
@@ -29,8 +38,24 @@
         "lima_ram",
         "lima_purge_toxin"
     ],
+    "active_slots": [],
     "stored_dice": [],
     "counter_dice": [],
+    "memory": {
+        "status_rank": "9 (Fixer)"
+    },
+    "death_count": 0,
+    "overkill_damage": 0,
+    "money_log": [
+        {
+            "amount": 5790000,
+            "reason": ""
+        },
+        {
+            "amount": -3700000,
+            "reason": "Шопинг, стрелы, гранаты"
+        }
+    ],
     "base_stats": {
         "current_hp": 115,
         "current_sp": 85,
@@ -51,7 +76,6 @@
         },
         "weapon_id": "skalalaz_iceaxe"
     },
-    "card_cooldowns": {},
     "attributes": {
         "strength": 2,
         "endurance": 5,
@@ -87,8 +111,7 @@
         "wild_cityscape",
         "mind_suppression"
     ],
-    "talents": [
-    ],
+    "talents": [],
     "augmentations": [
         "aug_strizh"
     ],
@@ -126,26 +149,5 @@
             "sp": 1
         }
     },
-    "cooldowns": {},
-    "active_buffs": {},
-    "resources": {},
-    "biography": "Броня - лёгкий экзоскелет \"СТРИЖ\" со шлемом и противогазом\nАкробатика +6\nДаёт статус спешки +1  :zHaste: каждый ход\n\nЛедоруб \"Скала Лаз\" х2 (6.5 ранг)\nПозволяет карабкаться по стенам, отвесным скалам. Иногда требуется проверка Ловкости / Акробатики для совершения действия\nПовышает значение куба :zAttackPowerUp: атаки на атакующих картами на 3\n\nСветошумовые гранаты 2шт B tier\n\nАПГРЕЙД КОСТЮМА: ПНВ B tier\nПозволяет видеть в темноте, не получает дебаффы в темноте. Возможны дебаффы при ярком свете/днём во включенном режиме \n",
-    "money_log": [
-        {
-            "amount": 5790000,
-            "reason": ""
-        },
-        {
-            "amount": -3700000,
-            "reason": "Шопинг, стрелы, гранаты"
-        }
-    ],
-    "death_count": 0,
-    "overkill_damage": 0,
-    "_status_effects": {},
-    "delayed_queue": [],
-    "memory": {
-        "status_rank": "9 (Fixer)"
-    },
-    "active_slots": []
+    "biography": "Броня - лёгкий экзоскелет \"СТРИЖ\" со шлемом и противогазом\nАкробатика +6\nДаёт статус спешки +1  :zHaste: каждый ход\n\nЛедоруб \"Скала Лаз\" х2 (6.5 ранг)\nПозволяет карабкаться по стенам, отвесным скалам. Иногда требуется проверка Ловкости / Акробатики для совершения действия\nПовышает значение куба :zAttackPowerUp: атаки на атакующих картами на 3\n\nСветошумовые гранаты 2шт B tier\n\nАПГРЕЙД КОСТЮМА: ПНВ B tier\nПозволяет видеть в темноте, не получает дебаффы в темноте. Возможны дебаффы при ярком свете/днём во включенном режиме \n"
 }

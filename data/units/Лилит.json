@@ -1,10 +1,10 @@
 {
     "name": "Лилит",
-    "level": 25,
+    "level": 28,
     "rank": 7,
     "avatar": "data/avatars/Лилит.png",
     "base_intellect": 3,
-    "total_xp": 17825792,
+    "total_xp": 152043520,
     "pct_mods": {
         "imp_hp": 6,
         "imp_sp": 0,
@@ -18,6 +18,17 @@
         "imp_sp": 0,
         "imp_stg": 0
     },
+    "current_hp": 130,
+    "current_sp": 77,
+    "current_stagger": 65,
+    "resources": {},
+    "cooldowns": {
+        "berserker_rage": 2
+    },
+    "card_cooldowns": {},
+    "active_buffs": {},
+    "_status_effects": {},
+    "delayed_queue": [],
     "deck": [
         "release_steam",
         "prelude",
@@ -28,6 +39,18 @@
         "smoke_arts",
         "demon_scream",
         "smoke_silhouette"
+    ],
+    "active_slots": [],
+    "stored_dice": [],
+    "counter_dice": [],
+    "memory": {},
+    "death_count": 0,
+    "overkill_damage": 0,
+    "money_log": [
+        {
+            "amount": 280000,
+            "reason": ""
+        }
     ],
     "base_stats": {
         "current_hp": 130,
@@ -49,7 +72,6 @@
         },
         "weapon_id": "lilith_scythe"
     },
-    "card_cooldowns": {},
     "attributes": {
         "strength": 18,
         "endurance": 15,
@@ -126,16 +148,5 @@
             "sp": 1
         }
     },
-    "cooldowns": {
-        "berserker_rage": 2
-    },
-    "active_buffs": {},
-    "resources": {},
-    "biography": "",
-    "money_log": [
-        {
-            "amount": 280000,
-            "reason": ""
-        }
-    ]
+    "biography": ""
 }
