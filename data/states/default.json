@@ -339,18 +339,19 @@
       "active_slots": [
         {
           "speed": 18,
-          "card": null,
+          "card": "lima_morphine_dart",
           "target_slot": null,
           "is_aggro": false,
-          "target_unit_idx": -1,
-          "target_slot_idx": -1,
+          "target_unit_idx": 1,
+          "target_slot_idx": 3,
           "force_clash": false,
           "ui_status": {
-            "text": "НЕТ ЦЕЛИ",
-            "icon": "⛔",
-            "color": "gray"
+            "text": "BUFF -> Лилит",
+            "icon": "✨",
+            "color": "green"
           },
-          "is_ally_target": false
+          "is_ally_target": true,
+          "destroy_on_speed": true
         },
         {
           "speed": 21,
@@ -365,11 +366,12 @@
             "icon": "⛔",
             "color": "gray"
           },
-          "is_ally_target": false
+          "is_ally_target": false,
+          "destroy_on_speed": true
         },
         {
           "speed": 21,
-          "card": null,
+          "card": "lima_assorted_arrows",
           "target_slot": null,
           "is_aggro": false,
           "target_unit_idx": -1,
@@ -380,7 +382,8 @@
             "icon": "⛔",
             "color": "gray"
           },
-          "is_ally_target": false
+          "is_ally_target": false,
+          "destroy_on_speed": true
         },
         {
           "speed": 13,
@@ -1657,7 +1660,7 @@
   "action_idx": 0,
   "executed_slots": [],
   "turn_actions": [],
-  "profile_unit": "ФанатBA",
+  "profile_unit": "Roland",
   "leveling_unit": "Roland",
   "tree_unit": "Roland",
   "checks_unit": "Roland",

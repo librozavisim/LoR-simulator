@@ -294,3 +294,12 @@ class BaseEffect:
         stat_key: Название проверяемого стата (strength, luck, etc).
         """
         pass
+
+    def override_roll_base_stat(self, unit, current_pair, dice=None, **kwargs):
+        """
+        Позволяет изменить базовую характеристику, от которой зависит бросок.
+        current_pair: (value, name_of_stat), например (30, 'Strength')
+        Returns: (new_value, new_name)
+        Пример: 'Доступ к истокам' заменяет Силу/Стойкость на Удачу.
+        """
+        return current_pair

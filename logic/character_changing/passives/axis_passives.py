@@ -139,7 +139,6 @@ class PassiveSourceAccess(BasePassive):
     )
     is_active_ability = False
 
-    # TODO: Реализовать подмену атрибута при расчете силы кубика
     def modify_dice_stat_dependency(self, unit, dice_obj):
         pass
 
