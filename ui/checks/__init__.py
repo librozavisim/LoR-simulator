@@ -1,0 +1,1 @@
+from ui.checks.main import render_checks_page

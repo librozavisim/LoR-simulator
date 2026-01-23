@@ -29,10 +29,6 @@ def process_mass_attack(engine, action, opposing_team, round_label, executed_slo
     for log in on_use_logs:
         logger.log(f"MassAtk On Use: {log}", LogLevel.VERBOSE, "MassAtk")
 
-    # Добавляем логи On Use в отчет (как отдельное событие или прикрепляем к первому удару)
-    # Но так как report - это список клэшей, лучше просто применить эффекты.
-    # Эффекты (Сила и т.д.) применятся к source и будут учтены в расчетах ниже.
-
     # Перебираем всех живых врагов
     for e_idx, target in enumerate(opposing_team):
         if target.is_dead(): continue

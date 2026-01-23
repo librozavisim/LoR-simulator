@@ -1,8 +1,8 @@
 # logic/card_scripts.py
-
-from logic.scripts.combat import modify_roll_power, deal_effect_damage, self_harm_percent, add_hp_damage, \
-    nullify_hp_damage, convert_status_to_power, repeat_dice_by_status, consume_evade_for_haste, lima_ram_logic, \
-    apply_axis_team_buff, adaptive_damage_type, summon_ally
+from logic.scripts.card_damage import deal_effect_damage, self_harm_percent, add_hp_damage, nullify_hp_damage
+from logic.scripts.card_dice import consume_evade_for_haste, repeat_dice_by_status, adaptive_damage_type
+from logic.scripts.card_power import modify_roll_power, convert_status_to_power, lima_ram_logic
+from logic.scripts.card_special import apply_axis_team_buff, summon_ally
 from logic.scripts.resources import restore_resource
 from logic.scripts.statuses import (
     apply_status, steal_status, multiply_status, remove_status_script,

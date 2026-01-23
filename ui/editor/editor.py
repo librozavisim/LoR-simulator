@@ -1,225 +1,35 @@
 import uuid
-
 import streamlit as st
-
 from core.card import Card
-from core.dice import Dice
-from core.enums import DiceType
 from core.library import Library
-from ui.components import _format_script_text
-from ui.editor.callbacks import (
-    edit_global_script, delete_global_script,
-    edit_dice_script, delete_dice_script
-)
-# Импорты из новых модулей
-from ui.editor.config import SCRIPT_SCHEMAS
-from ui.editor.editor_loader import load_card_to_state
-from ui.editor.forms import render_dynamic_form
 
+# Импорт новых секций
+from ui.editor.sections.loader import render_editor_loader
+from ui.editor.sections.general import render_general_info
+from ui.editor.sections.global_effects import render_global_effects
+from ui.editor.sections.dice_editor import render_dice_editor
 
 def render_editor_page():
     st.markdown("### 🛠️ Универсальный Редактор Карт")
 
+    # Инициализация стейта
     if "ed_script_list" not in st.session_state: st.session_state["ed_script_list"] = []
     if "ed_flags" not in st.session_state: st.session_state["ed_flags"] = []
     if "ed_source_file" not in st.session_state: st.session_state["ed_source_file"] = "custom_cards.json"
 
-    # === ЗАГРУЗКА (С ФИЛЬТРОМ ПО ПАПКАМ) ===
-    all_cards = Library.get_all_cards()
+    # 1. Загрузка
+    render_editor_loader()
 
-    # 1. Получаем список всех файлов-источников
-    unique_sources = set()
-    for c in all_cards:
-        src = Library.get_source(c.id)
-        if src: unique_sources.add(src)
+    # 2. Основная инфа
+    name, tier, ctype, desc = render_general_info()
 
-    sorted_sources = sorted(list(unique_sources))
-    sorted_sources.insert(0, "All")
+    # 3. Глобальные эффекты
+    render_global_effects()
 
-    # 2. Интерфейс выбора
-    c_filter, c_card_sel, c_load_btn = st.columns([1.5, 2.5, 1])
+    # 4. Кубики (возвращает готовые объекты Dice)
+    dice_objects = render_dice_editor(ctype)
 
-    with c_filter:
-        selected_source = st.selectbox("📁 Источник", sorted_sources, key="ed_file_filter")
-
-    # 3. Фильтрация списка карт
-    filtered_cards = []
-    if selected_source == "All":
-        filtered_cards = all_cards
-    else:
-        filtered_cards = [c for c in all_cards if Library.get_source(c.id) == selected_source]
-
-    # Сортировка: Сначала по файлу, потом по имени
-    filtered_cards.sort(key=lambda x: (Library.get_source(x.id) or "", x.name))
-
-    # Формирование опций
-    card_options = {"(Создать новую)": None}
-    for c in filtered_cards:
-        src = Library.get_source(c.id)
-        # Если смотрим "Все", добавляем префикс файла для ясности
-        label = c.name
-        if selected_source == "All" and src:
-            label = f"[{src}] {c.name}"
-
-        # Добавляем ID для уникальности
-        label += f" ({c.id[:4]}..)"
-        card_options[label] = c
-
-    with c_card_sel:
-        selected_option = st.selectbox("Шаблон", list(card_options.keys()))
-
-    with c_load_btn:
-        # Отступ для выравнивания с селектами
-        st.write("")
-        st.write("")
-        if st.button("📥 Загрузить", width='stretch'):
-            load_card_to_state(card_options[selected_option])
-            st.rerun()
-
-    # ПАРАМЕТРЫ
-    with st.container(border=True):
-        c1, c2, c3 = st.columns([3, 1, 1])
-        name = c1.text_input("Название карты", key="ed_name")
-        tier = c2.selectbox("Tier (Ранг)", [1, 2, 3, 4, 5], key="ed_tier")
-        ctype = c3.selectbox("Тип", ["Melee", "Offensive", "Ranged", "Mass Summation", "Mass Individual", "On Play",
-                                     "Item"], key="ed_type")
-
-        # === [NEW] СЕКЦИЯ ФЛАГОВ С ПРЕДПРОСМОТРОМ ЦЕЛИ ===
-        c_flags, c_preview = st.columns([3, 2])
-
-        with c_flags:
-            flags = st.multiselect("Флаги", ["friendly", "offensive", "unchangeable", "exhaust"], key="ed_flags")
-
-        with c_preview:
-            # Анализируем выбранные флаги для отображения режима
-            has_friendly = "friendly" in flags
-            has_offensive = "offensive" in flags
-
-            tgt_icon = "⚔️"
-            tgt_text = "Враги (Default)"
-            tgt_color = "red"  # Цвет Streamlit (red, green, orange, blue, violet)
-
-            if has_friendly and has_offensive:
-                tgt_icon = "⚔️+🛡️"
-                tgt_text = "Гибрид (Враги и Союзники)"
-                tgt_color = "orange"
-            elif has_friendly:
-                tgt_icon = "🛡️"
-                tgt_text = "Только Союзники (Buff)"
-                tgt_color = "green"
-            elif has_offensive:
-                tgt_icon = "⚔️"
-                tgt_text = "Только Враги"
-                tgt_color = "red"
-
-            st.markdown("**Режим прицеливания:**")
-            st.markdown(f":{tgt_color}[## {tgt_icon} {tgt_text}]")
-
-        desc = st.text_area("Описание", key="ed_desc", height=68)
-        save_file = st.session_state.get("ed_source_file", "custom_cards.json")
-        st.caption(f"📂 Файл сохранения: `{save_file}`")
-    # --- 2. ЭФФЕКТЫ КАРТЫ (ГЛОБАЛЬНЫЕ) ---
-    with st.expander("✨ Эффекты карты (Global Scripts)", expanded=True):
-        ce_col1, ce_col2 = st.columns([1, 2])
-        ce_trigger = ce_col1.selectbox("Триггер", ["on_use", "on_combat_end"], key="ce_trig")
-        ce_schema_name = ce_col2.selectbox("Эффект", list(SCRIPT_SCHEMAS.keys()), key="ce_schema")
-
-        current_params = render_dynamic_form("global", ce_schema_name)
-
-        if st.button("➕ Добавить эффект карты"):
-            script_id = SCRIPT_SCHEMAS[ce_schema_name]["id"]
-            st.session_state["ed_script_list"].append({
-                "trigger": ce_trigger,
-                "data": {"script_id": script_id, "params": current_params}
-            })
-            st.rerun()
-
-        st.divider()
-        st.caption("Список эффектов карты:")
-        g_scripts = st.session_state["ed_script_list"]
-
-        if not g_scripts:
-            st.caption("Пусто")
-
-        for i, item in enumerate(g_scripts):
-            trig = item['trigger']
-            sid = item['data'].get('script_id')
-            p = item['data'].get('params', {})
-
-            c_txt, c_edit, c_del = st.columns([4, 0.5, 0.5])
-            # [FIX] Разрешаем HTML для иконок в редакторе
-            c_txt.markdown(f"`{trig}` : **{_format_script_text(sid, p)}**", unsafe_allow_html=True)
-
-            c_edit.button("✏️", key=f"edit_g_{i}", on_click=edit_global_script, args=(i,), help="Редактировать")
-            c_del.button("❌", key=f"del_g_{i}", on_click=delete_global_script, args=(i,), help="Удалить")
-
-    # --- 3. КУБИКИ (DICE) ---
-    st.divider()
-    st.markdown("**Настройка кубиков**")
-
-    def_dice = 0 if ctype == "Item" else 1
-    if "ed_num_dice" not in st.session_state: st.session_state["ed_num_dice"] = def_dice
-    num_dice = st.number_input("Кол-во кубиков", 0, 10, key="ed_num_dice")
-
-    dice_objects = []
-
-    if num_dice > 0:
-        tabs = st.tabs([f"Dice {i + 1}" for i in range(num_dice)])
-
-        for i, tab in enumerate(tabs):
-            with tab:
-                d_c1, d_c2, d_c3, d_c4 = st.columns([1.5, 1, 1, 1])
-                dtype_str = d_c1.selectbox("Тип", ["Slash", "Pierce", "Blunt", "Block", "Evade"], key=f"d_t_{i}")
-                d_min = d_c2.number_input("Min", -99, 999, 2, key=f"d_min_{i}")
-                d_max = d_c3.number_input("Max", -99, 999, 5, key=f"d_max_{i}")
-                d_counter = d_c4.checkbox("Counter?", key=f"d_cnt_{i}")
-
-                st.divider()
-                st.caption("Добавить эффект к кубику:")
-
-                dice_script_key = f"ed_dice_scripts_{i}"
-                if dice_script_key not in st.session_state:
-                    st.session_state[dice_script_key] = []
-
-                de_c1, de_c2 = st.columns([1, 2])
-                de_trig = de_c1.selectbox("Условие", ["on_hit", "on_clash_win", "on_clash_lose", "on_roll", "on_play"], key=f"de_trig_sel_{i}")
-                de_schema = de_c2.selectbox("Эффект", list(SCRIPT_SCHEMAS.keys()), key=f"de_schema_sel_{i}")
-
-                de_params = render_dynamic_form(f"dice_{i}", de_schema)
-
-                if st.button(f"➕ Добавить к Dice {i + 1}", key=f"add_de_{i}"):
-                    s_id = SCRIPT_SCHEMAS[de_schema]["id"]
-                    st.session_state[dice_script_key].append({
-                        "trigger": de_trig,
-                        "data": {"script_id": s_id, "params": de_params}
-                    })
-                    st.rerun()
-
-                st.caption("Эффекты кубика:")
-                d_scripts_list = st.session_state[dice_script_key]
-                if not d_scripts_list: st.caption("Нет")
-
-                final_dice_scripts_dict = {}
-
-                for idx, ds in enumerate(d_scripts_list):
-                    t = ds['trigger']
-                    d_sid = ds['data'].get('script_id')
-                    d_p = ds['data'].get('params', {})
-
-                    c_d_txt, c_d_edit, c_d_del = st.columns([4, 0.5, 0.5])
-                    # [FIX] Разрешаем HTML
-                    c_d_txt.markdown(f"- `{t}` : {_format_script_text(d_sid, d_p)}", unsafe_allow_html=True)
-
-                    c_d_edit.button("✏️", key=f"edit_de_{i}_{idx}", on_click=edit_dice_script, args=(i, idx), help="Редактировать")
-                    c_d_del.button("❌", key=f"del_de_{i}_{idx}", on_click=delete_dice_script, args=(i, idx), help="Удалить")
-
-                    if t not in final_dice_scripts_dict: final_dice_scripts_dict[t] = []
-                    final_dice_scripts_dict[t].append(ds['data'])
-
-                new_die = Dice(d_min, d_max, DiceType[dtype_str.upper()], is_counter=d_counter, scripts=final_dice_scripts_dict)
-                dice_objects.append(new_die)
-
-    # --- 4. СОХРАНЕНИЕ ---
+    # 5. Сохранение и Удаление
     st.divider()
     c_save, c_del, _ = st.columns([1, 1, 2])
 
@@ -231,6 +41,7 @@ def render_editor_page():
             if not cid:
                 cid = name.lower().replace(" ", "_") + "_" + str(uuid.uuid4())[:4]
 
+            # Сборка глобальных скриптов
             final_global_scripts = {}
             for gs in st.session_state["ed_script_list"]:
                 trig = gs["trigger"]

@@ -2,7 +2,7 @@ import streamlit as st
 
 from logic.clash import ClashSystem
 from logic.statuses.status_manager import StatusManager
-from logic.state_manager import StateManager
+from logic.state.state_manager import StateManager
 from ui.simulator.logic.simulator_logic import get_teams, set_cooldowns, capture_output
 
 

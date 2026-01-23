@@ -114,7 +114,7 @@ class RollContext:
             mod_evd = self.source.modifiers.get("power_evade", {}).get("flat", 0)
             stat_bonus = base_acro + mod_evd
             reason = "Acrobatics"
-
+#todo щиты
         if stat_bonus != 0:
             self.modify_power(stat_bonus, reason)
 

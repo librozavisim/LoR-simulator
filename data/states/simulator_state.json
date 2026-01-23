@@ -142,7 +142,12 @@
           },
           "is_ally_target": false,
           "destroy_on_speed": true,
-          "force_onesided": false
+          "force_onesided": false,
+          "mass_defenses": {
+            "0": "Auto",
+            "1": "Auto",
+            "2": "Auto"
+          }
         },
         {
           "speed": 15,
@@ -702,7 +707,10 @@
           },
           "is_ally_target": false,
           "destroy_on_speed": true,
-          "force_onesided": true
+          "force_onesided": true,
+          "mass_defenses": {
+            "0": "Auto"
+          }
         },
         {
           "speed": 7,

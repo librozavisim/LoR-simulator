@@ -1,9 +1,5 @@
-from core.logging import LogLevel, logger
-from core.unit import unit
-from logic import context
 from logic.character_changing.passives.base_passive import BasePassive
-from logic.context import RollContext
-from logic.mechanics.damage import _apply_resource_damage
+from logic.mechanics.damage.damage import _apply_resource_damage
 
 
 # ======================================================================================
