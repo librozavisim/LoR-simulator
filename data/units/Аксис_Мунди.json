@@ -41,7 +41,7 @@
     "active_slots": [
         {
             "speed": 4,
-            "card": null,
+            "card": "axis_minor_setbacks",
             "target_slot": null,
             "is_aggro": false,
             "target_unit_idx": -1,
@@ -101,7 +101,7 @@
         "strike_power": 0,
         "medicine": 0,
         "willpower": 0,
-        "luck": 0,
+        "luck": 100,
         "acrobatics": 0,
         "shields": 0,
         "tough_skin": 0,
@@ -117,7 +117,10 @@
     },
     "passives": [
         "axis_unity",
-        "pseudo_protagonist"
+        "pseudo_protagonist",
+        "source_access",
+        "meta_awareness",
+        "chthonic_nature"
     ],
     "talents": [],
     "augmentations": [],

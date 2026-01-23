@@ -89,36 +89,50 @@ class RollContext:
             logger.log(f"🚫 Evade disabled for {self.source.name}", LogLevel.VERBOSE, "Combat")
             return
 
-        # --- 2. ДОБАВЛЕНИЕ СТАТОВ (Stats Logic) ---
-        stat_bonus = 0
+        # --- 2. ОПРЕДЕЛЕНИЕ БАЗОВОГО СТАТА (Base Stat Logic) ---
+        base_stat_val = 0
         reason = "Stat"
 
+        # Определяем стандартный стат для этого типа кубика
         if self.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
-            # Атака -> Сила + Мод. Атаки
-            base_str = self.source.stats.get("strength", 0)
-            mod_atk = self.source.modifiers.get("power_attack", {}).get("flat", 0)
-            stat_bonus = base_str + mod_atk
+            base_stat_val = self.source.attributes.get("strength", 0)
             reason = "Strength"
-
         elif self.dice.dtype == DiceType.BLOCK:
-            # Блок -> Стойкость + Мод. Блока
-            base_end = self.source.stats.get("endurance", 0)
-            mod_blk = self.source.modifiers.get("power_block", {}).get("flat", 0)
-            stat_bonus = base_end + mod_blk
+            base_stat_val = self.source.attributes.get("endurance", 0)
             reason = "Endurance"
-
         elif self.dice.dtype == DiceType.EVADE:
-            # Уклонение -> Акробатика (Навык) + Мод. Уклонения
-            # (Или Ловкость, зависит от вашей системы, здесь берем Акробатику как навык)
-            base_acro = self.source.skills.get("acrobatics", 0)
-            mod_evd = self.source.modifiers.get("power_evade", {}).get("flat", 0)
-            stat_bonus = base_acro + mod_evd
+            base_stat_val = self.source.skills.get("acrobatics", 0)
             reason = "Acrobatics"
 
-        if stat_bonus != 0:
-            self.modify_power(stat_bonus, reason)
+        # [NEW] Хук для подмены базового стата (например, Luck вместо Strength)
+        if hasattr(self.source, "apply_mechanics_filter"):
+            # Передаем текущую пару (значение, имя), получаем новую
+            base_stat_val, reason = self.source.apply_mechanics_filter(
+                "override_roll_base_stat",
+                (base_stat_val, reason),
+                dice=self.dice
+            )
 
-        # --- 3. ГЛОБАЛЬНЫЙ БОНУС (Power All) ---
+        # Применяем базовый (или подмененный) стат
+        if base_stat_val != 0:
+            self.modify_power(base_stat_val, reason)
+
+        # --- 3. ДОБАВЛЕНИЕ МОДИФИКАТОРОВ (Modifiers) ---
+        # Модификаторы (buffs/items) добавляются ПОВЕРХ базы (даже если база была подменена)
+
+        if self.dice.dtype in [DiceType.SLASH, DiceType.PIERCE, DiceType.BLUNT]:
+            mod_atk = self.source.modifiers.get("power_attack", {}).get("flat", 0)
+            if mod_atk: self.modify_power(mod_atk, "Power Attack")
+
+        elif self.dice.dtype == DiceType.BLOCK:
+            mod_blk = self.source.modifiers.get("power_block", {}).get("flat", 0)
+            if mod_blk: self.modify_power(mod_blk, "Power Block")
+
+        elif self.dice.dtype == DiceType.EVADE:
+            mod_evd = self.source.modifiers.get("power_evade", {}).get("flat", 0)
+            if mod_evd: self.modify_power(mod_evd, "Power Evade")
+
+        # --- 4. ГЛОБАЛЬНЫЙ БОНУС (Power All) ---
         power_all = self.source.modifiers.get("power_all", {}).get("flat", 0)
         if power_all != 0:
             self.modify_power(power_all, "Power All")
@@ -128,9 +142,6 @@ class RollContext:
         Вызов хуков on_roll у всех пассивок, талантов и статусов.
         """
         # 1. Пассивки и Таланты (Active Objects)
-        # В `collectors.py` мы должны были собрать активные объекты в список,
-        # или перебирать их здесь. Для надежности переберем реестры по ID.
-
         # Собираем все ID способностей
         all_ability_ids = self.source.passives + self.source.talents
 

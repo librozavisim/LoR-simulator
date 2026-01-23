@@ -135,12 +135,18 @@ class PassiveSourceAccess(BasePassive):
     name = "Доступ к истокам"
     description = (
         "В бою все кубики (кроме скорости) зависят не от характеристик, "
-        "а от Удачи (Luck). (Соотношение TBD: 1 к 5 или 1 к 10)."
+        "а от Удачи (Luck). (Соотношение 1 к 5 от прокачиваемого стата)."
     )
     is_active_ability = False
 
-    def modify_dice_stat_dependency(self, unit, dice_obj):
-        pass
+    def override_roll_base_stat(self, unit, current_pair, dice=None, **kwargs):
+        luck_val = unit.skills.get("luck", 0)
+
+        # Формула: Luck / 5
+        new_val = luck_val // 5
+
+        # Возвращаем новое значение и название для лога
+        return new_val, f"Luck ({luck_val}//5)"
 
 
 class PassiveMetaAwareness(BasePassive):
