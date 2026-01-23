@@ -18,7 +18,33 @@
         "imp_sp": 0,
         "imp_stg": 0
     },
+    "current_hp": 1674,
+    "current_sp": 20,
+    "current_stagger": 10,
+    "resources": {
+        "luck": 0
+    },
+    "cooldowns": {},
+    "card_cooldowns": {},
+    "active_buffs": {},
+    "_status_effects": {},
+    "delayed_queue": [],
     "deck": [],
+    "active_slots": [],
+    "stored_dice": [],
+    "counter_dice": [],
+    "memory": {
+        "status_rank": "9 (Fixer)",
+        "start_of_battle_stats": {
+            "hp": 1674,
+            "sp": 20,
+            "stagger": 10
+        },
+        "battle_initialized": true
+    },
+    "death_count": 0,
+    "overkill_damage": 0,
+    "money_log": [],
     "base_stats": {
         "current_hp": 1674,
         "current_sp": 20,
@@ -28,9 +54,9 @@
         "armor_name": "Standard Fixer Suit",
         "armor_type": "Medium",
         "hp_resists": {
-            "slash": 1.0,
-            "pierce": 1.0,
-            "blunt": 1.0
+            "slash": 1.7999999999999998,
+            "pierce": 0.8,
+            "blunt": 0.30000000000000004
         },
         "stagger_resists": {
             "slash": 1.0,
@@ -39,7 +65,6 @@
         },
         "weapon_id": "none"
     },
-    "card_cooldowns": {},
     "attributes": {
         "strength": 0,
         "endurance": 30,
@@ -190,11 +215,5 @@
             "sp": 4
         }
     },
-    "cooldowns": {},
-    "active_buffs": {},
-    "resources": {
-        "luck": 0
-    },
-    "biography": "",
-    "money_log": []
+    "biography": ""
 }

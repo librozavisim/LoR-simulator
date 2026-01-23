@@ -1,5 +1,7 @@
 from logic.character_changing.passives.asgick_passives import PassiveWitnessOfGroGoroth, PassivePovar, PassiveFoodLover, \
     PassiveDistortionGroGoroth
+from logic.character_changing.passives.axis_passives import PassiveAxisUnity, PassiveChthonic, PassiveMetaAwareness, \
+    PassiveSourceAccess, PassivePseudoProtagonist
 from logic.character_changing.passives.equipment_passives import PassiveAnnihilator, PassiveBanganrang, PassiveGanitar, \
     PassiveLimagun, PassivePhantomRazors, PassiveCoagulation
 from logic.character_changing.passives.fanat_passives import PassiveFanatReflect, PassiveFanatMarkHunter, \
@@ -50,4 +52,10 @@ PASSIVE_REGISTRY = {
     "fanat_mark_hunter": PassiveFanatMarkHunter(),
     "fanat_reflect": PassiveFanatReflect(),
 "fanat_unwavering": PassiveFanatUnwavering(),
+
+"axis_unity": PassiveAxisUnity(),
+"pseudo_protagonist": PassivePseudoProtagonist(),
+    "source_access": PassiveSourceAccess(),
+    "meta_awareness": PassiveMetaAwareness(),
+    "chthonic_nature": PassiveChthonic(),
 }

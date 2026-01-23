@@ -1,5 +1,8 @@
 from core.logging import LogLevel, logger
+from core.unit import unit
+from logic import context
 from logic.character_changing.passives.base_passive import BasePassive
+from logic.context import RollContext
 from logic.mechanics.damage import _apply_resource_damage
 
 
@@ -140,32 +143,32 @@ class TalentViciousMockery(BasePassive):
     )
     is_active_ability = False
 
-    def on_hit(self, unit, context):
-        """
-        Срабатывает при успешном попадании атакой.
-        Наносит доп. урон по SP врага.
-        """
-        target = context.target
-        if not target: return
-
-        # 1. Получаем значение Красноречия (Eloquence)
-        # skill_value берется из unit.skills (словарь)
-        eloquence = unit.skills.get("eloquence", 0)
-
-        # 2. Считаем урон
-        sp_damage = int(eloquence / 5)
-
-        if sp_damage > 0:
-            # Логируем
-            if context.log is not None:
-                context.log.append(f"👅 **Злой Язык**: {sp_damage} SP урона")
-
-            logger.log(f"👅 Vicious Mockery ({unit.name}) deals {sp_damage} SP dmg to {target.name}", LogLevel.VERBOSE,
-                       "Talent")
-
-            # 3. Наносим урон по SP
-            # Используем внутреннюю функцию, она обрабатывает смерть/панику корректно
-            _apply_resource_damage(target, sp_damage, "sp", context)
+    # def on_hit(self, ctx: RollContext, **kwargs):
+    #     """
+    #     Срабатывает при успешном попадании атакой.
+    #     Наносит доп. урон по SP врага.
+    #     """
+    #     target = context.target
+    #     if not target: return
+    #
+    #     # 1. Получаем значение Красноречия (Eloquence)
+    #     # skill_value берется из unit.skills (словарь)
+    #     eloquence = unit.skills.get("eloquence", 0)
+    #
+    #     # 2. Считаем урон
+    #     sp_damage = int(eloquence / 5)
+    #
+    #     if sp_damage > 0:
+    #         # Логируем
+    #         if context.log is not None:
+    #             context.log.append(f"👅 **Злой Язык**: {sp_damage} SP урона")
+    #
+    #         logger.log(f"👅 Vicious Mockery ({unit.name}) deals {sp_damage} SP dmg to {target.name}", LogLevel.VERBOSE,
+    #                    "Talent")
+    #
+    #         # 3. Наносим урон по SP
+    #         # Используем внутреннюю функцию, она обрабатывает смерть/панику корректно
+    #         _apply_resource_damage(target, sp_damage, "sp", context)
 
 
 class TalentVerbalBarrier(BasePassive):

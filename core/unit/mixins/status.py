@@ -1,6 +1,6 @@
 from typing import Dict, TYPE_CHECKING
 from core.logging import logger, LogLevel
-
+import streamlit as st
 if TYPE_CHECKING:
     pass
 
@@ -66,9 +66,38 @@ class UnitStatusMixin:
         logger.log(f"🧪 {self.name}: +{amount} {name} ({duration}t)", LogLevel.NORMAL, "Status")
 
         # === [ОПТИМИЗАЦИЯ] 2. ХУК: on_status_applied ===
-        if trigger_events and hasattr(self, "trigger_mechanics"):
-            # Вызывает метод on_status_applied у всех активных механик
-            self.trigger_mechanics("on_status_applied", self, name, amount, duration=duration)
+        if trigger_events:
+            # A. ЛОКАЛЬНЫЙ ХУК (Для самого себя)
+            if hasattr(self, "trigger_mechanics"):
+                self.trigger_mechanics("on_status_applied", self, name, amount, duration=duration)
+
+            # B. [NEW] ГЛОБАЛЬНЫЙ ХУК (Для наблюдателей, например Аксис)
+            # Мы оповещаем всех остальных юнитов в бою, что на 'self' наложился статус
+            try:
+                # Получаем списки команд из сессии (безопасный доступ)
+                team_l = st.session_state.get('team_left', [])
+                team_r = st.session_state.get('team_right', [])
+                all_units = team_l + team_r
+
+                for observer in all_units:
+                    # Пропускаем себя (локальный хук уже сработал) и мертвых
+                    if observer is self or observer.is_dead():
+                        continue
+
+                    if hasattr(observer, "trigger_mechanics"):
+                        # Вызываем событие у наблюдателя
+                        # Аргументы: (unit=observer, target=self, status_id=name, ...)
+                        observer.trigger_mechanics(
+                            "on_status_applied_global",
+                            observer,
+                            target=self,
+                            status_id=name,
+                            amount=amount,
+                            duration=duration
+                        )
+            except Exception as e:
+                # Заглушка на случай ошибок доступа к session_state вне контекста
+                pass
         # ==============================================
 
         return True, None

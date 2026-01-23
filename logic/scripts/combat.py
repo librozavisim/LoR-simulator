@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from core.enums import DiceType
 from core.logging import logger, LogLevel
 from logic.scripts.utils import _check_conditions, _resolve_value, _get_targets
+import streamlit as st
 
 if TYPE_CHECKING:
     from logic.context import RollContext
@@ -167,3 +168,88 @@ def lima_ram_logic(ctx: 'RollContext', params: dict):
         unit.remove_status("haste", 999)
         if ctx.log: ctx.log.append(f"📉 **{unit.name}** consumed all Haste")
         logger.log(f"📉 Ram Logic: {final_bonus} Power, Haste Consumed", LogLevel.VERBOSE, "Scripts")
+
+
+def apply_axis_team_buff(ctx: 'RollContext', params: dict):
+    """
+    Накладывает 1 статус всем союзникам (КРОМЕ СЕБЯ).
+    Если других союзников нет, накладывает 2 статуса СЕБЕ.
+    """
+    source = ctx.source
+    status = params.get("status")
+    duration = int(params.get("duration", 1))
+
+    # 1. Определяем команду
+    my_team = []
+    if 'team_left' in st.session_state and source in st.session_state['team_left']:
+        my_team = st.session_state['team_left']
+    elif 'team_right' in st.session_state and source in st.session_state['team_right']:
+        my_team = st.session_state['team_right']
+
+    # 2. Ищем других живых союзников
+    # (u is not source) исключает самого Аксиса
+    other_allies = [u for u in my_team if u is not source and not u.is_dead()]
+
+    if other_allies:
+        # Условие: Есть союзники -> Баффаем их по 1
+        for ally in other_allies:
+            ally.add_status(status, 1, duration=duration)
+
+        if ctx.log is not None:
+            ctx.log.append(f"🙌 **Axis Team**: +1 {status.capitalize()} to {len(other_allies)} allies")
+
+        logger.log(f"🙌 Axis Team Buff: Applied 1 {status} to allies of {source.name}", LogLevel.VERBOSE, "Scripts")
+    else:
+        # Условие: Нет союзников -> Баффаем себя на 2
+        source.add_status(status, 2, duration=duration)
+
+        if ctx.log is not None:
+            ctx.log.append(f"👤 **Axis Solo**: +2 {status.capitalize()} to Self")
+
+        logger.log(f"👤 Axis Solo Buff: Applied 2 {status} to {source.name}", LogLevel.VERBOSE, "Scripts")
+
+
+def adaptive_damage_type(ctx: 'RollContext', params: dict):
+    """
+    Меняет тип урона (кубика или всех кубиков карты) на тот,
+    к которому у цели наивысшая уязвимость (наибольший множитель резиста).
+    """
+    if not ctx.target: return
+
+    # Получаем резисты цели
+    res = ctx.target.hp_resists
+
+    # Ищем максимальный множитель (Больше множитель = Больше урона = Слабость)
+    # Приоритет при равенстве: Slash -> Pierce -> Blunt (можно любой)
+    best_type = DiceType.SLASH
+    max_mult = res.slash
+
+    if res.pierce > max_mult:
+        max_mult = res.pierce
+        best_type = DiceType.PIERCE
+
+    if res.blunt > max_mult:
+        max_mult = res.blunt
+        best_type = DiceType.BLUNT
+
+    # Применяем изменение
+    applied = False
+
+    # 1. Если вызвано на конкретном кубике (on_roll)
+    if ctx.dice:
+        if ctx.dice.dtype != best_type:
+            ctx.dice.dtype = best_type
+            applied = True
+
+    # 2. Если вызвано на карте (on_use), меняем все кубики карты
+    elif ctx.source.current_card:
+        for d in ctx.source.current_card.dice_list:
+            if d.dtype != best_type:
+                d.dtype = best_type
+                applied = True
+
+    if applied:
+        msg = f"🔄 **Adaptive**: Dmg Type -> {best_type.name} (Res: {max_mult}x)"
+        if ctx.log is not None:
+            ctx.log.append(msg)
+        logger.log(f"🔄 Adaptive: Switched to {best_type.name} vs {ctx.target.name}", LogLevel.VERBOSE, "Scripts")
