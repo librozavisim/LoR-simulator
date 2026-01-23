@@ -1,7 +1,9 @@
 import streamlit as st
-from ui.simulator.logic.step_func import roll_phase, execute_combat_auto
-from ui.simulator.logic.simulator_logic import sync_state_from_widgets
+
 from ui.simulator.logic.precalculate_speed_rolls import precalculate_interactions
+from ui.simulator.logic.simulator_logic import sync_state_from_widgets
+from ui.simulator.logic.step_func import roll_phase, execute_combat_auto
+
 
 def render_top_controls(team_left, team_right):
     col_counter, col_ctrl = st.columns([1, 4])

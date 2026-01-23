@@ -1,9 +1,11 @@
 import streamlit as st
-from ui.simulator.components.slots.utils import resolve_slot_card
+
 from ui.simulator.components.slots.header import render_slot_header
+from ui.simulator.components.slots.info import render_card_info
 from ui.simulator.components.slots.selector import render_card_selector
 from ui.simulator.components.slots.targeting import render_target_selector
-from ui.simulator.components.slots.info import render_card_info
+from ui.simulator.components.slots.utils import resolve_slot_card
+
 
 def render_slot_strip(unit, opposing_team, my_team, slot_idx, key_prefix):
     """

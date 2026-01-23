@@ -1,6 +1,9 @@
 import copy
+
 import streamlit as st
+
 from ui.app_modules.state_controller import update_and_save_state
+
 
 def render_team_builder_sidebar():
     """

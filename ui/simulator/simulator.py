@@ -1,11 +1,12 @@
 import streamlit as st
 
+from ui.simulator.views.controls import render_top_controls
+from ui.simulator.views.logs import render_logs
+from ui.simulator.views.sidebar import render_sidebar
 # Импорты новых представлений
 from ui.simulator.views.styles import inject_simulator_styles
-from ui.simulator.views.sidebar import render_sidebar
-from ui.simulator.views.controls import render_top_controls
 from ui.simulator.views.teams import render_teams
-from ui.simulator.views.logs import render_logs
+
 
 def render_simulator_page():
     # Инициализация состояния

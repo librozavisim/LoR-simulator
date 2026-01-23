@@ -1,7 +1,9 @@
 import copy
 import uuid
 from typing import TYPE_CHECKING
+
 import streamlit as st
+
 from core.logging import logger, LogLevel
 
 if TYPE_CHECKING:

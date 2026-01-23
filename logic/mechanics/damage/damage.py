@@ -1,9 +1,8 @@
 from core.logging import logger, LogLevel
 from logic.calculations.base_calc import get_modded_value
-
+from logic.mechanics.damage.damage_calc import _calculate_resistance, _calculate_outgoing_damage
 # Импортируем из новых модулей
 from logic.mechanics.damage.damage_utils import _get_attack_info, _apply_resource_damage
-from logic.mechanics.damage.damage_calc import _calculate_resistance, _calculate_outgoing_damage
 
 
 def _apply_stagger_side_damage(target, attacker_ctx, final_amt):

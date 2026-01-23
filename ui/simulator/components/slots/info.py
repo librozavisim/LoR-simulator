@@ -1,9 +1,10 @@
 import streamlit as st
-from ui.icons import get_icon_html
-from ui.components import _format_script_text
-from ui.styles import TYPE_COLORS
+
 from core.enums import DiceType
 from logic.weapon_definitions import WEAPON_REGISTRY
+from ui.components import _format_script_text
+from ui.icons import get_icon_html
+from ui.styles import TYPE_COLORS
 
 
 def render_card_info(unit, slot):

@@ -1,8 +1,10 @@
 import random
+
 from core.unit.unit import Unit
 from ui.checks.constants import (
     TYPE_10_ATTRS, TYPE_15_SKILLS, TYPE_WISDOM, TYPE_LUCK, TYPE_INTELLECT
 )
+
 
 class CheckContext:
     """Контекст для перехвата броска (механики Adv/Dis)."""

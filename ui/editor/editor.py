@@ -1,13 +1,15 @@
 import uuid
+
 import streamlit as st
+
 from core.card import Card
 from core.library import Library
-
-# Импорт новых секций
-from ui.editor.sections.loader import render_editor_loader
+from ui.editor.sections.dice_editor import render_dice_editor
 from ui.editor.sections.general import render_general_info
 from ui.editor.sections.global_effects import render_global_effects
-from ui.editor.sections.dice_editor import render_dice_editor
+# Импорт новых секций
+from ui.editor.sections.loader import render_editor_loader
+
 
 def render_editor_page():
     st.markdown("### 🛠️ Универсальный Редактор Карт")

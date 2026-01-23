@@ -1,6 +1,8 @@
 import streamlit as st
-from ui.checks.constants import TYPE_10_ATTRS, TYPE_15_SKILLS
+
 from ui.checks.components import draw_roll_interface, draw_luck_interface
+from ui.checks.constants import TYPE_10_ATTRS, TYPE_15_SKILLS
+
 
 def render_checks_page():
     st.title("🎲 Проверки (Skill Checks)")

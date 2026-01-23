@@ -1,7 +1,9 @@
-import streamlit as st
 import math
-from core.unit.unit_library import UnitLibrary
+
+import streamlit as st
+
 from core.ranks import get_rank_info
+from core.unit.unit_library import UnitLibrary
 from ui.format_utils import format_large_number
 
 

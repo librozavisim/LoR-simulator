@@ -1,13 +1,13 @@
 import streamlit as st
+
+from core.logging import logger  # [ВАЖНО] Импорт логгера
 from core.unit.unit import Unit
 from core.unit.unit_library import UnitLibrary
-from core.logging import logger, LogLevel  # [ВАЖНО] Импорт логгера
-
+from ui.profile.abilities import render_abilities
+from ui.profile.equipment import render_equipment
 # Import our new components
 from ui.profile.header import render_header, render_basic_info
 from ui.profile.stats import render_stats
-from ui.profile.equipment import render_equipment
-from ui.profile.abilities import render_abilities
 
 
 def render_profile_page():

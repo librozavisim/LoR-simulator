@@ -1,7 +1,8 @@
-import os
 import json
-import streamlit as st
+import os
 from collections import Counter
+
+import streamlit as st
 
 BUILDS_DIR = "data/builds"
 

@@ -1,5 +1,5 @@
 from core.logging import logger, LogLevel
-from logic.mechanics import scripts, rolling, damage
+from logic.mechanics import scripts
 from logic.mechanics.damage.damage import apply_damage, deal_direct_damage
 from logic.mechanics.rolling.rolling import create_roll_context
 

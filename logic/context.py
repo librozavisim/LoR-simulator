@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
+
 from core.dice import Dice
-from core.unit.unit import Unit
 from core.enums import DiceType
 from core.logging import logger, LogLevel  # [NEW] Для логов
+from core.unit.unit import Unit
 
 
 @dataclass

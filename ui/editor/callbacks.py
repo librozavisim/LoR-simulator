@@ -1,5 +1,7 @@
 import streamlit as st
+
 from ui.editor.config import SCRIPT_SCHEMAS
+
 
 def edit_global_script(index):
     """Callback для редактирования глобального скрипта."""

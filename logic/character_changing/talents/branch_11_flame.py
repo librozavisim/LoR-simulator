@@ -1,5 +1,5 @@
-from logic.character_changing.passives.base_passive import BasePassive
 from core.logging import logger, LogLevel  # [NEW] Import
+from logic.character_changing.passives.base_passive import BasePassive
 
 # Список ID талантов ветки 11 (используется для расчёта прокачки)
 BRANCH_11_IDS = [

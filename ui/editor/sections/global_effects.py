@@ -1,8 +1,10 @@
 import streamlit as st
+
+from ui.components import _format_script_text
+from ui.editor.callbacks import edit_global_script, delete_global_script
 from ui.editor.config import SCRIPT_SCHEMAS
 from ui.editor.forms import render_dynamic_form
-from ui.editor.callbacks import edit_global_script, delete_global_script
-from ui.components import _format_script_text
+
 
 def render_global_effects():
     """

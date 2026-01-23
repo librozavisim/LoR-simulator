@@ -1,6 +1,9 @@
 from typing import Dict, TYPE_CHECKING
-from core.logging import logger, LogLevel
+
 import streamlit as st
+
+from core.logging import logger, LogLevel
+
 if TYPE_CHECKING:
     pass
 

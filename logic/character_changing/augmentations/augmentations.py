@@ -1,6 +1,6 @@
-from logic.character_changing.passives.base_passive import BasePassive
 from core.enums import DiceType
-from logic.context import RollContext # Needed for type hinting if used
+from logic.character_changing.passives.base_passive import BasePassive
+
 
 class Augmentation(BasePassive):
     """Базовый класс для аугментаций."""

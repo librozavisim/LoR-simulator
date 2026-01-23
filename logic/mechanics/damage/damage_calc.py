@@ -1,4 +1,3 @@
-from core.logging import logger, LogLevel
 from logic.calculations.base_calc import get_modded_value
 
 

@@ -1,5 +1,7 @@
 import streamlit as st
+
 from core.unit.unit import Unit
+
 
 def render_combat_info(unit: Unit):
     """Отображает сопротивления и боевые бонусы."""

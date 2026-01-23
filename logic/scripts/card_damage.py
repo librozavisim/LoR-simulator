@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+
 from core.logging import logger, LogLevel
 from logic.scripts.utils import _check_conditions, _resolve_value, _get_targets
 

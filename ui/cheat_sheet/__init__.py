@@ -1,9 +1,11 @@
 import streamlit as st
+
+from ui.cheat_sheet.calculator import render_calculator_tab
 from ui.cheat_sheet.static_tabs import (
     render_speed_tab, render_hp_tab, render_power_tab,
     render_eco_tab, render_mech_tab
 )
-from ui.cheat_sheet.calculator import render_calculator_tab
+
 
 def render_cheat_sheet_page():
     st.title("📚 Справочник характеристик")

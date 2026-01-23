@@ -1,5 +1,3 @@
-from core.logging import logger, LogLevel
-
 def get_word(value, positive="Повышает", negative="Понижает"):
     return positive if value >= 0 else negative
 

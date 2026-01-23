@@ -1,7 +1,8 @@
+from ui.profile.stats.attributes import render_attributes
 from ui.profile.stats.augmentations import render_augmentations
 from ui.profile.stats.bars import render_status_bars
-from ui.profile.stats.attributes import render_attributes
 from ui.profile.stats.skills import render_luck, render_skills
+
 
 def render_stats(unit, u_key):
     """Главная функция для отрисовки вкладки Статистика."""

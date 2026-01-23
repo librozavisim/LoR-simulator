@@ -1,7 +1,10 @@
-import streamlit as st
 from collections import Counter
+
+import streamlit as st
+
 from core.library import Library
 from ui.simulator.components.common import CARD_TYPE_ICONS
+
 
 def render_card_selector(container, unit, slot, slot_idx, key_prefix):
     """

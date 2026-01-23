@@ -1,6 +1,6 @@
 from core.logging import logger, LogLevel
-from logic.battle_flow.speed import calculate_speed_advantage
 from logic.battle_flow.clash.clash_utils import check_destruction_immunity
+from logic.battle_flow.speed import calculate_speed_advantage
 
 
 def setup_clash_parameters(engine, attacker, defender, spd_a, spd_d, intent_a, intent_d):

@@ -1,8 +1,9 @@
-from logic.mechanics.clash_mechanics import ClashMechanicsMixin
-from logic.battle_flow.clash.clash import process_clash
-from logic.battle_flow.onesided.onesided import process_onesided
-from logic.battle_flow.interactions import resolve_interaction
 from core.logging import logger, LogLevel
+from logic.battle_flow.clash.clash import process_clash
+from logic.battle_flow.interactions import resolve_interaction
+from logic.battle_flow.onesided.onesided import process_onesided
+from logic.mechanics.clash_mechanics import ClashMechanicsMixin
+
 
 class ClashFlowMixin(ClashMechanicsMixin):
     """

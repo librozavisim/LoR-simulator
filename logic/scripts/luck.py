@@ -1,7 +1,8 @@
 import copy
 from typing import TYPE_CHECKING
-from logic.scripts.utils import _check_conditions
+
 from core.logging import logger, LogLevel
+from logic.scripts.utils import _check_conditions
 
 if TYPE_CHECKING:
     from logic.context import RollContext

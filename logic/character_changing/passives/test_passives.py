@@ -1,5 +1,6 @@
-from logic.context import RollContext
 from logic.character_changing.passives.base_passive import BasePassive
+from logic.context import RollContext
+
 
 class IWin(BasePassive):
     id = "i_win"

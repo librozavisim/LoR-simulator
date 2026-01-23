@@ -1,8 +1,8 @@
 from core.dice import Dice
 from core.enums import DiceType
+from core.logging import logger, LogLevel  # [NEW] Import
 from core.ranks import get_base_roll_by_level
 from logic.character_changing.passives.base_passive import BasePassive
-from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================

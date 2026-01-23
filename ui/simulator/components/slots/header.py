@@ -1,4 +1,3 @@
-import streamlit as st
 from ui.simulator.components.common import CARD_TYPE_ICONS
 
 

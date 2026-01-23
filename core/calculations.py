@@ -1,9 +1,5 @@
-from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
-from logic.character_changing.passives import PASSIVE_REGISTRY
-from logic.character_changing.talents import TALENT_REGISTRY
-
-# Импорт наших новых модулей
-from logic.calculations.modifiers import init_modifiers, init_bonuses
+# [LOG] Импорт логгера
+from core.logging import logger, LogLevel
 from logic.calculations.collectors import (
     collect_ability_bonuses, collect_status_bonuses, collect_weapon_bonuses
 )
@@ -11,9 +7,11 @@ from logic.calculations.formulas import (
     calculate_totals, apply_attribute_effects, apply_skill_effects,
     calculate_speed_dice, calculate_pools, finalize_state
 )
-
-# [LOG] Импорт логгера
-from core.logging import logger, LogLevel
+# Импорт наших новых модулей
+from logic.calculations.modifiers import init_modifiers, init_bonuses
+from logic.character_changing.augmentations.augmentations import AUGMENTATION_REGISTRY
+from logic.character_changing.passives import PASSIVE_REGISTRY
+from logic.character_changing.talents import TALENT_REGISTRY
 
 
 def recalculate_unit_stats(unit):

@@ -1,7 +1,7 @@
+from logic.state.action_serializer import ActionSerializer
 from logic.state.file_manager import StateFileManager
 from logic.state.snapshot_maker import SnapshotMaker
 from logic.state.snapshot_restorer import SnapshotRestorer
-from logic.state.action_serializer import ActionSerializer
 
 
 class StateManager:

@@ -1,5 +1,6 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
+
 from core.game_templates import CHARACTER_TEMPLATES
 
 

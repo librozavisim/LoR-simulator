@@ -1,10 +1,11 @@
 import streamlit as st
+
 from core.dice import Dice
 from core.enums import DiceType
+from ui.components import _format_script_text
+from ui.editor.callbacks import edit_dice_script, delete_dice_script
 from ui.editor.config import SCRIPT_SCHEMAS
 from ui.editor.forms import render_dynamic_form
-from ui.editor.callbacks import edit_dice_script, delete_dice_script
-from ui.components import _format_script_text
 
 
 def render_dice_editor(card_type):

@@ -1,6 +1,8 @@
 import streamlit as st
+
 from core.library import Library
 from logic.state.state_manager import StateManager
+
 
 def save_cb():
     StateManager.save_state(st.session_state)

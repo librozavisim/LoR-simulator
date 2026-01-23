@@ -11,9 +11,10 @@ from logic.character_changing.passives.lilith_passives import PassiveHedonism, P
 from logic.character_changing.passives.lima_passives import PassiveAcceleratedLearning, TalentArtOfSelfDefense, \
     PassiveLuckyStreak, \
     PassiveFourEyes, PassiveHuntersVedas, PassiveMindSuppression, PassiveShipOfTheseus, PassiveWildCityscape
-from logic.character_changing.passives.rein_passives import PassiveSCells, PassiveNewDiscovery, TalentRedLycoris, TalentShadowOfMajesty
-from logic.character_changing.passives.zafiel_passives import PassiveSevereTraining, PassiveAdaptation
+from logic.character_changing.passives.rein_passives import PassiveSCells, PassiveNewDiscovery, TalentRedLycoris, \
+    TalentShadowOfMajesty
 from logic.character_changing.passives.test_passives import IWin, ILose
+from logic.character_changing.passives.zafiel_passives import PassiveSevereTraining, PassiveAdaptation
 
 # === РЕГИСТРАЦИЯ ===
 PASSIVE_REGISTRY = {

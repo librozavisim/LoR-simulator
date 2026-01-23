@@ -1,10 +1,10 @@
 from core.enums import DiceType
 from core.logging import logger, LogLevel
-
+from logic.battle_flow.onesided.onesided_resolution import resolve_counter_clash, resolve_passive_defense, \
+    resolve_unopposed_hit
 # Новые модули
 from logic.battle_flow.onesided.onesided_setup import setup_onesided_parameters
 from logic.battle_flow.onesided.onesided_utils import fetch_next_counter, store_unused_counter
-from logic.battle_flow.onesided.onesided_resolution import resolve_counter_clash, resolve_passive_defense, resolve_unopposed_hit
 
 
 def process_onesided(engine, source, target, round_label, spd_atk, spd_d, intent_atk=True, is_redirected=False):

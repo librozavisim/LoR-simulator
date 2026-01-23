@@ -1,4 +1,5 @@
 import streamlit as st
+
 from logic.character_changing.passives import PASSIVE_REGISTRY
 from logic.character_changing.talents import TALENT_REGISTRY
 

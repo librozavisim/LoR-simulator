@@ -1,10 +1,10 @@
 import random
 
 from core.enums import DiceType
+from core.logging import logger, LogLevel  # [NEW] Import
 from core.tree_data import SKILL_TREE
 from logic.character_changing.passives.base_passive import BasePassive
 from logic.context import RollContext
-from core.logging import logger, LogLevel  # [NEW] Import
 
 
 # ==========================================

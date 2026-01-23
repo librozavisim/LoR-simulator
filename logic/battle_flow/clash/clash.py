@@ -1,11 +1,10 @@
 from core.enums import DiceType
 from core.logging import logger, LogLevel
-
+from logic.battle_flow.clash.clash_one_sided import handle_one_sided_exchange
+from logic.battle_flow.clash.clash_resolution import resolve_clash_round
 # Новые модули
 from logic.battle_flow.clash.clash_setup import setup_clash_parameters
 from logic.battle_flow.clash.clash_state import ClashParticipantState
-from logic.battle_flow.clash.clash_resolution import resolve_clash_round
-from logic.battle_flow.clash.clash_one_sided import handle_one_sided_exchange
 
 
 def process_clash(engine, attacker, defender, round_label, is_left, spd_a, spd_d, intent_a=True, intent_d=True):

@@ -1,7 +1,8 @@
 import random
-from logic.battle_flow.targeting import calculate_redirections
-from logic.battle_flow.priorities import get_action_priority
+
 from core.logging import logger, LogLevel
+from logic.battle_flow.priorities import get_action_priority
+from logic.battle_flow.targeting import calculate_redirections
 
 
 def prepare_turn(engine, team_left: list, team_right: list):

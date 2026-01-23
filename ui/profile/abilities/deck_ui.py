@@ -1,11 +1,14 @@
 import os
-import streamlit as st
 from collections import Counter
+
+import streamlit as st
+
 from core.library import Library
 from ui.profile.abilities.build_manager import (
     BUILDS_DIR, ensure_builds_dir, save_build, load_build_ids,
     get_card_source_files, load_ids_from_source, force_update_deck_ui
 )
+
 
 def render_deck_builder(unit, u_key):
     # Предварительная загрузка библиотеки

@@ -1,5 +1,4 @@
 from logic.character_changing.passives.base_passive import BasePassive
-from logic.mechanics.damage.damage import _apply_resource_damage
 
 
 # ======================================================================================

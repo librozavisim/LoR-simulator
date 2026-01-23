@@ -1,5 +1,6 @@
 import streamlit as st
-from ui.profile.stats.attributes import get_mod_value # Reuse helper
+
+from ui.profile.stats.attributes import get_mod_value  # Reuse helper
 
 SKILL_LABELS = {
     "strike_power": "Сила удара", "medicine": "Медицина", "willpower": "Сила воли",

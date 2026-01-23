@@ -1,8 +1,10 @@
 import streamlit as st
+
 from core.card import Card
+from ui.components.script_formatter import _format_script_text
 from ui.icons import get_icon_html
 from ui.styles import TYPE_COLORS
-from ui.components.script_formatter import _format_script_text
+
 
 def render_card_visual(card: Card, is_staggered: bool = False):
     """Визуальное представление карты с кубиками."""

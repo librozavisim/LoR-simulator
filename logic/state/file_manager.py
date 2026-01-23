@@ -1,6 +1,6 @@
-import os
-import json
 import glob
+import json
+import os
 
 STATES_DIR = "data/states"
 

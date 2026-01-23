@@ -1,8 +1,3 @@
-from logic.calculations.base_calc import get_word
-from logic.calculations.attributes import apply_attribute_effects
-from logic.calculations.skills import apply_skill_effects
-from logic.calculations.pools import calculate_pools, calculate_speed_dice
-
 def calculate_totals(unit, bonuses, mods):
     """Суммирует базу и бонусы, заполняет mods['total_X']."""
     attrs = {}

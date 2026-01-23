@@ -1,5 +1,5 @@
-from logic.battle_flow.mass_attack import process_mass_attack
 from core.logging import logger, LogLevel
+from logic.battle_flow.mass_attack import process_mass_attack
 
 
 def _apply_card_cooldown(unit, card):

@@ -1,4 +1,5 @@
 import streamlit as st
+
 from ui.icons import get_icon_html
 from ui.simulator.components.slots.utils import save_cb
 

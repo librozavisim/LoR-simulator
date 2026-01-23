@@ -1,5 +1,4 @@
 from logic.context import RollContext
-from core.logging import logger, LogLevel
 
 
 class BaseEffect:

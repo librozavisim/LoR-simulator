@@ -1,4 +1,5 @@
 import random
+
 from core.enums import CardType
 from core.logging import logger, LogLevel
 

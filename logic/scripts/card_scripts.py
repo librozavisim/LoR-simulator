@@ -3,12 +3,12 @@ from logic.scripts.card_damage import deal_effect_damage, self_harm_percent, add
 from logic.scripts.card_dice import consume_evade_for_haste, repeat_dice_by_status, adaptive_damage_type
 from logic.scripts.card_power import modify_roll_power, convert_status_to_power, lima_ram_logic
 from logic.scripts.card_special import apply_axis_team_buff, summon_ally
+from logic.scripts.luck import add_luck_bonus_roll, scale_roll_by_luck, add_power_by_luck, repeat_dice_by_luck
 from logic.scripts.resources import restore_resource
 from logic.scripts.statuses import (
     apply_status, steal_status, multiply_status, remove_status_script,
     remove_all_positive, apply_status_by_roll, remove_random_status, apply_slot_debuff
 )
-from logic.scripts.luck import add_luck_bonus_roll, scale_roll_by_luck, add_power_by_luck, repeat_dice_by_luck
 
 # Реестр скриптов для использования в JSON карт
 SCRIPTS_REGISTRY = {

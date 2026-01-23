@@ -1,7 +1,8 @@
 import streamlit as st
-from logic.state.state_manager import StateManager
+
 from core.unit.unit import Unit
 from core.unit.unit_library import UnitLibrary
+from logic.state.state_manager import StateManager
 
 
 def update_and_save_state():

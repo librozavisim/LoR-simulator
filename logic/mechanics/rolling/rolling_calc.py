@@ -1,8 +1,8 @@
 from core.enums import DiceType
 from core.logging import logger, LogLevel
 from logic.calculations.base_calc import get_modded_value
-from logic.weapon_definitions import WEAPON_REGISTRY
 from logic.mechanics.rolling.rolling_utils import safe_randint
+from logic.weapon_definitions import WEAPON_REGISTRY
 
 
 def calculate_base_roll(source, base_min, base_max, is_disadvantage):

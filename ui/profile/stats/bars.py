@@ -1,5 +1,7 @@
-import streamlit as st
 import random
+
+import streamlit as st
+
 from core.unit.unit_library import UnitLibrary
 
 

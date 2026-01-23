@@ -3,16 +3,15 @@ import streamlit as st
 # Модули управления приложением
 from ui.app_modules.state_controller import render_save_manager_sidebar, load_initial_state, update_and_save_state
 from ui.app_modules.team_builder import render_team_builder_sidebar
-
+from ui.cheat_sheet import render_cheat_sheet_page
+from ui.checks import render_checks_page
+from ui.editor.editor import render_editor_page
+from ui.leveling import render_leveling_page
+from ui.profile.main import render_profile_page
 # Страницы
 from ui.simulator.simulator import render_simulator_page
-from ui.profile.main import render_profile_page
-from ui.leveling import render_leveling_page
-from ui.tree_view import render_skill_tree_page
-from ui.editor.editor import render_editor_page
-from ui.checks import render_checks_page
-from ui.cheat_sheet import render_cheat_sheet_page
 from ui.styles import apply_styles
+from ui.tree_view import render_skill_tree_page
 
 # 1. Применяем CSS
 apply_styles()

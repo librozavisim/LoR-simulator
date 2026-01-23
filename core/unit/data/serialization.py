@@ -1,6 +1,5 @@
-import json
 import copy
-from typing import Any
+import json
 
 # Для type hinting
 from core.dice import Dice

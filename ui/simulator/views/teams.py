@@ -1,9 +1,10 @@
 import streamlit as st
+
+from logic.revival import render_death_overlay
 from ui.components import render_unit_stats
 from ui.simulator.components.abilities import render_active_abilities
 from ui.simulator.components.inventory import render_inventory
 from ui.simulator.components.slots import render_slot_strip
-from logic.revival import render_death_overlay
 
 
 def render_team_column(team, label, key_prefix, opposing_team):
