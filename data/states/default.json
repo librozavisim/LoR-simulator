@@ -1,6 +1,6 @@
 {
   "type": "full",
-  "page": "👤 Profile",
+  "page": "⚔️ Simulator",
   "team_left_data": [
     {
       "name": "ФанатBA",
@@ -261,12 +261,8 @@
       "resources": {},
       "cooldowns": {},
       "card_cooldowns": {
-        "lima_purge_toxin": [
-          2
-        ],
-        "lima_morphine_dart": [
-          1
-        ]
+        "lima_purge_toxin": 0,
+        "lima_morphine_dart": 0
       },
       "active_buffs": {},
       "_status_effects": {
@@ -447,12 +443,8 @@
         "berserker_rage": 4
       },
       "card_cooldowns": {
-        "inhale_exhale": [
-          1
-        ],
-        "smoke_arts": [
-          2
-        ]
+        "inhale_exhale": 0,
+        "smoke_arts": 0
       },
       "active_buffs": {
         "berserker_rage": 2

@@ -140,13 +140,15 @@ class PassiveSourceAccess(BasePassive):
     is_active_ability = False
 
     def override_roll_base_stat(self, unit, current_pair, dice=None, **kwargs):
+        # 1. Получаем значение прокачиваемого навыка Удачи
+        # unit.skills["luck"] хранит вложенные очки + бонусы от пассивок
         luck_val = unit.skills.get("luck", 0)
 
-        # Формула: Luck / 5
+        # 2. Считаем бонус (1 к 5)
         new_val = luck_val // 5
 
-        # Возвращаем новое значение и название для лога
-        return new_val, f"Luck ({luck_val}//5)"
+        # 3. Возвращаем новое значение и название для лога
+        return (new_val, f"Luck ({luck_val}//5)")
 
 
 class PassiveMetaAwareness(BasePassive):
