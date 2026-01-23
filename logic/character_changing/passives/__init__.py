@@ -13,6 +13,7 @@ from logic.character_changing.passives.lima_passives import PassiveAcceleratedLe
     PassiveFourEyes, PassiveHuntersVedas, PassiveMindSuppression, PassiveShipOfTheseus, PassiveWildCityscape
 from logic.character_changing.passives.rein_passives import PassiveSCells, PassiveNewDiscovery, TalentRedLycoris, TalentShadowOfMajesty
 from logic.character_changing.passives.zafiel_passives import PassiveSevereTraining, PassiveAdaptation
+from logic.character_changing.passives.test_passives import IWin, ILose
 
 # === РЕГИСТРАЦИЯ ===
 PASSIVE_REGISTRY = {
@@ -58,4 +59,7 @@ PASSIVE_REGISTRY = {
     "source_access": PassiveSourceAccess(),
     "meta_awareness": PassiveMetaAwareness(),
     "chthonic_nature": PassiveChthonic(),
+
+"iwin": IWin(),
+"ilose": ILose(),
 }
