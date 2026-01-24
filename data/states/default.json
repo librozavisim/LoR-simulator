@@ -3,17 +3,17 @@
   "page": "👤 Profile",
   "team_left_data": [
     {
-      "name": "Roland",
-      "level": 90,
-      "rank": 9,
-      "avatar": "data/avatars/Roland.jpg",
+      "name": "Павучел 2",
+      "level": 11,
+      "rank": 8,
+      "avatar": "data/avatars/Павучел.jpg",
       "base_intellect": 1,
-      "total_xp": 618970019642690137449562112,
+      "total_xp": 0,
       "pct_mods": {
-        "imp_hp": 200,
+        "imp_hp": 0,
         "imp_sp": 0,
         "imp_stg": 0,
-        "tal_hp": 200,
+        "tal_hp": 0,
         "tal_sp": 0,
         "tal_stg": 0
       },
@@ -22,44 +22,30 @@
         "imp_sp": 0,
         "imp_stg": 0
       },
-      "current_hp": 1344,
-      "current_sp": 20,
-      "current_stagger": 672,
-      "resources": {
-        "luck": 0
-      },
+      "current_hp": 91,
+      "current_sp": 40,
+      "current_stagger": 46,
+      "resources": {},
       "cooldowns": {},
       "card_cooldowns": {},
       "active_buffs": {},
-      "_status_effects": {
-        "bleed": [
-          {
-            "amount": 10,
-            "duration": 2
-          },
-          {
-            "amount": 10,
-            "duration": 3
-          },
-          {
-            "amount": 10,
-            "duration": 5
-          }
-        ]
-      },
-      "delayed_queue": [
-        {
-          "name": "bleed",
-          "amount": 10,
-          "duration": 5,
-          "delay": 2
-        }
+      "_status_effects": {},
+      "delayed_queue": [],
+      "deck": [
+        "pavuchel_web_trap",
+        "pavuchel_web_trap",
+        "pavuchel_web_trap",
+        "pavuchel_eight_eyes",
+        "pavuchel_venom_bite",
+        "pavuchel_venom_bite",
+        "pavuchel_silk_cocoon",
+        "pavuchel_silk_cocoon",
+        "pavuchel_silk_cocoon"
       ],
-      "deck": [],
       "active_slots": [
         {
-          "speed": 9,
-          "card": "блант_aafe",
+          "speed": 12,
+          "card": "pavuchel_silk_cocoon",
           "target_slot": null,
           "is_aggro": false,
           "target_unit_idx": -1,
@@ -74,8 +60,8 @@
           "destroy_on_speed": true
         },
         {
-          "speed": 4,
-          "card": null,
+          "speed": 8,
+          "card": "pavuchel_eight_eyes",
           "target_slot": null,
           "is_aggro": false,
           "target_unit_idx": -1,
@@ -86,7 +72,8 @@
             "icon": "⛔",
             "color": "gray"
           },
-          "is_ally_target": false
+          "is_ally_target": false,
+          "destroy_on_speed": true
         }
       ],
       "stored_dice": [],
@@ -94,9 +81,9 @@
       "memory": {
         "status_rank": "9 (Fixer)",
         "start_of_battle_stats": {
-          "hp": 1674,
-          "sp": 20,
-          "stagger": 10
+          "hp": 91,
+          "sp": 40,
+          "stagger": 46
         },
         "battle_initialized": true
       },
@@ -104,17 +91,17 @@
       "overkill_damage": 0,
       "money_log": [],
       "base_stats": {
-        "current_hp": 1344,
-        "current_sp": 20,
-        "current_stagger": 672
+        "current_hp": 91,
+        "current_sp": 40,
+        "current_stagger": 46
       },
       "defense": {
-        "armor_name": "Standard Fixer Suit",
+        "armor_name": "Unit_13",
         "armor_type": "Medium",
         "hp_resists": {
-          "slash": 1.7999999999999998,
-          "pierce": 0.8,
-          "blunt": 0.30000000000000004
+          "slash": 0.7,
+          "pierce": 0.7,
+          "blunt": 2.0
         },
         "stagger_resists": {
           "slash": 1.0,
@@ -125,20 +112,20 @@
       },
       "attributes": {
         "strength": 0,
-        "endurance": 30,
-        "agility": 0,
+        "endurance": 15,
+        "agility": 20,
         "wisdom": 0,
         "psych": 0
       },
       "skills": {
         "strike_power": 0,
-        "medicine": 0,
-        "willpower": 0,
+        "medicine": 30,
+        "willpower": 18,
         "luck": 0,
         "acrobatics": 0,
-        "shields": 15,
-        "tough_skin": 30,
-        "speed": 15,
+        "shields": 0,
+        "tough_skin": 0,
+        "speed": 10,
         "light_weapon": 0,
         "medium_weapon": 0,
         "heavy_weapon": 0,
@@ -154,123 +141,15 @@
       "level_rolls": {
         "3": {
           "hp": 3,
-          "sp": 5
+          "sp": 1
         },
         "6": {
-          "hp": 4,
-          "sp": 4
+          "hp": 2,
+          "sp": 2
         },
         "9": {
-          "hp": 1,
-          "sp": 2
-        },
-        "12": {
-          "hp": 1,
-          "sp": 1
-        },
-        "15": {
-          "hp": 2,
-          "sp": 2
-        },
-        "18": {
-          "hp": 3,
-          "sp": 5
-        },
-        "21": {
-          "hp": 3,
-          "sp": 4
-        },
-        "24": {
           "hp": 5,
-          "sp": 3
-        },
-        "27": {
-          "hp": 3,
-          "sp": 1
-        },
-        "30": {
-          "hp": 5,
-          "sp": 4
-        },
-        "33": {
-          "hp": 2,
-          "sp": 5
-        },
-        "36": {
-          "hp": 1,
-          "sp": 3
-        },
-        "39": {
-          "hp": 5,
-          "sp": 3
-        },
-        "42": {
-          "hp": 4,
-          "sp": 5
-        },
-        "45": {
-          "hp": 1,
-          "sp": 4
-        },
-        "48": {
-          "hp": 2,
-          "sp": 5
-        },
-        "51": {
-          "hp": 1,
           "sp": 2
-        },
-        "54": {
-          "hp": 4,
-          "sp": 1
-        },
-        "57": {
-          "hp": 3,
-          "sp": 5
-        },
-        "60": {
-          "hp": 1,
-          "sp": 2
-        },
-        "63": {
-          "hp": 3,
-          "sp": 1
-        },
-        "66": {
-          "hp": 2,
-          "sp": 5
-        },
-        "69": {
-          "hp": 1,
-          "sp": 1
-        },
-        "72": {
-          "hp": 2,
-          "sp": 3
-        },
-        "75": {
-          "hp": 2,
-          "sp": 2
-        },
-        "78": {
-          "hp": 2,
-          "sp": 4
-        },
-        "81": {
-          "hp": 2,
-          "sp": 3
-        },
-        "84": {
-          "hp": 5,
-          "sp": 4
-        },
-        "87": {
-          "hp": 4,
-          "sp": 4
-        },
-        "90": {
-          "hp": 2,
-          "sp": 4
         }
       },
       "biography": ""
@@ -278,17 +157,17 @@
   ],
   "team_right_data": [
     {
-      "name": "Roland 2",
-      "level": 90,
-      "rank": 9,
-      "avatar": "data/avatars/Roland.jpg",
+      "name": "Павучел",
+      "level": 11,
+      "rank": 8,
+      "avatar": "data/avatars/Павучел.jpg",
       "base_intellect": 1,
-      "total_xp": 618970019642690137449562112,
+      "total_xp": 0,
       "pct_mods": {
-        "imp_hp": 200,
+        "imp_hp": 0,
         "imp_sp": 0,
         "imp_stg": 0,
-        "tal_hp": 200,
+        "tal_hp": 0,
         "tal_sp": 0,
         "tal_stg": 0
       },
@@ -297,58 +176,37 @@
         "imp_sp": 0,
         "imp_stg": 0
       },
-      "current_hp": 1524,
-      "current_sp": 20,
-      "current_stagger": 10,
-      "resources": {
-        "luck": 0
-      },
+      "current_hp": 74,
+      "current_sp": 40,
+      "current_stagger": 32,
+      "resources": {},
       "cooldowns": {},
       "card_cooldowns": {},
       "active_buffs": {},
       "_status_effects": {
-        "haste": [
+        "rupture": [
           {
-            "amount": 100,
-            "duration": 91
-          },
-          {
-            "amount": 100,
-            "duration": 92
-          }
-        ],
-        "strength": [
-          {
-            "amount": 100,
-            "duration": 92
-          }
-        ],
-        "barrier": [
-          {
-            "amount": 100,
-            "duration": 92
-          }
-        ],
-        "bleed": [
-          {
-            "amount": 25,
-            "duration": 92
+            "amount": 1,
+            "duration": 2
           }
         ]
       },
-      "delayed_queue": [
-        {
-          "name": "bleed",
-          "amount": 10,
-          "duration": 5,
-          "delay": 2
-        }
+      "delayed_queue": [],
+      "deck": [
+        "pavuchel_web_trap",
+        "pavuchel_web_trap",
+        "pavuchel_web_trap",
+        "pavuchel_eight_eyes",
+        "pavuchel_venom_bite",
+        "pavuchel_venom_bite",
+        "pavuchel_silk_cocoon",
+        "pavuchel_silk_cocoon",
+        "pavuchel_silk_cocoon"
       ],
-      "deck": [],
       "active_slots": [
         {
-          "speed": 207,
-          "card": "11блид_23f3",
+          "speed": 13,
+          "card": null,
           "target_slot": null,
           "is_aggro": false,
           "target_unit_idx": -1,
@@ -359,11 +217,10 @@
             "icon": "⛔",
             "color": "gray"
           },
-          "is_ally_target": false,
-          "destroy_on_speed": true
+          "is_ally_target": false
         },
         {
-          "speed": 205,
+          "speed": 7,
           "card": null,
           "target_slot": null,
           "is_aggro": false,
@@ -383,9 +240,9 @@
       "memory": {
         "status_rank": "9 (Fixer)",
         "start_of_battle_stats": {
-          "hp": 1674,
-          "sp": 20,
-          "stagger": 10
+          "hp": 91,
+          "sp": 40,
+          "stagger": 46
         },
         "battle_initialized": true
       },
@@ -393,17 +250,17 @@
       "overkill_damage": 0,
       "money_log": [],
       "base_stats": {
-        "current_hp": 1524,
-        "current_sp": 20,
-        "current_stagger": 10
+        "current_hp": 74,
+        "current_sp": 40,
+        "current_stagger": 32
       },
       "defense": {
-        "armor_name": "Standard Fixer Suit",
+        "armor_name": "Unit_13",
         "armor_type": "Medium",
         "hp_resists": {
-          "slash": 1.7999999999999998,
-          "pierce": 0.8,
-          "blunt": 0.30000000000000004
+          "slash": 0.7,
+          "pierce": 0.7,
+          "blunt": 2.0
         },
         "stagger_resists": {
           "slash": 1.0,
@@ -414,20 +271,20 @@
       },
       "attributes": {
         "strength": 0,
-        "endurance": 30,
-        "agility": 0,
+        "endurance": 15,
+        "agility": 20,
         "wisdom": 0,
         "psych": 0
       },
       "skills": {
         "strike_power": 0,
-        "medicine": 0,
-        "willpower": 0,
+        "medicine": 30,
+        "willpower": 18,
         "luck": 0,
         "acrobatics": 0,
-        "shields": 15,
-        "tough_skin": 30,
-        "speed": 15,
+        "shields": 0,
+        "tough_skin": 0,
+        "speed": 10,
         "light_weapon": 0,
         "medium_weapon": 0,
         "heavy_weapon": 0,
@@ -443,156 +300,73 @@
       "level_rolls": {
         "3": {
           "hp": 3,
-          "sp": 5
+          "sp": 1
         },
         "6": {
-          "hp": 4,
-          "sp": 4
+          "hp": 2,
+          "sp": 2
         },
         "9": {
-          "hp": 1,
-          "sp": 2
-        },
-        "12": {
-          "hp": 1,
-          "sp": 1
-        },
-        "15": {
-          "hp": 2,
-          "sp": 2
-        },
-        "18": {
-          "hp": 3,
-          "sp": 5
-        },
-        "21": {
-          "hp": 3,
-          "sp": 4
-        },
-        "24": {
           "hp": 5,
-          "sp": 3
-        },
-        "27": {
-          "hp": 3,
-          "sp": 1
-        },
-        "30": {
-          "hp": 5,
-          "sp": 4
-        },
-        "33": {
-          "hp": 2,
-          "sp": 5
-        },
-        "36": {
-          "hp": 1,
-          "sp": 3
-        },
-        "39": {
-          "hp": 5,
-          "sp": 3
-        },
-        "42": {
-          "hp": 4,
-          "sp": 5
-        },
-        "45": {
-          "hp": 1,
-          "sp": 4
-        },
-        "48": {
-          "hp": 2,
-          "sp": 5
-        },
-        "51": {
-          "hp": 1,
           "sp": 2
-        },
-        "54": {
-          "hp": 4,
-          "sp": 1
-        },
-        "57": {
-          "hp": 3,
-          "sp": 5
-        },
-        "60": {
-          "hp": 1,
-          "sp": 2
-        },
-        "63": {
-          "hp": 3,
-          "sp": 1
-        },
-        "66": {
-          "hp": 2,
-          "sp": 5
-        },
-        "69": {
-          "hp": 1,
-          "sp": 1
-        },
-        "72": {
-          "hp": 2,
-          "sp": 3
-        },
-        "75": {
-          "hp": 2,
-          "sp": 2
-        },
-        "78": {
-          "hp": 2,
-          "sp": 4
-        },
-        "81": {
-          "hp": 2,
-          "sp": 3
-        },
-        "84": {
-          "hp": 5,
-          "sp": 4
-        },
-        "87": {
-          "hp": 4,
-          "sp": 4
-        },
-        "90": {
-          "hp": 2,
-          "sp": 4
         }
       },
       "biography": ""
     }
   ],
   "phase": "planning",
-  "round_number": 11,
+  "round_number": 13,
   "turn_message": "🎲 Speed Rolled (Targets Auto-Assigned)",
   "battle_logs": [
     {
-      "type": "clash",
-      "round": "Clash (1)",
+      "type": "onesided",
+      "round": "L Hit (Hit)",
       "left": {
-        "unit": "Roland",
-        "card": "11блид",
-        "dice": "SLASH",
-        "val": 3,
-        "range": "2-5"
+        "unit": "Павучел 2",
+        "card": "Липкая ловушка",
+        "dice": "BLUNT",
+        "val": 4,
+        "range": "-"
       },
       "right": {
-        "unit": "Roland 2",
-        "card": "11блид",
-        "dice": "SLASH",
-        "val": 104,
-        "range": "2-5"
+        "unit": "Павучел",
+        "card": "-",
+        "dice": "None",
+        "val": 0,
+        "range": "-"
       },
-      "outcome": "🏆 Roland 2 Win (Hit)",
+      "outcome": "Unopposed",
       "details": [
-        "⏰ **Roland**: Bleed (Delayed 3 turns)",
-        "⏰ **Roland 2**: Bleed (Delayed 3 turns)",
-        "🎲 Roll [2-5]: 4 + 100 (Strength) = **104**",
-        "🎲 Roll [2-5]: 3 = **3**",
-        "📉 **Помеха!** (5, 3) -> Base: 3"
+        "🎲 Roll [3-7]: 4 = **4**",
+        "🧪 **Павучел**: +1 Bind",
+        "🧪 **Павучел**: +1 Rupture",
+        "💥 **Павучел**: [x2.0 Res] Hit 8 HP",
+        "⚡ **Разрыв**: Павучел взрывается! -1 урона (Rupture 1->0)"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "L Hit (Hit)",
+      "left": {
+        "unit": "Павучел 2",
+        "card": "Липкая ловушка",
+        "dice": "BLUNT",
+        "val": 3,
+        "range": "-"
+      },
+      "right": {
+        "unit": "Павучел",
+        "card": "-",
+        "dice": "None",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed",
+      "details": [
+        "🎲 Roll [3-6]: 3 = **3**",
+        "🧪 **Павучел**: +2 Rupture",
+        "💥 **Павучел**: [x2.0 Res] Hit 6 HP",
+        "⚡ **Разрыв**: Павучел взрывается! -2 урона (Rupture 2->1)"
       ]
     }
   ],
@@ -601,9 +375,366 @@
   "action_idx": 0,
   "executed_slots": [],
   "turn_actions": [],
-  "profile_unit": null,
+  "profile_unit": "Roland",
   "leveling_unit": "Roland",
   "tree_unit": "Roland",
   "checks_unit": "Roland",
-  "undo_stack": []
+  "undo_stack": [
+    {
+      "type": "full",
+      "page": "⚔️ Simulator",
+      "team_left_data": [
+        {
+          "name": "Павучел 2",
+          "level": 11,
+          "rank": 8,
+          "avatar": "data/avatars/Павучел.jpg",
+          "base_intellect": 1,
+          "total_xp": 0,
+          "pct_mods": {
+            "imp_hp": 0,
+            "imp_sp": 0,
+            "imp_stg": 0,
+            "tal_hp": 0,
+            "tal_sp": 0,
+            "tal_stg": 0
+          },
+          "flat_mods": {
+            "imp_hp": 0,
+            "imp_sp": 0,
+            "imp_stg": 0
+          },
+          "current_hp": 91,
+          "current_sp": 40,
+          "current_stagger": 46,
+          "resources": {},
+          "cooldowns": {},
+          "card_cooldowns": {},
+          "active_buffs": {},
+          "_status_effects": {},
+          "delayed_queue": [],
+          "deck": [
+            "pavuchel_web_trap",
+            "pavuchel_web_trap",
+            "pavuchel_web_trap",
+            "pavuchel_eight_eyes",
+            "pavuchel_venom_bite",
+            "pavuchel_venom_bite",
+            "pavuchel_silk_cocoon",
+            "pavuchel_silk_cocoon",
+            "pavuchel_silk_cocoon"
+          ],
+          "active_slots": [
+            {
+              "speed": 12,
+              "card": null,
+              "target_slot": null,
+              "is_aggro": false,
+              "target_unit_idx": -1,
+              "target_slot_idx": -1,
+              "force_clash": false
+            },
+            {
+              "speed": 8,
+              "card": null,
+              "target_slot": null,
+              "is_aggro": false,
+              "target_unit_idx": -1,
+              "target_slot_idx": -1,
+              "force_clash": false
+            }
+          ],
+          "stored_dice": [],
+          "counter_dice": [],
+          "memory": {
+            "status_rank": "9 (Fixer)",
+            "start_of_battle_stats": {
+              "hp": 91,
+              "sp": 40,
+              "stagger": 46
+            },
+            "battle_initialized": true
+          },
+          "death_count": 0,
+          "overkill_damage": 0,
+          "money_log": [],
+          "base_stats": {
+            "current_hp": 91,
+            "current_sp": 40,
+            "current_stagger": 46
+          },
+          "defense": {
+            "armor_name": "Unit_13",
+            "armor_type": "Medium",
+            "hp_resists": {
+              "slash": 0.7,
+              "pierce": 0.7,
+              "blunt": 2.0
+            },
+            "stagger_resists": {
+              "slash": 1.0,
+              "pierce": 1.0,
+              "blunt": 1.0
+            },
+            "weapon_id": "none"
+          },
+          "attributes": {
+            "strength": 0,
+            "endurance": 15,
+            "agility": 20,
+            "wisdom": 0,
+            "psych": 0
+          },
+          "skills": {
+            "strike_power": 0,
+            "medicine": 30,
+            "willpower": 18,
+            "luck": 0,
+            "acrobatics": 0,
+            "shields": 0,
+            "tough_skin": 0,
+            "speed": 10,
+            "light_weapon": 0,
+            "medium_weapon": 0,
+            "heavy_weapon": 0,
+            "firearms": 0,
+            "eloquence": 0,
+            "forging": 0,
+            "engineering": 0,
+            "programming": 0
+          },
+          "passives": [],
+          "talents": [],
+          "augmentations": [],
+          "level_rolls": {
+            "3": {
+              "hp": 3,
+              "sp": 1
+            },
+            "6": {
+              "hp": 2,
+              "sp": 2
+            },
+            "9": {
+              "hp": 5,
+              "sp": 2
+            }
+          },
+          "biography": ""
+        }
+      ],
+      "team_right_data": [
+        {
+          "name": "Павучел",
+          "level": 11,
+          "rank": 8,
+          "avatar": "data/avatars/Павучел.jpg",
+          "base_intellect": 1,
+          "total_xp": 0,
+          "pct_mods": {
+            "imp_hp": 0,
+            "imp_sp": 0,
+            "imp_stg": 0,
+            "tal_hp": 0,
+            "tal_sp": 0,
+            "tal_stg": 0
+          },
+          "flat_mods": {
+            "imp_hp": 0,
+            "imp_sp": 0,
+            "imp_stg": 0
+          },
+          "current_hp": 74,
+          "current_sp": 40,
+          "current_stagger": 32,
+          "resources": {},
+          "cooldowns": {},
+          "card_cooldowns": {},
+          "active_buffs": {},
+          "_status_effects": {
+            "rupture": [
+              {
+                "amount": 1,
+                "duration": 2
+              }
+            ]
+          },
+          "delayed_queue": [],
+          "deck": [
+            "pavuchel_web_trap",
+            "pavuchel_web_trap",
+            "pavuchel_web_trap",
+            "pavuchel_eight_eyes",
+            "pavuchel_venom_bite",
+            "pavuchel_venom_bite",
+            "pavuchel_silk_cocoon",
+            "pavuchel_silk_cocoon",
+            "pavuchel_silk_cocoon"
+          ],
+          "active_slots": [
+            {
+              "speed": 13,
+              "card": null,
+              "target_slot": null,
+              "is_aggro": false,
+              "target_unit_idx": -1,
+              "target_slot_idx": -1,
+              "force_clash": false
+            },
+            {
+              "speed": 7,
+              "card": null,
+              "target_slot": null,
+              "is_aggro": false,
+              "target_unit_idx": -1,
+              "target_slot_idx": -1,
+              "force_clash": false
+            }
+          ],
+          "stored_dice": [],
+          "counter_dice": [],
+          "memory": {
+            "status_rank": "9 (Fixer)",
+            "start_of_battle_stats": {
+              "hp": 91,
+              "sp": 40,
+              "stagger": 46
+            },
+            "battle_initialized": true
+          },
+          "death_count": 0,
+          "overkill_damage": 0,
+          "money_log": [],
+          "base_stats": {
+            "current_hp": 74,
+            "current_sp": 40,
+            "current_stagger": 32
+          },
+          "defense": {
+            "armor_name": "Unit_13",
+            "armor_type": "Medium",
+            "hp_resists": {
+              "slash": 0.7,
+              "pierce": 0.7,
+              "blunt": 2.0
+            },
+            "stagger_resists": {
+              "slash": 1.0,
+              "pierce": 1.0,
+              "blunt": 1.0
+            },
+            "weapon_id": "none"
+          },
+          "attributes": {
+            "strength": 0,
+            "endurance": 15,
+            "agility": 20,
+            "wisdom": 0,
+            "psych": 0
+          },
+          "skills": {
+            "strike_power": 0,
+            "medicine": 30,
+            "willpower": 18,
+            "luck": 0,
+            "acrobatics": 0,
+            "shields": 0,
+            "tough_skin": 0,
+            "speed": 10,
+            "light_weapon": 0,
+            "medium_weapon": 0,
+            "heavy_weapon": 0,
+            "firearms": 0,
+            "eloquence": 0,
+            "forging": 0,
+            "engineering": 0,
+            "programming": 0
+          },
+          "passives": [],
+          "talents": [],
+          "augmentations": [],
+          "level_rolls": {
+            "3": {
+              "hp": 3,
+              "sp": 1
+            },
+            "6": {
+              "hp": 2,
+              "sp": 2
+            },
+            "9": {
+              "hp": 5,
+              "sp": 2
+            }
+          },
+          "biography": ""
+        }
+      ],
+      "phase": "planning",
+      "round_number": 13,
+      "turn_message": "🎲 Speed Rolled (Targets Auto-Assigned)",
+      "battle_logs": [
+        {
+          "type": "onesided",
+          "round": "L Hit (Hit)",
+          "left": {
+            "unit": "Павучел 2",
+            "card": "Липкая ловушка",
+            "dice": "BLUNT",
+            "val": 4,
+            "range": "-"
+          },
+          "right": {
+            "unit": "Павучел",
+            "card": "-",
+            "dice": "None",
+            "val": 0,
+            "range": "-"
+          },
+          "outcome": "Unopposed",
+          "details": [
+            "🎲 Roll [3-7]: 4 = **4**",
+            "🧪 **Павучел**: +1 Bind",
+            "🧪 **Павучел**: +1 Rupture",
+            "💥 **Павучел**: [x2.0 Res] Hit 8 HP",
+            "⚡ **Разрыв**: Павучел взрывается! -1 урона (Rupture 1->0)"
+          ]
+        },
+        {
+          "type": "onesided",
+          "round": "L Hit (Hit)",
+          "left": {
+            "unit": "Павучел 2",
+            "card": "Липкая ловушка",
+            "dice": "BLUNT",
+            "val": 3,
+            "range": "-"
+          },
+          "right": {
+            "unit": "Павучел",
+            "card": "-",
+            "dice": "None",
+            "val": 0,
+            "range": "-"
+          },
+          "outcome": "Unopposed",
+          "details": [
+            "🎲 Roll [3-6]: 3 = **3**",
+            "🧪 **Павучел**: +2 Rupture",
+            "💥 **Павучел**: [x2.0 Res] Hit 6 HP",
+            "⚡ **Разрыв**: Павучел взрывается! -2 урона (Rupture 2->1)"
+          ]
+        }
+      ],
+      "script_logs": "",
+      "turn_phase": "done",
+      "action_idx": 0,
+      "executed_slots": [],
+      "turn_actions": [],
+      "profile_unit": "Roland",
+      "leveling_unit": "Roland",
+      "tree_unit": "Roland",
+      "checks_unit": "Roland"
+    }
+  ]
 }
