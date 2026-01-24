@@ -1,6 +1,5 @@
 from logic.context import RollContext
-from logic.statuses.status_manager import STATUS_REGISTRY
-from core.logging import logger, LogLevel
+from logic.statuses.status_definitions import STATUS_REGISTRY
 
 
 class ModifierSystem:

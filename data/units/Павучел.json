@@ -1,0 +1,103 @@
+{
+    "name": "Павучел",
+    "level": 11,
+    "rank": 8,
+    "avatar": "data/avatars/Павучел.jpg",
+    "base_intellect": 1,
+    "total_xp": 0,
+    "pct_mods": {
+        "imp_hp": 0,
+        "imp_sp": 0,
+        "imp_stg": 0,
+        "tal_hp": 0,
+        "tal_sp": 0,
+        "tal_stg": 0
+    },
+    "flat_mods": {
+        "imp_hp": 0,
+        "imp_sp": 0,
+        "imp_stg": 0
+    },
+    "current_hp": 92,
+    "current_sp": 46,
+    "current_stagger": 46,
+    "resources": {},
+    "cooldowns": {},
+    "card_cooldowns": {},
+    "active_buffs": {},
+    "_status_effects": {},
+    "delayed_queue": [],
+    "deck": [],
+    "active_slots": [],
+    "stored_dice": [],
+    "counter_dice": [],
+    "memory": {
+        "status_rank": "9 (Fixer)"
+    },
+    "death_count": 0,
+    "overkill_damage": 0,
+    "money_log": [],
+    "base_stats": {
+        "current_hp": 92,
+        "current_sp": 46,
+        "current_stagger": 46
+    },
+    "defense": {
+        "armor_name": "Unit_13",
+        "armor_type": "Medium",
+        "hp_resists": {
+            "slash": 0.7,
+            "pierce": 0.7,
+            "blunt": 2.0
+        },
+        "stagger_resists": {
+            "slash": 1.0,
+            "pierce": 1.0,
+            "blunt": 1.0
+        },
+        "weapon_id": "none"
+    },
+    "attributes": {
+        "strength": 0,
+        "endurance": 15,
+        "agility": 20,
+        "wisdom": 0,
+        "psych": 0
+    },
+    "skills": {
+        "strike_power": 0,
+        "medicine": 30,
+        "willpower": 18,
+        "luck": 0,
+        "acrobatics": 0,
+        "shields": 0,
+        "tough_skin": 0,
+        "speed": 10,
+        "light_weapon": 0,
+        "medium_weapon": 0,
+        "heavy_weapon": 0,
+        "firearms": 0,
+        "eloquence": 0,
+        "forging": 0,
+        "engineering": 0,
+        "programming": 0
+    },
+    "passives": [],
+    "talents": [],
+    "augmentations": [],
+    "level_rolls": {
+        "3": {
+            "hp": 3,
+            "sp": 1
+        },
+        "6": {
+            "hp": 2,
+            "sp": 2
+        },
+        "9": {
+            "hp": 5,
+            "sp": 2
+        }
+    },
+    "biography": ""
+}

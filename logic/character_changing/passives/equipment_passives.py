@@ -1,7 +1,7 @@
 # logic/character_changing/passives/equipment_passives.py
-from logic.character_changing.passives.base_passive import BasePassive
 from core.enums import DiceType
 from core.logging import logger, LogLevel  # [NEW] Import
+from logic.character_changing.passives.base_passive import BasePassive
 
 
 # === АННИГИЛЯТОРНАЯ ПУШКА ===

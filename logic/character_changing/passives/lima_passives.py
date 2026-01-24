@@ -1,7 +1,7 @@
 from core.enums import DiceType
-from logic.context import RollContext
-from logic.character_changing.passives.base_passive import BasePassive
 from core.logging import logger, LogLevel  # [NEW] Import
+from logic.character_changing.passives.base_passive import BasePassive
+from logic.context import RollContext
 
 
 class PassiveAcceleratedLearning(BasePassive):

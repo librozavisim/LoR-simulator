@@ -1,7 +1,8 @@
 import copy
+import glob
 import json
 import os
-import glob
+
 from core.card import Card
 from core.logging import logger, LogLevel  # [LOG]
 

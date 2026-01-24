@@ -180,12 +180,6 @@ class InvisibilityStatus(StatusEffect):
         return ["👻 Невидимость рассеялась."]
 
 
-
-class MentalProtectionStatus(StatusEffect):
-    id = "mental_protection"
-    pass
-
-
 class SatietyStatus(StatusEffect):
     id = "satiety"
 

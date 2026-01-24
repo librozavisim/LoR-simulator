@@ -1,5 +1,3 @@
-from core.dice import Dice
-from core.enums import DiceType
 from core.logging import logger, LogLevel
 from logic.character_changing.passives.base_passive import BasePassive
 

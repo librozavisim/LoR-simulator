@@ -1,5 +1,7 @@
 from core.logging import logger, LogLevel
-from logic.mechanics import scripts, rolling, damage
+from logic.mechanics import scripts
+from logic.mechanics.damage.damage import apply_damage, deal_direct_damage
+from logic.mechanics.rolling.rolling import create_roll_context
 
 
 class ClashMechanicsMixin:
@@ -19,7 +21,7 @@ class ClashMechanicsMixin:
 
     def _create_roll_context(self, source, target, die, is_disadvantage=False):
         # Создаем контекст броска
-        return rolling.create_roll_context(source, target, die, is_disadvantage)
+        return create_roll_context(source, target, die, is_disadvantage)
 
     def _handle_clash_win(self, ctx):
         logger.log(f"🏆 Clash Win Hook: {ctx.source.name}", LogLevel.VERBOSE, "Mechanics")
@@ -39,7 +41,7 @@ class ClashMechanicsMixin:
 
     def _deal_direct_damage(self, source_ctx, target, amount, dmg_type):
         logger.log(f"Direct Damage Call: {amount} {dmg_type} -> {target.name}", LogLevel.VERBOSE, "Mechanics")
-        return damage.deal_direct_damage(source_ctx, target, amount, dmg_type, self._trigger_unit_event)
+        return deal_direct_damage(source_ctx, target, amount, dmg_type, self._trigger_unit_event)
 
     def _apply_damage(self, attacker_ctx, defender_ctx, dmg_type="hp"):
         # [FIX] Безопасное получение имени защитника
@@ -51,7 +53,7 @@ class ClashMechanicsMixin:
 
         logger.log(f"Apply Damage Flow: {attacker_ctx.source.name} -> {def_name}", LogLevel.VERBOSE, "Mechanics")
 
-        return damage.apply_damage(
+        return apply_damage(
             attacker_ctx,
             defender_ctx,
             dmg_type,

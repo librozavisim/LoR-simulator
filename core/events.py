@@ -1,6 +1,6 @@
 import heapq
 from collections import defaultdict
-from core.logging import logger, LogLevel
+
 
 class EventManager:
     def __init__(self):

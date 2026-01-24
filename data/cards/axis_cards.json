@@ -1,0 +1,384 @@
+{
+  "cards": [
+    {
+      "id": "axis_minor_setbacks",
+      "name": "Мелкие неудачи",
+      "tier": 1,
+      "type": "Ranged",
+      "description": "I. Дальний бой. On Hit: на следующий ход накладывает статус.",
+      "flags": [],
+      "scripts": {},
+      "dice": [
+        {
+          "type": "slash",
+          "base_min": 1,
+          "base_max": 1,
+          "scripts": {
+            "on_hit": [
+              {
+                "script_id": "apply_status",
+                "params": {
+                  "status": "weakness",
+                  "base": 1,
+                  "duration": 1,
+                  "delay": 1,
+                  "target": "target"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "pierce",
+          "base_min": 1,
+          "base_max": 1,
+          "scripts": {
+            "on_hit": [
+              {
+                "script_id": "apply_status",
+                "params": {
+                  "status": "paralysis",
+                  "base": 1,
+                  "duration": 1,
+                  "delay": 1,
+                  "target": "target"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "blunt",
+          "base_min": 1,
+          "base_max": 1,
+          "scripts": {
+            "on_hit": [
+              {
+                "script_id": "apply_status",
+                "params": {
+                  "status": "slow",
+                  "base": 1,
+                  "duration": 1,
+                  "delay": 1,
+                  "target": "target"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "axis_min_effort",
+      "name": "Минимум усилий",
+      "tier": 1,
+      "type": "Melee",
+      "description": "I. Ближний. On Clash Lose: Аксис получает бонусы на следующий ход.",
+      "flags": [],
+      "scripts": {},
+      "dice": [
+        {
+          "type": "block",
+          "base_min": 1,
+          "base_max": 1,
+          "scripts": {
+            "on_clash_lose": [
+              {
+                "script_id": "apply_status",
+                "params": {
+                  "status": "strength",
+                  "base": 1,
+                  "duration": 1,
+                  "delay": 1,
+                  "target": "self"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "block",
+          "base_min": 1,
+          "base_max": 1,
+          "scripts": {
+            "on_clash_lose": [
+              {
+                "script_id": "apply_status",
+                "params": {
+                  "status": "endurance",
+                  "base": 1,
+                  "duration": 1,
+                  "delay": 1,
+                  "target": "self"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "block",
+          "base_min": 1,
+          "base_max": 1,
+          "scripts": {
+            "on_clash_lose": [
+              {
+                "script_id": "apply_status",
+                "params": {
+                  "status": "haste",
+                  "base": 1,
+                  "duration": 1,
+                  "delay": 1,
+                  "target": "self"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "axis_pirouette",
+      "name": "Пируэт",
+      "tier": 1,
+      "type": "Melee",
+      "description": "I. Ближний. Просто уворот.",
+      "flags": [],
+      "scripts": {},
+      "dice": [
+        {
+          "type": "evade",
+          "base_min": 1,
+          "base_max": 9,
+          "scripts": {}
+        }
+      ]
+    },
+    {
+      "id": "axis_sword_glory",
+      "name": "Меч славы",
+      "tier": 2,
+      "type": "Melee",
+      "description": "II. Ближний. 1. Слабость врагу. 2. Сила себе. 3. Сила команде (или х2 себе).",
+      "flags": [],
+      "scripts": {
+        "on_use": [
+          { "script_id": "apply_status", "params": { "status": "weakness", "base": 1, "duration": 1, "target": "target" } }
+        ]
+      },
+      "dice": [
+        {
+          "type": "slash", "base_min": 1, "base_max": 2,
+          "scripts": {
+            "on_hit": [
+              { "script_id": "apply_status", "params": { "status": "strength", "base": 1, "duration": 2, "target": "self" } }
+            ]
+          }
+        },
+        {
+          "type": "slash", "base_min": 1, "base_max": 2,
+          "scripts": {
+            "on_hit": [
+               { "script_id": "apply_axis_team_buff", "params": { "status": "strength", "duration": 2 } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "axis_spear_determination",
+      "name": "Копьё решимости",
+      "tier": 2,
+      "type": "Ranged",
+      "description": "II. Дальний. 1. Замедление врагу. 2. Скорость себе. 3. Скорость команде (или х2 себе).",
+       "scripts": {
+        "on_use": [
+           { "script_id": "apply_status", "params": { "status": "slow", "base": 1, "duration": 1, "target": "target" } }
+        ]
+      },
+      "dice": [
+        {
+          "type": "pierce", "base_min": 1, "base_max": 2,
+           "scripts": {
+            "on_hit": [
+              { "script_id": "apply_status", "params": { "status": "haste", "base": 1, "duration": 2, "target": "self" } }
+            ]
+          }
+        },
+        {
+          "type": "pierce", "base_min": 1, "base_max": 2,
+           "scripts": {
+            "on_hit": [
+               { "script_id": "apply_axis_team_buff", "params": { "status": "haste", "duration": 2 } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "axis_fist_justice",
+      "name": "Кулак правосудия",
+      "tier": 2,
+      "type": "Melee",
+      "description": "II. Ближний. 1. Обезоруживание врагу. 2. Стойкость себе. 3. Стойкость команде (или х2 себе).",
+       "scripts": {
+        "on_use": [
+           { "script_id": "apply_status", "params": { "status": "paralysis", "base": 1, "duration": 1, "target": "target" } }
+        ]
+      },
+      "dice": [
+        {
+          "type": "blunt", "base_min": 1, "base_max": 2,
+           "scripts": {
+            "on_hit": [
+              { "script_id": "apply_status", "params": { "status": "endurance", "base": 1, "duration": 2, "target": "self" } }
+            ]
+          }
+        },
+        {
+          "type": "blunt", "base_min": 1, "base_max": 2,
+           "scripts": {
+            "on_hit": [
+               { "script_id": "apply_axis_team_buff", "params": { "status": "endurance", "duration": 2 } }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "axis_mcguffin",
+      "name": "Прототип МакГаффина",
+      "tier": 3,
+      "type": "Ranged",
+      "description": "III. Дальний. Все кубики адаптируются под уязвимость врага.",
+      "flags": [],
+      "scripts": {
+        "on_use": [
+          { "script_id": "adaptive_damage_type", "params": {} }
+        ]
+      },
+      "dice": [
+        { "type": "slash", "base_min": 2, "base_max": 4, "scripts": {} },
+        { "type": "slash", "base_min": 2, "base_max": 4, "scripts": {} },
+        { "type": "slash", "base_min": 2, "base_max": 4, "scripts": {} }
+      ]
+    },
+    {
+      "id": "axis_plot_armor",
+      "name": "Прототип Сюжетной Брони",
+      "tier": 3,
+      "type": "Melee",
+      "description": "III. Ближний. On Use: Баффы на 3 хода. On Clash Lose: Дебафф врагу.",
+      "flags": [],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "apply_status",
+            "params": {
+              "status": "strength",
+              "base": 3,
+              "duration": 3,
+              "target": "self"
+            }
+          },
+          {
+            "script_id": "apply_status",
+            "params": {
+              "status": "endurance",
+              "base": 3,
+              "duration": 3,
+              "target": "self"
+            }
+          },
+          {
+            "script_id": "apply_status",
+            "params": {
+              "status": "haste",
+              "base": 3,
+              "duration": 3,
+              "target": "self"
+            }
+          }
+        ]
+      },
+      "dice": [
+        {
+          "type": "block",
+          "base_min": 1,
+          "base_max": 1,
+          "scripts": {
+            "on_clash_lose": [
+              {
+                "script_id": "apply_status",
+                "params": {
+                  "status": "weakness",
+                  "base": 1,
+                  "duration": 2,
+                  "target": "target"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "block",
+          "base_min": 1,
+          "base_max": 1,
+          "scripts": {
+            "on_clash_lose": [
+              {
+                "script_id": "apply_status",
+                "params": {
+                  "status": "weakness",
+                  "base": 1,
+                  "duration": 2,
+                  "target": "target"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "block",
+          "base_min": 1,
+          "base_max": 1,
+          "scripts": {
+            "on_clash_lose": [
+              {
+                "script_id": "apply_status",
+                "params": {
+                  "status": "weakness",
+                  "base": 1,
+                  "duration": 2,
+                  "target": "target"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "axis_ex_machina",
+      "name": "Прототип Экс Махины",
+      "tier": 3,
+      "type": "Melee",
+      "description": "III. Ближний. On Use: Призывает 'Ex Machina' из резерва.",
+      "flags": [],
+      "scripts": {
+        "on_use": [
+          {
+            "script_id": "summon_ally",
+            "params": {
+              "unit_name": "Экс Машинариум"
+            }
+          }
+        ]
+      },
+      "dice": [
+        { "type": "evade", "base_min": 1, "base_max": 5, "scripts": {} },
+        { "type": "evade", "base_min": 1, "base_max": 5, "scripts": {} },
+        { "type": "evade", "base_min": 1, "base_max": 5, "scripts": {} }
+      ]
+    }
+  ]
+}

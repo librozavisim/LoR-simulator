@@ -1,5 +1,6 @@
-from logic.base_effect import BaseEffect
 from core.logging import logger, LogLevel
+from logic.base_effect import BaseEffect
+
 
 class StatusEffect(BaseEffect):
     """

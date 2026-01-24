@@ -1,5 +1,4 @@
 from logic.context import RollContext
-from core.logging import logger, LogLevel
 
 
 class BaseEffect:
@@ -266,7 +265,7 @@ class BaseEffect:
         """
         return res
 
-    def absorb_damage(self, unit, amount: int, damage_type: str, stack=0, log_list=None) -> int:
+    def absorb_damage(self, unit: object, amount: int, damage_type: str, stack: object = 0, log_list: object = None) -> int:
         """
         Поглощает финальный урон (после защиты и резистов), тратя ресурс эффекта.
         Пример: BarrierStatus (поглощает X урона, тратит X стаков).
@@ -286,3 +285,28 @@ class BaseEffect:
         Пример: DmgUp (+урон), DmgDown (-урон), пассивки на % урона.
         """
         return amount
+
+    def on_skill_check(self, unit, check_result: int, stat_key: str, **kwargs):
+        """
+        Вызывается после совершения проверки навыка/характеристики вне боя.
+        check_result: Итоговое значение броска.
+        stat_key: Название проверяемого стата (strength, luck, etc).
+        """
+        pass
+
+    def override_roll_base_stat(self, unit, current_pair, dice=None, **kwargs):
+        """
+        Позволяет изменить базовую характеристику, от которой зависит бросок.
+        current_pair: (value, name_of_stat), например (30, 'Strength')
+        Returns: (new_value, new_name)
+        Пример: 'Доступ к истокам' заменяет Силу/Стойкость на Удачу.
+        """
+        return current_pair
+
+    def on_check_roll(self, unit, attribute, context):
+        """
+        Вызывается ПЕРЕД броском проверки навыка (Skill Check) в UI.
+        context: объект CheckContext с флагами is_advantage / is_disadvantage.
+        attribute: название навыка (строка).
+        """
+        pass

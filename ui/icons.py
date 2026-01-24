@@ -1,6 +1,7 @@
 import base64
-import os
 import mimetypes
+import os
+
 import streamlit as st
 
 # Путь к папке с иконками

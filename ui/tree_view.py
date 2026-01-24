@@ -1,5 +1,7 @@
 import streamlit as st
+
 from core.tree_data import SKILL_TREE
+from core.unit.unit_library import UnitLibrary
 from logic.tree_logic import (
     can_unlock_talent,
     learn_talent,
@@ -7,7 +9,6 @@ from logic.tree_logic import (
     can_forget_talent,
     get_talent_info
 )
-from core.unit.unit_library import UnitLibrary
 
 
 def render_skill_tree_page():

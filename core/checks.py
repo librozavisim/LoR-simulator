@@ -1,7 +1,8 @@
 import random
 from typing import Dict, Any
-from core.unit.unit import Unit
+
 from core.logging import logger, LogLevel  # [LOG] Импорт логгера
+from core.unit.unit import Unit
 
 
 class CheckSystem:

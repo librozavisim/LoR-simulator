@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
+
 from core.dice import Dice
-from core.unit.unit import Unit
 from core.enums import DiceType
 from core.logging import logger, LogLevel  # [NEW] Для логов
 
@@ -114,7 +114,7 @@ class RollContext:
             mod_evd = self.source.modifiers.get("power_evade", {}).get("flat", 0)
             stat_bonus = base_acro + mod_evd
             reason = "Acrobatics"
-
+#todo щиты
         if stat_bonus != 0:
             self.modify_power(stat_bonus, reason)
 
@@ -137,6 +137,7 @@ class RollContext:
         # Импортируем реестры внутри метода во избежание циклического импорта
         from logic.character_changing.passives import PASSIVE_REGISTRY
         from logic.character_changing.talents import TALENT_REGISTRY
+        from logic.statuses.status_definitions import STATUS_REGISTRY
 
         for pid in all_ability_ids:
             obj = None
@@ -149,7 +150,6 @@ class RollContext:
                 obj.on_roll(self, stack=stack)
 
         # 2. Статусы
-        from logic.statuses.status_manager import STATUS_REGISTRY
         for status_id, amount in self.source.statuses.items():
             if amount > 0 and status_id in STATUS_REGISTRY:
                 st_obj = STATUS_REGISTRY[status_id]

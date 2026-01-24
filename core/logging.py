@@ -1,7 +1,8 @@
 import os
-import streamlit as st
-from enum import IntEnum
 from datetime import datetime
+from enum import IntEnum
+
+import streamlit as st
 
 # Путь к файлу полного лога
 LOG_FILE_PATH = "data/logs/full_battle_log.txt"

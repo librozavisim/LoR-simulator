@@ -1,6 +1,3 @@
-from core.logging import logger, LogLevel
-
-
 def get_action_priority(card):
     """
     Возвращает базовый приоритет действия на основе типа карты.

@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
-from logic.scripts.utils import _check_conditions, _resolve_value, _get_targets
+
 from core.logging import logger, LogLevel
+from logic.scripts.utils import _check_conditions, _resolve_value, _get_targets
 
 if TYPE_CHECKING:
     from logic.context import RollContext

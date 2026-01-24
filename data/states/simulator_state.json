@@ -1,0 +1,2076 @@
+{
+  "type": "full",
+  "page": "⚔️ Simulator",
+  "team_left_data": [
+    {
+      "name": "ФанатBA",
+      "level": 29,
+      "rank": 5,
+      "avatar": "data/avatars/ФанатBA.png",
+      "base_intellect": 3,
+      "total_xp": 0,
+      "pct_mods": {
+        "imp_hp": 50,
+        "imp_sp": 50,
+        "imp_stg": 0,
+        "tal_hp": 0,
+        "tal_sp": 0,
+        "tal_stg": 0
+      },
+      "flat_mods": {
+        "imp_hp": 50,
+        "imp_sp": 200,
+        "imp_stg": -100
+      },
+      "current_hp": 482,
+      "current_sp": 444,
+      "current_stagger": 17,
+      "resources": {},
+      "cooldowns": {
+        "mind_power": 1
+      },
+      "card_cooldowns": {
+        "fanat_holy_crusade": 0,
+        "tea_red": 0,
+        "tea_fruit": 0,
+        "fanat_living_shield": 0,
+        "fanat_frenzy_barrage": 0,
+        "tea_coffee": 0,
+        "tea_ginger": 0,
+        "tea_berry": 0,
+        "tea_sakura": 0,
+        "tea_green": 0,
+        "tea_dark": 0
+      },
+      "active_buffs": {
+        "berserker_rage": 1
+      },
+      "_status_effects": {
+        "haste": [
+          {
+            "amount": 2,
+            "duration": 2
+          },
+          {
+            "amount": 2,
+            "duration": 1
+          },
+          {
+            "amount": 2,
+            "duration": 1
+          }
+        ],
+        "strength": [
+          {
+            "amount": 1,
+            "duration": 2
+          },
+          {
+            "amount": 5,
+            "duration": 1
+          },
+          {
+            "amount": 2,
+            "duration": 1
+          },
+          {
+            "amount": 2,
+            "duration": 1
+          }
+        ],
+        "smoke": [
+          {
+            "amount": 4,
+            "duration": 98
+          }
+        ],
+        "endurance": [
+          {
+            "amount": 1,
+            "duration": 3
+          },
+          {
+            "amount": 2,
+            "duration": 1
+          }
+        ],
+        "barrier": [
+          {
+            "amount": 127,
+            "duration": 3
+          }
+        ],
+        "protection": [
+          {
+            "amount": 2,
+            "duration": 1
+          }
+        ]
+      },
+      "delayed_queue": [],
+      "deck": [
+        "fanat_branding",
+        "fanat_blind_faith",
+        "fanat_frenzy_barrage",
+        "fanat_living_shield",
+        "fanat_idols_voice",
+        "fanat_meat_grinder",
+        "fanat_sacrifice",
+        "fanat_holy_crusade",
+        "tea_dark",
+        "tea_green",
+        "tea_fruit",
+        "tea_sakura",
+        "tea_berry",
+        "tea_red",
+        "tea_ginger",
+        "tea_coffee"
+      ],
+      "active_slots": [
+        {
+          "speed": 13,
+          "card": "fanat_idols_voice",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 0,
+          "target_slot_idx": 0,
+          "force_clash": true,
+          "ui_status": {
+            "text": "CLASH vs Лима [S1] | Перехват!",
+            "icon": "⚡",
+            "color": "red"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": false,
+          "mass_defenses": {
+            "0": "Auto",
+            "1": "Auto",
+            "2": "Auto"
+          }
+        },
+        {
+          "speed": 15,
+          "card": "fanat_sacrifice",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 1,
+          "target_slot_idx": 1,
+          "force_clash": true,
+          "ui_status": {
+            "text": "CLASH vs Лилит [S2] | Перехват!",
+            "icon": "⚡",
+            "color": "red"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": false
+        },
+        {
+          "speed": 10,
+          "card": "fanat_meat_grinder",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 2,
+          "target_slot_idx": 0,
+          "force_clash": false,
+          "ui_status": {
+            "text": "🚫 BROKEN vs Лима [S2] | Speed Gap 11",
+            "icon": "💥",
+            "color": "red"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": true
+        }
+      ],
+      "stored_dice": [],
+      "counter_dice": [
+        {
+          "type": "block",
+          "base_min": 7,
+          "base_max": 10,
+          "is_counter": true,
+          "scripts": {}
+        }
+      ],
+      "memory": {
+        "status_rank": "9 (Fixer)",
+        "start_of_battle_stats": {
+          "hp": 635,
+          "sp": 444,
+          "stagger": 217
+        },
+        "clarity_cooldown_counter": 4,
+        "peak_sanity_initialized": true,
+        "emotional_storm_initialized": true,
+        "emo_level": 5,
+        "emo_progress": 35,
+        "emo_coins_pos": 32,
+        "emo_coins_neg": 3,
+        "battle_initialized": true
+      },
+      "death_count": 1,
+      "overkill_damage": 0,
+      "money_log": [
+        {
+          "amount": 1,
+          "reason": "Счастливая монетка"
+        }
+      ],
+      "base_stats": {
+        "current_hp": 482,
+        "current_sp": 444,
+        "current_stagger": 17
+      },
+      "defense": {
+        "armor_name": "Standard Fixer Suit",
+        "armor_type": "Medium",
+        "hp_resists": {
+          "slash": 2.6,
+          "pierce": 0.8,
+          "blunt": 0.5
+        },
+        "stagger_resists": {
+          "slash": 1.0,
+          "pierce": 1.0,
+          "blunt": 1.0
+        },
+        "weapon_id": "none"
+      },
+      "attributes": {
+        "strength": 20,
+        "endurance": 67,
+        "agility": 0,
+        "wisdom": 0,
+        "psych": 0
+      },
+      "skills": {
+        "strike_power": 30,
+        "medicine": 0,
+        "willpower": 0,
+        "luck": 0,
+        "acrobatics": 0,
+        "shields": 0,
+        "tough_skin": 30,
+        "speed": 20,
+        "light_weapon": 0,
+        "medium_weapon": 0,
+        "heavy_weapon": 0,
+        "firearms": 0,
+        "eloquence": 30,
+        "forging": 0,
+        "engineering": 0,
+        "programming": 0
+      },
+      "passives": [
+        "fanat_unwavering",
+        "fanat_anti_defense",
+        "fanat_mark_hunter",
+        "fanat_reflect"
+      ],
+      "talents": [
+        "tea_master",
+        "mind_power",
+        "peak_sanity",
+        "psychic_strain",
+        "unbearable_presence",
+        "emotional_storm",
+        "controlled_distortion",
+        "big_guy",
+        "defense"
+      ],
+      "augmentations": [],
+      "level_rolls": {
+        "3": {
+          "hp": 5,
+          "sp": 5
+        },
+        "6": {
+          "hp": 5,
+          "sp": 3
+        },
+        "9": {
+          "hp": 1,
+          "sp": 4
+        },
+        "12": {
+          "hp": 1,
+          "sp": 4
+        },
+        "15": {
+          "hp": 5,
+          "sp": 2
+        },
+        "18": {
+          "hp": 3,
+          "sp": 4
+        },
+        "21": {
+          "hp": 5,
+          "sp": 4
+        },
+        "24": {
+          "hp": 3,
+          "sp": 3
+        },
+        "27": {
+          "hp": 1,
+          "sp": 2
+        }
+      },
+      "biography": ""
+    }
+  ],
+  "team_right_data": [
+    {
+      "name": "Лима",
+      "level": 28,
+      "rank": 6,
+      "avatar": "data/avatars/Лима.png",
+      "base_intellect": 8,
+      "total_xp": 134206336,
+      "pct_mods": {
+        "imp_hp": 0,
+        "imp_sp": 0,
+        "imp_stg": 0,
+        "tal_hp": 0,
+        "tal_sp": 0,
+        "tal_stg": 0
+      },
+      "flat_mods": {
+        "imp_hp": 0,
+        "imp_sp": 0,
+        "imp_stg": 0
+      },
+      "current_hp": 73,
+      "current_sp": 35,
+      "current_stagger": 15,
+      "resources": {},
+      "cooldowns": {},
+      "card_cooldowns": {
+        "lima_hit_and_run": 0,
+        "lima_inertia": 0
+      },
+      "active_buffs": {},
+      "_status_effects": {
+        "fanat_mark": [
+          {
+            "amount": 1,
+            "duration": 1
+          }
+        ],
+        "haste": [
+          {
+            "amount": 1,
+            "duration": 1
+          },
+          {
+            "amount": 1,
+            "duration": 1
+          }
+        ]
+      },
+      "delayed_queue": [],
+      "deck": [
+        "lima_little_tricks",
+        "lima_jump_shooting",
+        "lima_assorted_arrows",
+        "lima_hit_and_run",
+        "lima_inertia",
+        "lima_morphine_dart",
+        "lima_one_furious_shot",
+        "lima_ram",
+        "lima_purge_toxin"
+      ],
+      "active_slots": [
+        {
+          "speed": 18,
+          "card": "lima_little_tricks",
+          "target_slot": null,
+          "is_aggro": true,
+          "target_unit_idx": 0,
+          "target_slot_idx": 0,
+          "force_clash": true,
+          "ui_status": {
+            "text": "CLASH vs ФанатBA [S1] | Перехват!",
+            "icon": "⚡",
+            "color": "red"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": false
+        },
+        {
+          "speed": 21,
+          "card": "lima_assorted_arrows",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 0,
+          "target_slot_idx": 2,
+          "force_clash": true,
+          "ui_status": {
+            "text": "✨ SPEED BREAK -> ФанатBA | Уничтожение (21 >> 10)",
+            "icon": "⚡",
+            "color": "green"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": false
+        },
+        {
+          "speed": 20,
+          "card": "lima_jump_shooting",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 0,
+          "target_slot_idx": 2,
+          "force_clash": false,
+          "ui_status": {
+            "text": "✨ SPEED BREAK -> ФанатBA | Уничтожение (20 >> 10)",
+            "icon": "⚡",
+            "color": "green"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": true
+        },
+        {
+          "speed": 15,
+          "card": "lima_one_furious_shot",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 0,
+          "target_slot_idx": 2,
+          "force_clash": false,
+          "ui_status": {
+            "text": "ONE SIDED (Провал) -> ФанатBA | Слаб",
+            "icon": "🐌",
+            "color": "orange"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": true
+        }
+      ],
+      "stored_dice": [],
+      "counter_dice": [],
+      "memory": {
+        "status_rank": "9 (Fixer)",
+        "start_of_battle_stats": {
+          "hp": 115,
+          "sp": 85,
+          "stagger": 57
+        },
+        "mind_suppression_bonus": 15,
+        "battle_initialized": true
+      },
+      "death_count": 0,
+      "overkill_damage": 0,
+      "money_log": [
+        {
+          "amount": 5790000,
+          "reason": ""
+        },
+        {
+          "amount": -3700000,
+          "reason": "Шопинг, стрелы, гранаты"
+        }
+      ],
+      "base_stats": {
+        "current_hp": 73,
+        "current_sp": 35,
+        "current_stagger": 15
+      },
+      "defense": {
+        "armor_name": "Standard Fixer Suit",
+        "armor_type": "Medium",
+        "hp_resists": {
+          "slash": 1.0,
+          "pierce": 1.0,
+          "blunt": 1.2
+        },
+        "stagger_resists": {
+          "slash": 1.0,
+          "pierce": 1.0,
+          "blunt": 1.0
+        },
+        "weapon_id": "skalalaz_iceaxe"
+      },
+      "attributes": {
+        "strength": 2,
+        "endurance": 5,
+        "agility": 30,
+        "wisdom": 15,
+        "psych": 9
+      },
+      "skills": {
+        "strike_power": 2,
+        "medicine": 24,
+        "willpower": 0,
+        "luck": 2,
+        "acrobatics": 15,
+        "shields": 0,
+        "tough_skin": 8,
+        "speed": 30,
+        "light_weapon": 10,
+        "medium_weapon": 0,
+        "heavy_weapon": 0,
+        "firearms": 15,
+        "eloquence": 4,
+        "forging": 0,
+        "engineering": 0,
+        "programming": 0
+      },
+      "passives": [
+        "accelerated_learning",
+        "art_of_self_defense",
+        "lucky_streak",
+        "four_eyes",
+        "hunters_vedas",
+        "ship_of_theseus",
+        "wild_cityscape",
+        "mind_suppression"
+      ],
+      "talents": [
+        "remarkable",
+        "on_the_wave_of_success",
+        "tactical_analysis",
+        "behavior_study",
+        "speech_master",
+        "deal_with_fortune",
+        "second_chance",
+        "athletic",
+        "pathfinder"
+      ],
+      "augmentations": [
+        "aug_strizh"
+      ],
+      "level_rolls": {
+        "3": {
+          "hp": 3,
+          "sp": 3
+        },
+        "6": {
+          "hp": 4,
+          "sp": 4
+        },
+        "9": {
+          "hp": 4,
+          "sp": 1
+        },
+        "12": {
+          "hp": 2,
+          "sp": 2
+        },
+        "15": {
+          "hp": 2,
+          "sp": 3
+        },
+        "18": {
+          "hp": 1,
+          "sp": 4
+        },
+        "21": {
+          "hp": 2,
+          "sp": 1
+        },
+        "24": {
+          "hp": 2,
+          "sp": 1
+        }
+      },
+      "biography": "Броня - лёгкий экзоскелет \"СТРИЖ\" со шлемом и противогазом\nАкробатика +6\nДаёт статус спешки +1  :zHaste: каждый ход\n\nЛедоруб \"Скала Лаз\" х2 (6.5 ранг)\nПозволяет карабкаться по стенам, отвесным скалам. Иногда требуется проверка Ловкости / Акробатики для совершения действия\nПовышает значение куба :zAttackPowerUp: атаки на атакующих картами на 3\n\nСветошумовые гранаты 2шт B tier\n\nАПГРЕЙД КОСТЮМА: ПНВ B tier\nПозволяет видеть в темноте, не получает дебаффы в темноте. Возможны дебаффы при ярком свете/днём во включенном режиме \n"
+    },
+    {
+      "name": "Лилит",
+      "level": 25,
+      "rank": 7,
+      "avatar": "data/avatars/Лилит.png",
+      "base_intellect": 3,
+      "total_xp": 17825792,
+      "pct_mods": {
+        "imp_hp": 6,
+        "imp_sp": 0,
+        "imp_stg": 0,
+        "tal_hp": 0,
+        "tal_sp": 0,
+        "tal_stg": 0
+      },
+      "flat_mods": {
+        "imp_hp": 0,
+        "imp_sp": 0,
+        "imp_stg": 0
+      },
+      "current_hp": 59,
+      "current_sp": 29,
+      "current_stagger": 6,
+      "resources": {},
+      "cooldowns": {},
+      "card_cooldowns": {
+        "inhale_exhale": 0
+      },
+      "active_buffs": {},
+      "_status_effects": {
+        "smoke": [
+          {
+            "amount": 10,
+            "duration": 98
+          }
+        ],
+        "strength": [
+          {
+            "amount": 2,
+            "duration": 2
+          },
+          {
+            "amount": 5,
+            "duration": 3
+          },
+          {
+            "amount": 4,
+            "duration": 1
+          }
+        ],
+        "fanat_mark": [
+          {
+            "amount": 1,
+            "duration": 2
+          }
+        ],
+        "endurance": [
+          {
+            "amount": 4,
+            "duration": 1
+          }
+        ]
+      },
+      "delayed_queue": [],
+      "deck": [
+        "release_steam",
+        "prelude",
+        "puff",
+        "bad_habit",
+        "trip_up",
+        "inhale_exhale",
+        "smoke_arts",
+        "demon_scream",
+        "smoke_silhouette"
+      ],
+      "active_slots": [
+        {
+          "speed": 11,
+          "card": "release_steam",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 0,
+          "target_slot_idx": 0,
+          "force_clash": false,
+          "ui_status": {
+            "text": "ONE SIDED (Провал) -> ФанатBA | Слаб",
+            "icon": "🐌",
+            "color": "orange"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": true
+        },
+        {
+          "speed": 11,
+          "card": "prelude",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 0,
+          "target_slot_idx": 1,
+          "force_clash": true,
+          "ui_status": {
+            "text": "CLASH vs ФанатBA [S2] | Перехват!",
+            "icon": "⚡",
+            "color": "red"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": false
+        },
+        {
+          "speed": 13,
+          "card": "demon_scream",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 0,
+          "target_slot_idx": 1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "ONE SIDED (Провал) -> ФанатBA | Слаб",
+            "icon": "🐌",
+            "color": "orange"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": true,
+          "mass_defenses": {
+            "0": "Auto"
+          }
+        },
+        {
+          "speed": 7,
+          "card": "puff",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 0,
+          "target_slot_idx": 2,
+          "force_clash": false,
+          "ui_status": {
+            "text": "ONE SIDED (Провал) -> ФанатBA | Слаб",
+            "icon": "🐌",
+            "color": "orange"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": true
+        }
+      ],
+      "stored_dice": [],
+      "counter_dice": [
+        {
+          "type": "evade",
+          "base_min": 7,
+          "base_max": 10,
+          "is_counter": true,
+          "scripts": {}
+        },
+        {
+          "type": "slash",
+          "base_min": 5,
+          "base_max": 7,
+          "is_counter": true,
+          "scripts": {}
+        },
+        {
+          "type": "evade",
+          "base_min": 5,
+          "base_max": 7,
+          "is_counter": true,
+          "scripts": {}
+        },
+        {
+          "type": "evade",
+          "base_min": 5,
+          "base_max": 7,
+          "is_counter": true,
+          "scripts": {}
+        },
+        {
+          "type": "evade",
+          "base_min": 5,
+          "base_max": 7,
+          "is_counter": true,
+          "scripts": {}
+        }
+      ],
+      "memory": {
+        "start_of_battle_stats": {
+          "hp": 130,
+          "sp": 77,
+          "stagger": 65
+        },
+        "smoke_is_defensive": true,
+        "smoke_limit_bonus": 5,
+        "battle_initialized": true,
+        "vengeful_payback_chunks": 7
+      },
+      "death_count": 0,
+      "overkill_damage": 0,
+      "money_log": [
+        {
+          "amount": 280000,
+          "reason": ""
+        }
+      ],
+      "base_stats": {
+        "current_hp": 59,
+        "current_sp": 29,
+        "current_stagger": 6
+      },
+      "defense": {
+        "armor_name": "None",
+        "armor_type": "Medium",
+        "hp_resists": {
+          "slash": 1.0,
+          "pierce": 1.0,
+          "blunt": 1.0
+        },
+        "stagger_resists": {
+          "slash": 1.0,
+          "pierce": 1.0,
+          "blunt": 1.0
+        },
+        "weapon_id": "lilith_scythe"
+      },
+      "attributes": {
+        "strength": 18,
+        "endurance": 15,
+        "agility": 16,
+        "wisdom": 0,
+        "psych": 0
+      },
+      "skills": {
+        "strike_power": 4,
+        "medicine": 0,
+        "willpower": 0,
+        "luck": 0,
+        "acrobatics": 15,
+        "shields": 0,
+        "tough_skin": 4,
+        "speed": 30,
+        "light_weapon": 3,
+        "medium_weapon": 15,
+        "heavy_weapon": 0,
+        "firearms": 0,
+        "eloquence": 15,
+        "forging": 0,
+        "engineering": 0,
+        "programming": 0
+      },
+      "passives": [
+        "wag_tail",
+        "backstreet_demon",
+        "daughter_of_backstreets",
+        "hedonism",
+        "live_fast_die_young"
+      ],
+      "talents": [
+        "naked_defense",
+        "vengeful_payback",
+        "berserker_rage",
+        "calm_mind",
+        "frenzy",
+        "hiding_in_smoke",
+        "smoke_universality",
+        "aerial_foot"
+      ],
+      "augmentations": [
+        "aug_blessing_of_wind",
+        "aug_merchant_hysteria"
+      ],
+      "level_rolls": {
+        "3": {
+          "hp": 2,
+          "sp": 4
+        },
+        "6": {
+          "hp": 1,
+          "sp": 3
+        },
+        "9": {
+          "hp": 1,
+          "sp": 2
+        },
+        "12": {
+          "hp": 2,
+          "sp": 3
+        },
+        "15": {
+          "hp": 5,
+          "sp": 4
+        },
+        "18": {
+          "hp": 4,
+          "sp": 5
+        },
+        "21": {
+          "hp": 1,
+          "sp": 1
+        }
+      },
+      "biography": ""
+    },
+    {
+      "name": "Зафиэль",
+      "level": 28,
+      "rank": 6,
+      "avatar": "data/avatars/Зафиэль.jpg",
+      "base_intellect": 5,
+      "total_xp": 159383552,
+      "pct_mods": {
+        "imp_hp": 0,
+        "imp_sp": 0,
+        "imp_stg": 0,
+        "tal_hp": 0,
+        "tal_sp": 0,
+        "tal_stg": 0
+      },
+      "flat_mods": {
+        "imp_hp": 0,
+        "imp_sp": 0,
+        "imp_stg": 0
+      },
+      "current_hp": 150,
+      "current_sp": 15,
+      "current_stagger": 50,
+      "resources": {},
+      "cooldowns": {},
+      "card_cooldowns": {
+        "thrill_of_battle": 0
+      },
+      "active_buffs": {},
+      "_status_effects": {
+        "adaptation": [
+          {
+            "amount": 4,
+            "duration": 99
+          }
+        ],
+        "protection": [
+          {
+            "amount": 2,
+            "duration": 1
+          },
+          {
+            "amount": 2,
+            "duration": 2
+          }
+        ]
+      },
+      "delayed_queue": [],
+      "deck": [
+        "unbridled_cruelty",
+        "unbridled_cruelty",
+        "unbridled_cruelty",
+        "thrill_of_battle",
+        "thrill_of_battle",
+        "thrill_of_battle",
+        "furious_assault",
+        "furious_assault",
+        "furious_assault"
+      ],
+      "active_slots": [
+        {
+          "speed": 12,
+          "card": "furious_assault",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": 0,
+          "target_slot_idx": 0,
+          "force_clash": false,
+          "ui_status": {
+            "text": "ONE SIDED (Провал) -> ФанатBA | Слаб",
+            "icon": "🐌",
+            "color": "orange"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true,
+          "force_onesided": true
+        },
+        {
+          "speed": 12,
+          "card": "furious_assault",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        },
+        {
+          "speed": 9,
+          "card": "furious_assault",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        },
+        {
+          "speed": 7,
+          "card": "thrill_of_battle",
+          "target_slot": null,
+          "is_aggro": false,
+          "target_unit_idx": -1,
+          "target_slot_idx": -1,
+          "force_clash": false,
+          "ui_status": {
+            "text": "НЕТ ЦЕЛИ",
+            "icon": "⛔",
+            "color": "gray"
+          },
+          "is_ally_target": false,
+          "destroy_on_speed": true
+        }
+      ],
+      "stored_dice": [],
+      "counter_dice": [
+        {
+          "type": "block",
+          "base_min": 7,
+          "base_max": 10,
+          "is_counter": true,
+          "scripts": {}
+        },
+        {
+          "type": "block",
+          "base_min": 7,
+          "base_max": 10,
+          "is_counter": true,
+          "scripts": {}
+        },
+        {
+          "type": "block",
+          "base_min": 7,
+          "base_max": 10,
+          "is_counter": true,
+          "scripts": {}
+        }
+      ],
+      "memory": {
+        "start_of_battle_stats": {
+          "hp": 178,
+          "sp": 65,
+          "stagger": 90
+        },
+        "adaptation_stats": {
+          "slash": 0,
+          "pierce": 0,
+          "blunt": 0
+        },
+        "battle_initialized": true,
+        "adaptation_active_type": "pierce"
+      },
+      "death_count": 0,
+      "overkill_damage": 0,
+      "money_log": [
+        {
+          "amount": 14460000,
+          "reason": ""
+        }
+      ],
+      "base_stats": {
+        "current_hp": 150,
+        "current_sp": 15,
+        "current_stagger": 50
+      },
+      "defense": {
+        "armor_name": "Standard Fixer Suit",
+        "armor_type": "Medium",
+        "hp_resists": {
+          "slash": 0.5,
+          "pierce": 2.0,
+          "blunt": 1.0
+        },
+        "stagger_resists": {
+          "slash": 1.0,
+          "pierce": 1.0,
+          "blunt": 1.0
+        },
+        "weapon_id": "none"
+      },
+      "attributes": {
+        "strength": 30,
+        "endurance": 13,
+        "agility": 9,
+        "wisdom": 0,
+        "psych": 0
+      },
+      "skills": {
+        "strike_power": 15,
+        "medicine": 0,
+        "willpower": 2,
+        "luck": 0,
+        "acrobatics": 0,
+        "shields": 15,
+        "tough_skin": 15,
+        "speed": 30,
+        "light_weapon": 0,
+        "medium_weapon": 0,
+        "heavy_weapon": 15,
+        "firearms": 0,
+        "eloquence": 0,
+        "forging": 0,
+        "engineering": 0,
+        "programming": 0
+      },
+      "passives": [
+        "severe_training",
+        "adaptation"
+      ],
+      "talents": [
+        "big_guy",
+        "defense",
+        "commendable_constitution",
+        "rock",
+        "despiteAdversities",
+        "adaptation_tireless",
+        "tough_as_steel",
+        "survivor",
+        "idol_oath"
+      ],
+      "augmentations": [],
+      "level_rolls": {
+        "3": {
+          "hp": 1,
+          "sp": 5
+        },
+        "6": {
+          "hp": 1,
+          "sp": 4
+        },
+        "9": {
+          "hp": 2,
+          "sp": 4
+        },
+        "12": {
+          "hp": 5,
+          "sp": 2
+        },
+        "15": {
+          "hp": 3,
+          "sp": 3
+        },
+        "18": {
+          "hp": 5,
+          "sp": 4
+        },
+        "21": {
+          "hp": 2,
+          "sp": 5
+        },
+        "24": {
+          "hp": 1,
+          "sp": 5
+        },
+        "27": {
+          "hp": 2,
+          "sp": 3
+        }
+      },
+      "biography": ""
+    }
+  ],
+  "phase": "planning",
+  "round_number": 3,
+  "turn_message": "🎲 Speed Rolled (Targets Auto-Assigned)",
+  "battle_logs": [
+    {
+      "type": "clash",
+      "round": "Clash (1)",
+      "left": {
+        "unit": "ФанатBA",
+        "card": "Живой Щит",
+        "dice": "BLOCK",
+        "val": 43,
+        "range": "1-7"
+      },
+      "right": {
+        "unit": "Лима",
+        "card": "Ассорти Стрел",
+        "dice": "PIERCE",
+        "val": 7,
+        "range": "3-4"
+      },
+      "outcome": "🛡️ Blocked",
+      "details": [
+        "🧪 **ФанатBA**: +4 Protection",
+        "🎲 Roll [3-4]: 4 + 3 (Сила) = **7**",
+        "🎲 Roll [1-7]: 6 + 13 (Стойкость) + 4 (Endurance) + 5 (Anti-Defense) + 15 (Marked Target) = **43**"
+      ]
+    },
+    {
+      "type": "clash",
+      "round": "Clash (2)",
+      "left": {
+        "unit": "ФанатBA",
+        "card": "Живой Щит",
+        "dice": "BLOCK (C)",
+        "val": 46,
+        "range": "7-10"
+      },
+      "right": {
+        "unit": "Лима",
+        "card": "Ассорти Стрел",
+        "dice": "PIERCE",
+        "val": 7,
+        "range": "3-4"
+      },
+      "outcome": "🛡️ Blocked",
+      "details": [
+        "🎲 Roll [3-4]: 4 + 3 (Сила) = **7**",
+        "🎲 Roll [7-10]: 7 + 13 (Стойкость) + 4 (Endurance) + 5 (Anti-Defense) + 15 (Marked Target) + 2 (Peak Sanity (Min+2)) = **46**",
+        "🔴 **Эмоции**: +1 Негативная монета"
+      ]
+    },
+    {
+      "type": "clash",
+      "round": "Clash (3)",
+      "left": {
+        "unit": "ФанатBA",
+        "card": "Живой Щит",
+        "dice": "Broken",
+        "val": 0,
+        "range": "-"
+      },
+      "right": {
+        "unit": "Лима",
+        "card": "Ассорти Стрел",
+        "dice": "PIERCE",
+        "val": 7,
+        "range": "3-4"
+      },
+      "outcome": "🚫 ФанатBA Broken",
+      "details": [
+        "🎲 Roll [3-4]: 4 + 3 (Сила) = **7**"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лима",
+        "card": "Бей И Беги",
+        "dice": "PIERCE",
+        "val": 9,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [4-7]: 6 + 3 (Сила) = **9**",
+        "📉 **Помеха!** (6, 6) -> Base: 6",
+        "💥 **ФанатBA**: [-12 Skin] [x0.8 Res] Hit 0 HP"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лима",
+        "card": "Бей И Беги",
+        "dice": "EVADE",
+        "val": 16,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "🏃 Evade Stored",
+      "details": [
+        "🎲 Roll [4-6]: 5 + 11 (Ловкость) = **16**",
+        "📉 **Помеха!** (5, 6) -> Base: 5"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лима",
+        "card": "Бей И Беги",
+        "dice": "PIERCE",
+        "val": 8,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [4-7]: 5 + 3 (Сила) = **8**",
+        "📉 **Помеха!** (7, 5) -> Base: 5",
+        "🛡️ Damage mitigated to 0"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лима",
+        "card": "Бей И Беги",
+        "dice": "EVADE",
+        "val": 16,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "🏃 Evade Stored",
+      "details": [
+        "🎲 Roll [4-6]: 5 + 11 (Ловкость) = **16**",
+        "📉 **Помеха!** (5, 5) -> Base: 5"
+      ]
+    },
+    {
+      "type": "clash",
+      "round": "Clash (1)",
+      "left": {
+        "unit": "ФанатBA",
+        "card": "Клеймо Фаната",
+        "dice": "BLUNT",
+        "val": 35,
+        "range": "1-1"
+      },
+      "right": {
+        "unit": "Лилит",
+        "card": "Затяг",
+        "dice": "SLASH",
+        "val": 22,
+        "range": "6-8"
+      },
+      "outcome": "🏆 ФанатBA Win (Hit)",
+      "details": [
+        "🧪 **Лилит**: +1 Fanat_mark",
+        "🎲 Roll [1-1]: 1 + 4 (Сила) + 8 (Strength) + 5 (Anti-Defense) + 15 (Marked Target) + 2 (Peak Sanity (Min+2)) = **35**",
+        "🟢 **Эмоции**: +1 Позитивная монета",
+        "🎲 Roll [6-8]: 7 + 3 (Сила) + 5 (Среднее ор.) + 6 (Strength) + 1 (Blessing (6)) = **22**"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лима",
+        "card": "Маленькие Хитрости",
+        "dice": "EVADE",
+        "val": 18,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "🏃 Evade Stored",
+      "details": [
+        "🎲 Roll [2-2]: 2 + 11 (Ловкость) + 5 (Total_Intellect scale) = **18**",
+        "📉 **Помеха!** (2, 2) -> Base: 2"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лима",
+        "card": "Маленькие Хитрости",
+        "dice": "EVADE",
+        "val": 18,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "🏃 Evade Stored",
+      "details": [
+        "🎲 Roll [2-2]: 2 + 11 (Ловкость) + 5 (Total_Intellect scale) = **18**",
+        "📉 **Помеха!** (2, 2) -> Base: 2"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лима",
+        "card": "Маленькие Хитрости",
+        "dice": "EVADE",
+        "val": 18,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "🏃 Evade Stored",
+      "details": [
+        "🎲 Roll [2-2]: 2 + 11 (Ловкость) + 5 (Total_Intellect scale) = **18**",
+        "📉 **Помеха!** (2, 2) -> Base: 2"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лилит",
+        "card": "Прелюдия",
+        "dice": "BLUNT",
+        "val": 19,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🧪 **Лилит**: +2 Smoke",
+        "🧪 **ФанатBA**: +2 Smoke",
+        "🎲 Roll [3-4]: 4 + 3 (Сила) + 5 (Среднее ор.) + 6 (Strength) + 1 (Blessing (8)) = **19**",
+        "🧠 **Не теряя голову**: +1 Self-Control",
+        "👊 Atk Boost: +1",
+        "💥 **ФанатBA**: [-12 Skin] [x0.5 Res] Hit 0 HP"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лилит",
+        "card": "Прелюдия",
+        "dice": "BLUNT",
+        "val": 19,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [3-4]: 4 + 3 (Сила) + 5 (Среднее ор.) + 6 (Strength) + 1 (Blessing (8)) = **19**",
+        "💨 CRIT! (5%) x2 DMG",
+        "🧠 **Не теряя голову**: +1 Self-Control",
+        "👊 Atk Boost: +1",
+        "💥 **ФанатBA**: [-12 Skin] [x0.5 Res] Hit 10 HP"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лима",
+        "card": "Инерция",
+        "dice": "SLASH",
+        "val": 6,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [2-4]: 3 + 3 (Сила) = **6**",
+        "🛡️ Damage mitigated to 0"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лима",
+        "card": "Инерция",
+        "dice": "SLASH",
+        "val": 5,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [2-4]: 2 + 3 (Сила) = **5**",
+        "🛡️ Damage mitigated to 0"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лима",
+        "card": "Инерция",
+        "dice": "SLASH",
+        "val": 7,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [2-4]: 4 + 3 (Сила) = **7**",
+        "🛡️ Damage mitigated to 0"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лима",
+        "card": "Инерция",
+        "dice": "SLASH",
+        "val": 7,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [2-4]: 4 + 3 (Сила) = **7**",
+        "🛡️ Damage mitigated to 0"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лима",
+        "card": "Инерция",
+        "dice": "SLASH",
+        "val": 5,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [2-4]: 2 + 3 (Сила) = **5**",
+        "🛡️ Damage mitigated to 0"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лилит",
+        "card": "Вдох-выдох",
+        "dice": "BLUNT",
+        "val": 23,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🧪 **Лилит**: +3 Smoke",
+        "🎲 Roll [6-8]: 6 + 3 (Сила) + 5 (Среднее ор.) + 1 (Smoke (Base)) + 6 (Strength) + 2 (Blessing (11)) = **23**",
+        "🧠 **Не теряя голову**: +1 Self-Control",
+        "👊 Atk Boost: +1",
+        "💥 **ФанатBA**: [-12 Skin] [x0.5 Res] Hit 2 HP"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лилит",
+        "card": "Вдох-выдох",
+        "dice": "SLASH",
+        "val": 24,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [4-7]: 7 + 3 (Сила) + 5 (Среднее ор.) + 1 (Smoke (Base)) + 6 (Strength) + 2 (Blessing (11)) = **24**",
+        "💨 CRIT! (10%) x2 DMG",
+        "🧠 **Не теряя голову**: +1 Self-Control",
+        "👊 Atk Boost: +1",
+        "💥 **ФанатBA**: [-12 Skin] [x2.6 Res] Hit 78 HP"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лилит",
+        "card": "Выпустить пар",
+        "dice": "SLASH",
+        "val": 20,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [1-3]: 3 + 3 (Сила) + 5 (Среднее ор.) + 1 (Smoke (Base)) + 6 (Strength) + 2 (Blessing (11)) = **20**",
+        "🧠 **Не теряя голову**: +1 Self-Control",
+        "🧪 **ФанатBA**: +1 Smoke",
+        "👊 Atk Boost: +1",
+        "💥 **ФанатBA**: [-12 Skin] [x2.6 Res] Hit 2 HP"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лилит",
+        "card": "Выпустить пар",
+        "dice": "SLASH",
+        "val": 18,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [1-3]: 1 + 3 (Сила) + 5 (Среднее ор.) + 1 (Smoke (Base)) + 6 (Strength) + 2 (Blessing (11)) = **18**",
+        "🧠 **Не теряя голову**: +1 Self-Control",
+        "🧪 **ФанатBA**: +1 Smoke",
+        "👊 Atk Boost: +1",
+        "💥 **ФанатBA**: [-12 Skin] [x2.6 Res] Hit 0 HP"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Лилит",
+        "card": "Выпустить пар",
+        "dice": "SLASH",
+        "val": 20,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [1-3]: 3 + 3 (Сила) + 5 (Среднее ор.) + 1 (Smoke (Base)) + 6 (Strength) + 2 (Blessing (11)) = **20**",
+        "🧠 **Не теряя голову**: +1 Self-Control",
+        "🧪 **ФанатBA**: +1 Smoke",
+        "👊 Atk Boost: +1",
+        "💥 **ФанатBA**: [-12 Skin] [x2.6 Res] Hit 2 HP"
+      ]
+    },
+    {
+      "type": "clash",
+      "round": "Clash (1)",
+      "left": {
+        "unit": "ФанатBA",
+        "card": "Безумный Напор",
+        "dice": "PIERCE",
+        "val": 20,
+        "range": "1-4"
+      },
+      "right": {
+        "unit": "Зафиэль",
+        "card": "Безудержная жестокость",
+        "dice": "SLASH",
+        "val": 16,
+        "range": "5-12"
+      },
+      "outcome": "🏆 ФанатBA Win (Hit)",
+      "details": [
+        "🎲 Roll [5-12]: 10 + 6 (Сила) = **16**",
+        "🎲 Roll [1-4]: 3 + 4 (Сила) + 8 (Strength) + 5 (Anti-Defense) = **20**"
+      ]
+    },
+    {
+      "type": "clash",
+      "round": "Clash (2)",
+      "left": {
+        "unit": "ФанатBA",
+        "card": "Безумный Напор",
+        "dice": "SLASH",
+        "val": 21,
+        "range": "2-5"
+      },
+      "right": {
+        "unit": "Зафиэль",
+        "card": "Безудержная жестокость",
+        "dice": "BLOCK (C)",
+        "val": 16,
+        "range": "7-10"
+      },
+      "outcome": "🔨 Block Broken",
+      "details": [
+        "🎲 Roll [7-10]: 9 + 7 (Стойкость) = **16**",
+        "🎲 Roll [2-5]: 4 + 4 (Сила) + 8 (Strength) + 5 (Anti-Defense) = **21**"
+      ]
+    },
+    {
+      "type": "clash",
+      "round": "Clash (3)",
+      "left": {
+        "unit": "ФанатBA",
+        "card": "Безумный Напор",
+        "dice": "BLUNT",
+        "val": 23,
+        "range": "3-6"
+      },
+      "right": {
+        "unit": "Зафиэль",
+        "card": "Безудержная жестокость",
+        "dice": "BLOCK (C)",
+        "val": 16,
+        "range": "7-10"
+      },
+      "outcome": "🔨 Block Broken",
+      "details": [
+        "🎲 Roll [7-10]: 9 + 7 (Стойкость) = **16**",
+        "🎲 Roll [3-6]: 6 + 4 (Сила) + 8 (Strength) + 5 (Anti-Defense) = **23**",
+        "🟢 **Эмоции**: +1 Позитивная монета"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Зафиэль",
+        "card": "Азарт битвы",
+        "dice": "SLASH",
+        "val": 14,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [7-10]: 8 + 6 (Сила) = **14**",
+        "👊 Atk Boost: +5",
+        "💥 **ФанатBA**: [-12 Skin] [x2.6 Res] Hit 0 HP"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Зафиэль",
+        "card": "Азарт битвы",
+        "dice": "SLASH",
+        "val": 13,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [7-10]: 7 + 6 (Сила) = **13**",
+        "👊 Atk Boost: +5",
+        "💥 **ФанатBA**: [-12 Skin] [x2.6 Res] Hit 0 HP"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Зафиэль",
+        "card": "Азарт битвы",
+        "dice": "SLASH",
+        "val": 16,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [7-10]: 10 + 6 (Сила) = **16**",
+        "👊 Atk Boost: +5",
+        "💥 **ФанатBA**: [-12 Skin] [x2.6 Res] Hit 2 HP"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Зафиэль",
+        "card": "Азарт битвы",
+        "dice": "SLASH",
+        "val": 14,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [7-10]: 8 + 6 (Сила) = **14**",
+        "👊 Atk Boost: +5",
+        "💥 **ФанатBA**: [-12 Skin] [x2.6 Res] Hit 0 HP"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Зафиэль",
+        "card": "Азарт битвы",
+        "dice": "SLASH",
+        "val": 16,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [7-10]: 10 + 6 (Сила) = **16**",
+        "📉 **Помеха!** (10, 10) -> Base: 10",
+        "👊 Atk Boost: +5",
+        "💥 **ФанатBA**: [-12 Skin] [x2.6 Res] Hit 2 HP"
+      ]
+    },
+    {
+      "type": "onesided",
+      "round": "R Hit (Hit)",
+      "left": {
+        "unit": "Зафиэль",
+        "card": "Азарт битвы",
+        "dice": "SLASH",
+        "val": 13,
+        "range": "-"
+      },
+      "right": {
+        "unit": "ФанатBA",
+        "card": "-",
+        "dice": "Busy",
+        "val": 0,
+        "range": "-"
+      },
+      "outcome": "Unopposed (Redirected)",
+      "details": [
+        "🎲 Roll [7-10]: 7 + 6 (Сила) = **13**",
+        "📉 **Помеха!** (7, 10) -> Base: 7",
+        "👊 Atk Boost: +5",
+        "💥 **ФанатBA**: [-12 Skin] [x2.6 Res] Hit 0 HP"
+      ]
+    },
+    {
+      "round": "Skill",
+      "rolls": "Activate",
+      "details": "🧠 **Умопомрачительная сила**: Пожертвовано 50 SP -> Получено +5 Силы!"
+    },
+    {
+      "round": "Item",
+      "rolls": "Consumable",
+      "details": [
+        "💊 **ФанатBA** uses **Кофе-чай**!",
+        "🧠 **ФанатBA**: +30 SP"
+      ]
+    },
+    {
+      "round": "Item",
+      "rolls": "Consumable",
+      "details": [
+        "💊 **ФанатBA** uses **Имбирный чай**!",
+        "🧠 **ФанатBA**: +20 SP",
+        "🧪 **ФанатBA**: +1 Clarity"
+      ]
+    },
+    {
+      "round": "Item",
+      "rolls": "Consumable",
+      "details": [
+        "💊 **ФанатBA** uses **Ягодный Чай**!",
+        "🧠 **ФанатBA**: +0 SP",
+        "🧪 **ФанатBA**: +1 Endurance"
+      ]
+    },
+    {
+      "round": "Item",
+      "rolls": "Consumable",
+      "details": [
+        "💊 **ФанатBA** uses **Чай из листьев сакуры**!",
+        "🧠 **ФанатBA**: +0 SP",
+        "🛡️ ✨ Clarity blocked **paralysis**! (-1 stack)"
+      ]
+    },
+    {
+      "round": "Item",
+      "rolls": "Consumable",
+      "details": [
+        "💊 **ФанатBA** uses **Особый зелёный чай**!",
+        "🧠 **ФанатBA**: +0 SP",
+        "🧪 **ФанатBA**: +127 Barrier"
+      ]
+    },
+    {
+      "round": "Item",
+      "rolls": "Consumable",
+      "details": [
+        "💊 **ФанатBA** uses **Особый тёмный чай**!",
+        "🧠 **ФанатBA**: +0 SP"
+      ]
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **ФанатBA**: 👁️ **Невыносимое присутствие [WIP roll advantage]**: 3 врагов подавлены (-11 SP)"
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **ФанатBA**: 🌪️ **Эмоции (Ур. 5)**: Баффы активированы (Haste, Endurance, Protection, Strength, All+1)."
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **Лима**: 🏃 **Атлетичный**: +1 Haste"
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **Лима**: ⚡ **Лима**: Экзоскелет активирует сервоприводы (Спешка +1)."
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **Лилит**: 🩸 **Злобная расплата**: Потеря здоровья (Порог 2->7) -> +5 Силы"
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **Зафиэль**: 🧬 Адаптация: Рост -> Уровень 4"
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **Зафиэль**: 🛡️ **Похвальное телосложение**: +2 protection"
+    },
+    {
+      "round": "Round Start",
+      "rolls": "Event",
+      "details": "🔄 **Зафиэль**: 🧬 **Адаптация**: Активна защита от Pierce (-25% урона)."
+    },
+    {
+      "round": "Speed Roll",
+      "rolls": "Passive",
+      "details": "⚡ **ФанатBA**: 🛡️ **Оборона**: Добавлено 1 контр-кубиков Блока (7-10)."
+    },
+    {
+      "round": "Speed Roll",
+      "rolls": "Passive",
+      "details": "⚡ **Лилит**: 🐈 **Махнуть хвостиком**: +1 Counter Evade (7-10) added to pool."
+    },
+    {
+      "round": "Speed Roll",
+      "rolls": "Passive",
+      "details": "⚡ **Лилит**: ⚡ **Живи быстро, умирай молодым**: +4 Силы и Стойкости (за 4 слота)"
+    },
+    {
+      "round": "Speed Roll",
+      "rolls": "Passive",
+      "details": "⚡ **Лилит**: 😡 **Неистовство**: Frenzy (+1 Counter 5-7)"
+    },
+    {
+      "round": "Speed Roll",
+      "rolls": "Passive",
+      "details": "⚡ **Лилит**: 🦶 **Воздушная стопа**: Добавлено 3 контр-уклонений (Smoke: 10)."
+    },
+    {
+      "round": "Speed Roll",
+      "rolls": "Passive",
+      "details": "⚡ **Зафиэль**: 🛡️ **Оборона**: Добавлено 3 контр-кубиков Блока (7-10)."
+    }
+  ],
+  "script_logs": "",
+  "turn_phase": "done",
+  "action_idx": 0,
+  "executed_slots": [],
+  "turn_actions": [],
+  "profile_unit": "Roland",
+  "leveling_unit": "Roland",
+  "tree_unit": "Roland",
+  "checks_unit": "Roland",
+  "undo_stack": []
+}

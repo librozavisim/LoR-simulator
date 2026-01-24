@@ -1,4 +1,5 @@
 import streamlit as st
+
 from ui.editor.config import SCRIPT_SCHEMAS, STATUS_LIST
 # [NEW] Импортируем утилиты для иконок
 from ui.icons import get_icon_html, FALLBACK_EMOJIS

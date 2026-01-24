@@ -1,10 +1,12 @@
 import random
-import streamlit as st
 from typing import TYPE_CHECKING
+
+import streamlit as st
+
 from core.logging import logger, LogLevel
 
 if TYPE_CHECKING:
-    from logic.context import RollContext
+    pass
 
 
 # ==========================================
