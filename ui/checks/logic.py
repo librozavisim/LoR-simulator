@@ -70,8 +70,7 @@ def calculate_pre_roll_stats(unit, stat_key, stat_value, difficulty, bonus):
     # Без Ошибок (5 + 1d15 для всех проверок)
     if "no_mistakes" in unit.talents:
         die_max = 15
-        base_add = 5
-        # Определяем бонус от характеристики/навыка в зависимости от типа
+        base_add = 5        
         if check_type == "type10":
             stat_bonus = stat_value // 3
         elif check_type == "type15":
