@@ -1,6 +1,6 @@
 {
   "type": "full",
-  "page": "⚔️ Simulator",
+  "page": "👤 Profile",
   "team_left_data": [
     {
       "name": "Roland",
@@ -601,7 +601,7 @@
   "action_idx": 0,
   "executed_slots": [],
   "turn_actions": [],
-  "profile_unit": "Roland",
+  "profile_unit": null,
   "leveling_unit": "Roland",
   "tree_unit": "Roland",
   "checks_unit": "Roland",
