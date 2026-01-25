@@ -18,6 +18,20 @@
         "imp_sp": 200,
         "imp_stg": -100
     },
+    "current_hp": 635,
+    "current_sp": 444,
+    "current_stagger": 217,
+    "resources": {},
+    "cooldowns": {},
+    "card_cooldowns": {
+        "fanat_idols_voice": 0,
+        "fanat_holy_crusade": 0
+    },
+    "active_buffs": {
+        "berserker_rage": 1
+    },
+    "_status_effects": {},
+    "delayed_queue": [],
     "deck": [
         "fanat_branding",
         "fanat_blind_faith",
@@ -36,8 +50,20 @@
         "tea_ginger",
         "tea_coffee"
     ],
+    "active_slots": [],
     "stored_dice": [],
     "counter_dice": [],
+    "memory": {
+        "status_rank": "9 (Fixer)"
+    },
+    "death_count": 1,
+    "overkill_damage": 0,
+    "money_log": [
+        {
+            "amount": 1,
+            "reason": "Счастливая монетка"
+        }
+    ],
     "base_stats": {
         "current_hp": 635,
         "current_sp": 444,
@@ -57,14 +83,6 @@
             "blunt": 1.0
         },
         "weapon_id": "none"
-    },
-    "card_cooldowns": {
-        "fanat_idols_voice": [
-            1
-        ],
-        "fanat_holy_crusade": [
-            3
-        ]
     },
     "attributes": {
         "strength": 20,
@@ -147,24 +165,7 @@
             "sp": 2
         }
     },
-    "cooldowns": {},
-    "active_buffs": {
-        "berserker_rage": 1
-    },
-    "resources": {},
     "biography": "",
-    "money_log": [
-        {
-            "amount": 1,
-            "reason": "Счастливая монетка"
-        }
-    ],
-    "death_count": 1,
-    "overkill_damage": 0,
-    "_status_effects": {},
-    "delayed_queue": [],
-    "memory": {
-        "status_rank": "9 (Fixer)"
-    },
-    "active_slots": []
+    "relationships": {},
+    "unit_type": "mob"
 }

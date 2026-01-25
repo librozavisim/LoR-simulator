@@ -18,9 +18,9 @@
         "imp_sp": 0,
         "imp_stg": 0
     },
-    "current_hp": 180,
+    "current_hp": 150,
     "current_sp": 65,
-    "current_stagger": 93,
+    "current_stagger": 78,
     "resources": {},
     "cooldowns": {},
     "card_cooldowns": {},
@@ -53,9 +53,9 @@
         }
     ],
     "base_stats": {
-        "current_hp": 180,
+        "current_hp": 150,
         "current_sp": 65,
-        "current_stagger": 93
+        "current_stagger": 78
     },
     "defense": {
         "armor_name": "Standard Fixer Suit",
@@ -151,5 +151,7 @@
             "sp": 3
         }
     },
-    "biography": ""
+    "biography": "",
+    "relationships": {},
+    "unit_type": "player"
 }

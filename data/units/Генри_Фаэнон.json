@@ -18,6 +18,15 @@
         "imp_sp": 10,
         "imp_stg": 0
     },
+    "current_hp": 167,
+    "current_sp": 65,
+    "current_stagger": 79,
+    "resources": {},
+    "cooldowns": {},
+    "card_cooldowns": {},
+    "active_buffs": {},
+    "_status_effects": {},
+    "delayed_queue": [],
     "deck": [
         "open_veins",
         "bloody_overture",
@@ -29,7 +38,20 @@
         "blood_mist",
         "crimson_trail"
     ],
+    "active_slots": [],
     "stored_dice": [],
+    "counter_dice": [],
+    "memory": {
+        "status_rank": "9 (Fixer)"
+    },
+    "death_count": 0,
+    "overkill_damage": 0,
+    "money_log": [
+        {
+            "amount": 7500000,
+            "reason": ""
+        }
+    ],
     "base_stats": {
         "current_hp": 167,
         "current_sp": 65,
@@ -50,7 +72,6 @@
         },
         "weapon_id": "phantom_razors"
     },
-    "card_cooldowns": {},
     "attributes": {
         "strength": 30,
         "endurance": 15,
@@ -148,14 +169,7 @@
             "sp": 1
         }
     },
-    "cooldowns": {},
-    "active_buffs": {},
-    "resources": {},
     "biography": "",
-    "money_log": [
-        {
-            "amount": 7500000,
-            "reason": ""
-        }
-    ]
+    "relationships": {},
+    "unit_type": "syndicate"
 }

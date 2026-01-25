@@ -19,8 +19,8 @@
         "imp_stg": 0
     },
     "current_hp": 91,
-    "current_sp": 41,
-    "current_stagger": 56,
+    "current_sp": 40,
+    "current_stagger": 53,
     "resources": {},
     "cooldowns": {},
     "card_cooldowns": {},
@@ -49,8 +49,8 @@
     "money_log": [],
     "base_stats": {
         "current_hp": 91,
-        "current_sp": 41,
-        "current_stagger": 56
+        "current_sp": 40,
+        "current_stagger": 53
     },
     "defense": {
         "armor_name": "Unit_13",
@@ -109,5 +109,7 @@
             "sp": 2
         }
     },
-    "biography": ""
+    "biography": "",
+    "relationships": {},
+    "unit_type": "mob"
 }
