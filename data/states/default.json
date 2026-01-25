@@ -1,6 +1,6 @@
 {
   "type": "full",
-  "page": "❤️ Relationships",
+  "page": "👤 Profile",
   "team_left_data": [
     {
       "name": "Павучел 2",
@@ -377,7 +377,7 @@
   "action_idx": 0,
   "executed_slots": [],
   "turn_actions": [],
-  "profile_unit": "Roland",
+  "profile_unit": "default",
   "leveling_unit": "Roland",
   "tree_unit": "Roland",
   "checks_unit": "Roland",

@@ -1,9 +1,4 @@
-=== BATTLE LOG CLEARED: 2026-01-25 11:33:01.125792 ===
-[11:33:01.126] [VERBOSE] [Stats] Recalculating stats for Roland
-[11:33:01.127] [VERBOSE] [Stats] 🔄 Recalculating stats for Roland
-[11:33:01.128] [VERBOSE] [Stats] Повышает значение куба 🛡️ блока на 6
-[11:33:01.128] [VERBOSE] [Stats] Повышает значение куба 🛡️ щита на 4
-[11:33:01.129] [VERBOSE] [Stats] Понижает 🧱 получаемый урон на 12
-[11:33:01.130] [VERBOSE] [Stats] Повышает максимальный показатель ❤️ здоровья на 60% от основного
-[11:33:01.130] [VERBOSE] [Stats] Персонаж получает дополнительные 50 ❤️ здоровья
-[11:33:01.131] [VERBOSE] [Stats] ✅ Stats updated for Roland. HP: 1674, SP: 267, Speed: [(6, 9), (3, 6)]
+=== BATTLE LOG CLEARED: 2026-01-25 11:50:56.273006 ===
+[11:50:56.274] [VERBOSE] [Stats] Recalculating stats for default
+[11:50:56.276] [VERBOSE] [Stats] 🔄 Recalculating stats for default
+[11:50:56.277] [VERBOSE] [Stats] ✅ Stats updated for default. HP: 20, SP: 20, Speed: [(1, 4)]

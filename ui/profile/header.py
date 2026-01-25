@@ -1,5 +1,4 @@
 import os
-
 import streamlit as st
 
 from core.game_templates import CHARACTER_TEMPLATES
@@ -19,19 +18,22 @@ def save_avatar_file(uploaded, unit_name):
 def create_character_from_template(template, roster):
     """Создает персонажа на основе шаблона"""
     base_name = template["name"]
+    cnt = 1
     name = f"{base_name} {len(roster) + 1}"
+    while name in roster:
+        name = f"{base_name} {len(roster) + 1}_{cnt}"
+        cnt += 1
 
     u = Unit(name)
     u.level = template["level"]
-    u.rank = 9 - template["tier"]  # В системе рангов: 9=Rank9, 0=Color. Инверсия для UI.
-    if u.rank < -1: u.rank = -1  # Cap for high tiers
+    u.rank = 9 - template["tier"]
+    if u.rank < -1: u.rank = -1
 
     # Атрибуты из шаблона
     u.attributes["endurance"] = template["endurance"]
     u.attributes["agility"] = template["agility"]
     u.skills["speed"] = template["speed_skill"]
 
-    # Для баланса заполняем остальные статы средними значениями
     avg_stat = template["endurance"] // 2
     u.attributes["strength"] = avg_stat
     u.skills["strike_power"] = avg_stat
@@ -48,6 +50,8 @@ def delete_unit_action(unit_name):
     """Callback для безопасного удаления персонажа."""
     if UnitLibrary.delete_unit(unit_name):
         roster = UnitLibrary.get_roster()
+        st.session_state["roster"] = roster
+
         current_keys = sorted(list(roster.keys()))
         if current_keys:
             st.session_state["profile_selected_unit"] = current_keys[0]
@@ -57,6 +61,45 @@ def delete_unit_action(unit_name):
         st.toast(f"Персонаж {unit_name} удален.", icon="🗑️")
         if 'save_callback' in st.session_state:
             st.session_state['save_callback']()
+
+
+def rename_unit_callback(unit, input_key):
+    """
+    Callback функция для переименования.
+    Выполняется ДО ререндера интерфейса, поэтому может менять profile_selected_unit.
+    """
+    new_name = st.session_state[input_key]
+    old_name = unit.name
+
+    # Если имя не изменилось или пустое
+    if not new_name or new_name == old_name:
+        return
+
+    roster = st.session_state.get("roster")
+    if roster is None:
+        roster = UnitLibrary.get_roster()
+        st.session_state["roster"] = roster
+
+    if new_name in roster:
+        st.toast(f"Имя '{new_name}' уже занято!", icon="⚠️")
+        # Возвращаем старое имя в input (визуально сбросится при реране)
+        return
+
+    # 1. Удаляем старый файл и запись
+    UnitLibrary.delete_unit(old_name)
+    if old_name in roster:
+        del roster[old_name]
+
+    # 2. Обновляем имя в объекте
+    unit.name = new_name
+
+    # 3. Сохраняем новый файл и добавляем в словарь
+    roster[new_name] = unit
+    UnitLibrary.save_unit(unit)
+
+    # 4. Обновляем сессию (Теперь это безопасно!)
+    st.session_state["profile_selected_unit"] = new_name
+    st.toast(f"Переименовано в {new_name}", icon="✏️")
 
 
 def render_header(roster):
@@ -89,23 +132,22 @@ def render_header(roster):
                 if 'save_callback' in st.session_state: st.session_state['save_callback']()
                 st.rerun()
 
-    # === [FIX] ЯВНОЕ ЗАДАНИЕ ИНДЕКСА ДЛЯ SELECTBOX ===
-    # 1. Получаем список ключей
+    # === SELECTBOX ===
     roster_keys = sorted(list(roster.keys()))
-
-    # 2. Получаем текущее значение из стейта (которое мы восстановили в app.py)
     current_key = st.session_state.get("profile_selected_unit")
 
-    # 3. Вычисляем индекс для UI
     default_index = 0
     if current_key in roster_keys:
         default_index = roster_keys.index(current_key)
 
-    # 4. Рисуем виджет с index
+    if not roster_keys:
+        st.info("Нет персонажей.")
+        return None, None
+
     sel = c1.selectbox(
         "Персонаж",
         roster_keys,
-        index=default_index,  # <--- Ключевое изменение
+        index=default_index,
         key="profile_selected_unit",
         on_change=st.session_state.get('save_callback')
     )
@@ -133,6 +175,8 @@ def render_header(roster):
 
     st.divider()
     return unit, u_key
+
+
 def render_basic_info(unit, u_key):
     # Avatar
     img = unit.avatar if unit.avatar and os.path.exists(
@@ -144,8 +188,15 @@ def render_basic_info(unit, u_key):
         UnitLibrary.save_unit(unit)
         st.rerun()
 
-    # Basic Data
-    unit.name = st.text_input("Имя", unit.name, key=f"name_{u_key}")
+    # Basic Data (С ИСПОЛЬЗОВАНИЕМ CALLBACK)
+    input_key = f"name_inp_{u_key}"
+    st.text_input(
+        "Имя",
+        value=unit.name,
+        key=input_key,
+        on_change=rename_unit_callback,  # <--- Вызываем callback
+        args=(unit, input_key)  # <--- Передаем аргументы
+    )
 
     c_lvl, c_int = st.columns(2)
     unit.level = c_lvl.number_input("Уровень", 1, 120, unit.level, key=f"lvl_{u_key}")
@@ -181,7 +232,7 @@ def render_basic_info(unit, u_key):
     rank_color = "gray"
 
     for _, name, tier in RANK_THRESHOLDS:
-        if (10-tier) == unit.rank:
+        if (10 - tier) == unit.rank:
             rank_name = name
             if tier >= 10:
                 rank_color = "red"
