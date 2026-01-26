@@ -28,15 +28,15 @@
     "_status_effects": {},
     "delayed_queue": [],
     "deck": [
-        "boom_6233",
-        "boom_6233",
-        "boom_6233",
-        "клеш_вин_9c21",
-        "клеш_вин_9c21",
-        "клеш_вин_9c21",
-        "абсолютная_защита_c72d",
-        "абсолютная_защита_c72d",
-        "абсолютная_защита_c72d"
+        "short_lunge_blunt",
+        "long_lunge_blunt",
+        "draw_sword_blunt",
+        "long_edge_blunt",
+        "tale_of_rebirth_blunt",
+        "double_strike_blunt",
+        "time_cant_turn_back_blunt",
+        "still_alive_blunt",
+        "perfect_cut"
     ],
     "active_slots": [],
     "stored_dice": [],
@@ -112,23 +112,10 @@
         "topographic_cretinism",
         "not_economically_minded",
         "fear_of_healing",
-        "sharp_mind"
+        "sharp_mind",
+        "low_endurance"
     ],
-    "talents": [
-        "pain_points",
-        "pain_shock",
-        "entering_rhythm",
-        "dirty_tricks",
-        "playing_on_nerves",
-        "with_caution",
-        "sharp_eye",
-        "arrest",
-        "feint",
-        "weak_point_energy",
-        "rupture_application",
-        "achilles_heel",
-        "pride_of_seven"
-    ],
+    "talents": [],
     "augmentations": [],
     "level_rolls": {
         "3": {
