@@ -1,7 +1,7 @@
 {
     "name": "Лайла",
-    "level": 50,
-    "rank": -2,
+    "level": 1,
+    "rank": 9,
     "avatar": "data/avatars/Лайла.jpg",
     "base_intellect": 10,
     "total_xp": 0,
@@ -18,24 +18,43 @@
         "imp_sp": 0,
         "imp_stg": 0
     },
-    "current_hp": 182,
-    "current_sp": 125,
-    "current_stagger": 109,
+    "current_hp": 27,
+    "current_sp": 27,
+    "current_stagger": 13,
     "resources": {},
-    "cooldowns": {},
-    "card_cooldowns": {},
+    "cooldowns": {
+        "stances": 1
+    },
+    "card_cooldowns": {
+        "time_cant_turn_back_blunt": [
+            1
+        ],
+        "still_alive_blunt": [
+            1
+        ],
+        "perfect_strike_blunt": [
+            1
+        ]
+    },
     "active_buffs": {},
-    "_status_effects": {},
+    "_status_effects": {
+        "stance_slash": [
+            {
+                "amount": 1,
+                "duration": 98
+            }
+        ]
+    },
     "delayed_queue": [],
     "deck": [
-        "short_lunge_blunt",
-        "long_lunge_blunt",
-        "draw_sword_blunt",
-        "long_edge_blunt",
-        "tale_of_rebirth_blunt",
-        "double_strike_blunt",
-        "time_cant_turn_back_blunt",
-        "still_alive_blunt",
+        "short_lunge",
+        "long_lunge",
+        "draw_sword",
+        "long_edge",
+        "tale_of_rebirth",
+        "double_strike",
+        "time_cant_turn_back",
+        "still_alive",
         "perfect_cut"
     ],
     "active_slots": [],
@@ -44,121 +63,82 @@
     "memory": {
         "status_rank": "9 (Fixer)",
         "start_of_battle_stats": {
-            "hp": 100,
-            "sp": 100,
-            "stagger": 50
+            "hp": 27,
+            "sp": 27,
+            "stagger": 13
         },
-        "last_revive_attempt_round": 5,
+        "last_revive_attempt_round": 2,
         "last_revive_log": {
             "roll": 3,
             "bonus": 0,
-            "penalty": 7,
-            "total": -4,
+            "penalty": 0,
+            "total": 3,
             "dc": 0,
-            "success": false
-        }
+            "success": true
+        },
+        "battle_initialized": true
     },
-    "death_count": 3,
+    "death_count": 0,
     "overkill_damage": 0,
     "money_log": [],
     "base_stats": {
-        "current_hp": 182,
-        "current_sp": 125,
-        "current_stagger": 109
+        "current_hp": 27,
+        "current_sp": 27,
+        "current_stagger": 13
     },
     "defense": {
         "armor_name": "Standard Fixer Suit",
         "armor_type": "Medium",
         "hp_resists": {
-            "slash": 1.0,
+            "slash": 0.75,
             "pierce": 1.0,
-            "blunt": 1.0
+            "blunt": 1.2
         },
         "stagger_resists": {
             "slash": 1.0,
             "pierce": 1.0,
             "blunt": 1.0
         },
-        "weapon_id": "none"
+        "weapon_id": "two_handed_sword"
     },
     "attributes": {
-        "strength": 20,
-        "endurance": 20,
-        "agility": 20,
-        "wisdom": 7,
-        "psych": 7
+        "strength": 10,
+        "endurance": 5,
+        "agility": 6,
+        "wisdom": 0,
+        "psych": 4
     },
     "skills": {
-        "strike_power": 20,
+        "strike_power": 3,
         "medicine": 0,
-        "willpower": 20,
+        "willpower": 0,
         "luck": 0,
-        "acrobatics": 20,
-        "shields": 0,
-        "tough_skin": 26,
-        "speed": 20,
+        "acrobatics": 3,
+        "shields": 3,
+        "tough_skin": 0,
+        "speed": 10,
         "light_weapon": 0,
-        "medium_weapon": 0,
+        "medium_weapon": 6,
         "heavy_weapon": 0,
-        "firearms": 20,
-        "eloquence": 10,
-        "forging": 0,
+        "firearms": 3,
+        "eloquence": 0,
+        "forging": 10,
         "engineering": 0,
         "programming": 0
     },
     "passives": [
-        "stances",
-        "hardened_by_solitude",
-        "topographic_cretinism",
+        "social_phobia",
         "not_economically_minded",
-        "fear_of_healing",
         "sharp_mind",
-        "low_endurance"
+        "low_endurance",
+        "topographic_cretinism",
+        "fear_of_healing",
+        "stances",
+        "hardened_by_solitude"
     ],
     "talents": [],
     "augmentations": [],
-    "level_rolls": {
-        "3": {
-            "hp": 3,
-            "sp": 3
-        },
-        "6": {
-            "hp": 3,
-            "sp": 3
-        },
-        "9": {
-            "hp": 3,
-            "sp": 3
-        },
-        "12": {
-            "hp": 3,
-            "sp": 3
-        },
-        "15": {
-            "hp": 3,
-            "sp": 3
-        },
-        "18": {
-            "hp": 3,
-            "sp": 3
-        },
-        "21": {
-            "hp": 3,
-            "sp": 3
-        },
-        "24": {
-            "hp": 3,
-            "sp": 3
-        },
-        "27": {
-            "hp": 3,
-            "sp": 3
-        },
-        "30": {
-            "hp": 3,
-            "sp": 3
-        }
-    },
+    "level_rolls": {},
     "biography": "",
     "relationships": {},
     "unit_type": "player"

@@ -112,4 +112,22 @@ WEAPON_REGISTRY = {
         stats={"heavy_weapon": 3, "power_blunt": 2},
         weapon_type="heavy"
     ),
+
+    "zweihander_swite": Weapon(
+        id="zweihander_swite",
+        name="Цвайхандер Свайт",
+        rank=6,
+        description="Среднее оружие. +3 к Среднему, +1 к Рубящему, +1 к Блоку.",
+        stats={"medium_weapon": 3, "power_slash": 1, "power_block": 1},
+        weapon_type="medium"
+    ),
+
+    "two_handed_sword": Weapon(
+        id="two_handed_sword",
+        name="Двуручный меч",
+        rank=9,
+        description="Среднее оружие.",
+        stats={},
+        weapon_type="medium"
+    ),
 }

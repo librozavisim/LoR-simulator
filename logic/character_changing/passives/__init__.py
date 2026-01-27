@@ -12,7 +12,7 @@ from logic.character_changing.passives.lima_passives import PassiveAcceleratedLe
 from logic.character_changing.passives.rein_passives import PassiveSCells, PassiveNewDiscovery, TalentRedLycoris, TalentShadowOfMajesty
 from logic.character_changing.passives.zafiel_passives import PassiveSevereTraining, PassiveAdaptation
 from logic.character_changing.passives.leila_passives import PassiveStances, PassiveHardenedBySolitude, \
-    PassiveFearOfHealing, PassiveNotEconomicallyMinded, PassiveTopographicCretinism, PassiveSharpMind, PassiveLowEndurance
+    PassiveFearOfHealing, PassiveNotEconomicallyMinded, PassiveTopographicCretinism, PassiveSharpMind, PassiveLowEndurance, PassiveSocialPhobia
 from logic.character_changing.passives.axis_passives import PassiveAxisUnity, PassivePseudoProtagonist, \
     PassiveSourceAccess, PassiveMetaAwareness, PassiveChthonic
     
@@ -61,6 +61,7 @@ PASSIVE_REGISTRY = {
 "topographic_cretinism": PassiveTopographicCretinism(),
 "sharp_mind": PassiveSharpMind(),
 "low_endurance": PassiveLowEndurance(),
+"social_phobia": PassiveSocialPhobia(),
 
 # Axis Mundi
 "axis_unity": PassiveAxisUnity(),
