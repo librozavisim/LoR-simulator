@@ -64,6 +64,7 @@ def render_profile_page():
         pdf.set_font("DejaVu", size=12)
 
         page_width = pdf.w - 2 * pdf.l_margin
+        line_height = 6
 
         lines = [
             unit.name,
@@ -104,7 +105,19 @@ def render_profile_page():
         lines.extend(unit.biography.split("\n"))
 
         for line in lines:
-            pdf.multi_cell(page_width, 6, txt=line)
+            words = line.split(" ")
+            current_line = ""
+            for word in words:
+                if pdf.get_string_width(current_line + " " + word) > page_width:
+                    pdf.multi_cell(page_width, line_height, current_line, align="L")
+                    current_line = word
+                else:
+                    if current_line:
+                        current_line += " " + word
+                    else:
+                        current_line = word
+            if current_line:
+                pdf.multi_cell(page_width, line_height, current_line, align="L")
 
         pdf_bytes = pdf.output(dest="S")
         return io.BytesIO(pdf_bytes)
