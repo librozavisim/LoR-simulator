@@ -63,6 +63,8 @@ def render_profile_page():
         pdf.add_font("DejaVu", "", font_path, uni=True)
         pdf.set_font("DejaVu", size=12)
 
+        page_width = pdf.w - 2 * pdf.l_margin
+
         lines = [
             unit.name,
             f"Уровень: {unit.level}",
@@ -102,7 +104,7 @@ def render_profile_page():
         lines.extend(unit.biography.split("\n"))
 
         for line in lines:
-            pdf.multi_cell(0, 6, txt=line)
+            pdf.multi_cell(page_width, 6, txt=line, break_long_words=True)
 
         pdf_bytes = pdf.output(dest="S").encode("latin1")
         return io.BytesIO(pdf_bytes)
