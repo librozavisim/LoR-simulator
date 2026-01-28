@@ -98,13 +98,12 @@ def render_profile_page():
         lines.extend(unit.biography.split("\n"))
 
         for line in lines:
-            pdf.multi_cell(0, 6, txt=line, break_long_words=True)
+            pdf.multi_cell(0, 6, txt=line)
 
-        pdf_buffer = io.BytesIO()
-        pdf.output(pdf_buffer)
-        pdf_buffer.seek(0)
-        return pdf_buffer
 
+        pdf_bytes=pdf.output(dest="S")
+        return io.BytesIO(pdf_bytes)
+        
     if st.button("Download"):
         pdf_buffer = create_character_pdf(unit)
         st.download_button(
