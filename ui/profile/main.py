@@ -61,72 +61,91 @@ def render_profile_page():
             os.path.join(os.path.dirname(__file__), "..", "fonts", "DejaVuSans", "DejaVuSans.ttf")
         )
         pdf.add_font("DejaVu", "", font_path, uni=True)
-        pdf.set_font("DejaVu", size=12)
+        pdf.set_font("DejaVu", size=10)
 
-        page_width = pdf.w - 2 * pdf.l_margin
-        line_height = 6
+        pdf.image(unit.avatar, 100, 10, 100, 100)
+        
+        y = pdf.get_y()
+        
+        pdf.set_xy(10, y)
+        
+        pdf.multi_cell(
+            100,
+            5,
+            f"ПЕРСОНАЖ\n"
+            f"Имя: {unit.name}\n"
+            f"Уровень: {unit.level}\n"
+            f"Ранг: {unit.rank}\n"
+            f"Статус: {unit.memory.get('status_rank', '-')}\n"
+            f"Интеллект: {unit.base_intellect}\n"
+            f"Накопленный опыт: {unit.total_xp}\n"
+            f"\n"
+            f"СОСТОЯНИЕ\n"
+            f"HP: {unit.current_hp}/{unit.max_hp}\n"
+            f"SP: {unit.current_sp}/{unit.max_hp}\n"
+            f"Stagger: {unit.current_stagger}\n"
+            f"Текущая удача: {unit.resources.get('luck', 0)}\n"
+        )
 
-        lines = [
-            unit.name,
-            f"Уровень: {unit.level}",
-            f"Ранг: {unit.rank}",
-            f"Базовый интеллект: {unit.base_intellect}",
-            f"Накопленный опыт: {unit.total_xp}",
-            "",
-            "Текущее состояние",
-            f"HP: {unit.current_hp}",
-            f"SP: {unit.current_sp}",
-            f"Stagger: {unit.current_stagger}",
-            f"Удача: {unit.resources.get('luck', 0)}",
-            "",
-            "Атрибуты",
-        ]
+        pdf.ln(40)
 
-        for attr, val in unit.attributes.items():
-            lines.append(f"{attr.capitalize()}: {val}")
+        pdf.multi_cell(
+            100,
+            5,
+            f"АТРИБУТЫ\n"
+            f"Сила: {unit.attributes.get('strength', 0)}\n"
+            f"Стойкость: {unit.attributes.get('endurance', 0)}\n"
+            f"Ловкость: {unit.attributes.get('agility', 0)}\n"
+            f"Мудрость: {unit.attributes.get('wisdom', 0)}\n"
+            f"Психический порог: {unit.attributes.get('psych', 0)}\n"
+            "\n"
+        )
 
-        lines.append("")
-        lines.append("Навыки")
-        for skill, val in unit.skills.items():
-            lines.append(f"{skill.replace('_',' ').capitalize()}: {val}")
+        pdf.multi_cell(
+            100,
+            5,
+            f"НАВЫКИ\n"
+            f"Сила удара: {unit.skills.get('strike_power', 0)}\n"
+            f"Медицина: {unit.skills.get('medicine', 0)}\n"
+            f"Сила воли: {unit.skills.get('willpower', 0)}\n"
+            f"Удача: {unit.skills.get('luck', 0)}\n"
+            f"Акробатика: {unit.skills.get('acrobatics', 0)}\n"
+            f"Щиты: {unit.skills.get('shields', 0)}\n"
+            f"Прочная кожа: {unit.skills.get('tough_skin', 0)}\n"
+            f"Скорость: {unit.skills.get('speed', 0)}\n"
+            f"Лёгкое оружие: {unit.skills.get('light_weapon', 0)}\n"
+            f"Среднее оружие: {unit.skills.get('medium_weapon', 0)}\n"
+            f"Тяжёлое оружие: {unit.skills.get('heavy_weapon', 0)}\n"
+            f"Огнестрел: {unit.skills.get('firearms', 0)}\n"
+            f"Красноречие: {unit.skills.get('eloquence', 0)}\n"
+            f"Кузнечное дело: {unit.skills.get('forging', 0)}\n"
+            f"Инженерия: {unit.skills.get('engineering', 0)}\n"
+            f"Программирование: {unit.skills.get('programming', 0)}\n"
+        )
 
-        lines.append("")
-        lines.append("Пассивные способности")
-        for passive_obj in getattr(unit, "passives", []):
-            lines.append(f"— {passive_obj.name}: {passive_obj.description}")
+        pdf.set_xy(100, 120)
 
-        lines.append("")
-        lines.append("Таланты")
-        for idx, talent_obj in enumerate(getattr(unit, "talents", []), 1):
-            lines.append(f"{idx}. {talent_obj.name}: {talent_obj.description}")
+        pdf.multi_cell(
+            100,
+            5,
+            f"Броня: {unit.armor_name}\n"
+            f"Тип брони: {unit.armor_type}\n"
+        )
 
-        lines.append("")
-        lines.append("Биография")
-        lines.extend(unit.biography.split("\n"))
-
-        for line in lines:
-            words = line.split(" ")
-            current_line = ""
-            for word in words:
-                if pdf.get_string_width(current_line + " " + word) > page_width:
-                    pdf.multi_cell(page_width, line_height, current_line, align="L")
-                    current_line = word
-                else:
-                    if current_line:
-                        current_line += " " + word
-                    else:
-                        current_line = word
-            if current_line:
-                pdf.multi_cell(page_width, line_height, current_line, align="L")
-
+        pdf.add_page()
+        pdf.set_xy(10, y)
+        
+        pdf.multi_cell(200, 5, "БИОГРАФИЯ")
+        pdf.multi_cell(100, 5, unit.biography) #я хз чезабаг
+        
         pdf_bytes = pdf.output(dest="S")
         return io.BytesIO(pdf_bytes)
 
-    if st.button("Download"):
+    if st.button("Сгенерировать"):
         pdf_buffer = create_character_pdf(unit)
         st.download_button(
-            label="Download",
+            label="Скачать",
             data=pdf_buffer,
-            file_name=f"{unit.name}_report.pdf",
+            file_name=f"{unit.name}_charsheet.pdf",
             mime="application/pdf"
         )
