@@ -53,64 +53,59 @@ def render_profile_page():
     st.divider()
     st.markdown("## Скачать профиль в PDF")
 
-    def create_character_pdf(unit):
+    def create_character_pdf(unit: Unit) -> io.BytesIO:
         pdf = FPDF()
-        pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
 
-        # путь к шрифту относительно этого файла
         font_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "..", "fonts", "DejaVuSans", "DejaVuSans.ttf")
         )
         pdf.add_font("DejaVu", "", font_path, uni=True)
         pdf.set_font("DejaVu", size=12)
 
-        lines = []
+        lines = [
+            unit.name,
+            f"Уровень: {unit.level}",
+            f"Ранг: {unit.rank}",
+            f"Базовый интеллект: {unit.base_intellect}",
+            f"Накопленный опыт: {unit.total_xp}",
+            "",
+            "Текущее состояние",
+            f"HP: {unit.current_hp}",
+            f"SP: {unit.current_sp}",
+            f"Stagger: {unit.current_stagger}",
+            f"Удача: {unit.resources.get('luck', 0)}",
+            "",
+            "Атрибуты",
+        ]
 
-        lines.append(unit.name)
-        lines.append(f"Уровень: {unit.level}")
-        lines.append(f"Ранг: {unit.rank}")
-        lines.append(f"Базовый интеллект: {unit.base_intellect}")
-        lines.append(f"Накопленный опыт: {unit.total_xp}")
-        lines.append("")
-
-        lines.append("Текущее состояние")
-        lines.append(f"HP: {unit.current_hp}")
-        lines.append(f"SP: {unit.current_sp}")
-        lines.append(f"Stagger: {unit.current_stagger}")
-        lines.append(f"Удача: {unit.resources.get('luck', 0)}")
-        lines.append("")
-
-        lines.append("Атрибуты")
         for attr, val in unit.attributes.items():
             lines.append(f"{attr.capitalize()}: {val}")
-        lines.append("")
 
+        lines.append("")
         lines.append("Навыки")
         for skill, val in unit.skills.items():
             lines.append(f"{skill.replace('_',' ').capitalize()}: {val}")
-        lines.append("")
 
+        lines.append("")
         lines.append("Пассивные способности")
         for passive_obj in getattr(unit, "passives", []):
             lines.append(f"— {passive_obj.name}: {passive_obj.description}")
-        lines.append("")
 
+        lines.append("")
         lines.append("Таланты")
         for idx, talent_obj in enumerate(getattr(unit, "talents", []), 1):
             lines.append(f"{idx}. {talent_obj.name}: {talent_obj.description}")
-        lines.append("")
 
+        lines.append("")
         lines.append("Биография")
         lines.extend(unit.biography.split("\n"))
 
         for line in lines:
             pdf.multi_cell(0, 6, txt=line)
 
-        buffer = io.BytesIO()
-        pdf.output(buffer)
-        buffer.seek(0)
-        return buffer
+        pdf_bytes = pdf.output(dest="S").encode("latin1")
+        return io.BytesIO(pdf_bytes)
 
     if st.button("Download"):
         pdf_buffer = create_character_pdf(unit)
