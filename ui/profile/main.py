@@ -51,7 +51,6 @@ def render_profile_page():
             st.info("Нет записей. Проверьте уровень логирования или наличие пассивок.")
 
     st.divider()
-
     st.markdown("## Скачать профиль в PDF")
 
     def create_character_pdf(unit):
@@ -59,7 +58,10 @@ def render_profile_page():
         pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
 
-        font_path = os.path.join("..", "fonts", "DejaVuSans", "DejaVuSans.ttf")
+        # путь к шрифту относительно этого файла
+        font_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "fonts", "DejaVuSans", "DejaVuSans.ttf")
+        )
         pdf.add_font("DejaVu", "", font_path, uni=True)
         pdf.set_font("DejaVu", size=12)
 
@@ -76,8 +78,7 @@ def render_profile_page():
         lines.append(f"HP: {unit.current_hp}")
         lines.append(f"SP: {unit.current_sp}")
         lines.append(f"Stagger: {unit.current_stagger}")
-        luck = unit.resources.get("luck", 0)
-        lines.append(f"Удача: {luck}")
+        lines.append(f"Удача: {unit.resources.get('luck', 0)}")
         lines.append("")
 
         lines.append("Атрибуты")
@@ -111,10 +112,10 @@ def render_profile_page():
         buffer.seek(0)
         return buffer
 
-    if st.button("Download PDF"):
+    if st.button("Download"):
         pdf_buffer = create_character_pdf(unit)
         st.download_button(
-            label="Download PDF",
+            label="Download",
             data=pdf_buffer,
             file_name=f"{unit.name}_report.pdf",
             mime="application/pdf"
